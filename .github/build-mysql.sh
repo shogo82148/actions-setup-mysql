@@ -10,7 +10,18 @@ cd working
 curl -sSL "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.tar.gz" -o mysql.tar.gz
 tar zxvf mysql.tar.gz
 
+# detect the number of CPU Core
+JOBS=1
+if command -v sysctl > /dev/null; then
+    # on macOX
+    JOBS=$(sysctl -n hw.logicalcpu_max)
+fi
+if command -v nproc > /dev/null; then
+    # on Linux
+    JOBS=$(nproc)
+fi
+
 mkdir build
 cd build
 cmake "../mysql-server-mysql-$MYSQL_VERSION" -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost
-make "-j$(nproc)"
+make "-j$JOBS"
