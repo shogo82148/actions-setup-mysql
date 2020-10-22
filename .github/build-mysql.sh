@@ -14,11 +14,11 @@ tar zxvf mysql.tar.gz
 JOBS=1
 if command -v sysctl > /dev/null; then
     # on macOX
-    JOBS=$(sysctl -n hw.logicalcpu_max || echo 1)
+    JOBS=$(sysctl -n hw.logicalcpu_max || echo "$JOBS")
 fi
 if command -v nproc > /dev/null; then
     # on Linux
-    JOBS=$(nproc || echo 1)
+    JOBS=$(nproc || echo "$JOBS")
 fi
 
 mkdir build
