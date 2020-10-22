@@ -1,0 +1,37 @@
+name: "Build MySQL"
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - "releases/*"
+  workflow_dispatch:
+    inputs:
+      mysql-versions:
+        description: MySQL versions to build (JSON Array)
+        required: false
+        default: ""
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        name: list available MySQL versions
+        run: |
+          if [ -n "$MYSQL_VERSIONS" ]; then
+            echo "::set-output name=matrix::$(printenv MYSQL_VERSIONS | jq -c '{mysql: .}')"
+          else
+            echo "::set-output name=matrix::$(cat mysql-versions.json | jq -c '{mysql: .}')"
+          fi
+        env:
+          MYSQL_VERSIONS: ${{ github.event.inputs.mysql-versions }}
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - run: .github/build-mysql.sh ${{ matrix.mysql }}
