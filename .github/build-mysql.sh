@@ -29,3 +29,7 @@ cd build
 cmake "../mysql-server-mysql-$MYSQL_VERSION" -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost -DCMAKE_INSTALL_PREFIX="$RUNNER_TEMP/dist"
 make "-j$JOBS"
 make install
+
+# archive
+cd "$RUNNER_TEMP/dist"
+tar czf "../mysql.tar.gz" .
