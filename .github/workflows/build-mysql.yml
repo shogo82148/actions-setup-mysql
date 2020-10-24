@@ -1,9 +1,7 @@
 name: "Build MySQL"
 on:
-  pull_request:
   push:
     branches:
-      - main
       - "releases/*"
   workflow_dispatch:
     inputs:
