@@ -23,7 +23,7 @@ jobs:
           if [ -n "$MYSQL_VERSIONS" ]; then
             echo "::set-output name=matrix::$(printenv MYSQL_VERSIONS | jq -c '{mysql: .}')"
           else
-            echo "::set-output name=matrix::$(cat mysql-versions.json | jq -c '{mysql: .}')"
+            echo "::set-output name=matrix::$(cat versions/mysql.json | jq -c '{mysql: .}')"
           fi
         env:
           MYSQL_VERSIONS: ${{ github.event.inputs.mysql-versions }}
