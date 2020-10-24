@@ -1,6 +1,3 @@
-// Load tempDirectory before it gets wiped by tool-cache
-let tempDirectory = process.env['RUNNER_TEMPDIRECTORY'] || ''
-
 import * as core from '@actions/core'
 import * as tc from '@actions/tool-cache'
 import * as fs from 'fs'
@@ -10,16 +7,6 @@ import * as semver from 'semver'
 
 const osPlat = os.platform()
 const osArch = os.arch()
-
-if (!tempDirectory) {
-  let baseLocation
-  if (process.platform === 'darwin') {
-    baseLocation = '/Users'
-  } else {
-    baseLocation = '/home'
-  }
-  tempDirectory = path.join(baseLocation, 'actions', 'temp')
-}
 
 async function getAvailableVersions(): Promise<string[]> {
   return new Promise<string[]>((resolve, reject) => {
