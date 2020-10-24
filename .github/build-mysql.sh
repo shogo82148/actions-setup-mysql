@@ -45,7 +45,7 @@ echo "::group::build OpenSSL"
 (
     set -eux
     cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
-    ./Configure --prefix="$PREFIX" gcc
+    ./Configure --prefix="$PREFIX" clang
     make "-j$JOBS"
     make install_sw
 )
@@ -73,7 +73,7 @@ echo "::group::build MySQL"
     cd "$RUNNER_TEMP"
     mkdir build
     cd build
-    cmake "../mysql-server-mysql-$MYSQL_VERSION" \
+    CC=clang CXX=clang++ cmake "../mysql-server-mysql-$MYSQL_VERSION" \
         -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" \
         -DWITH_SSL="$PREFIX"
