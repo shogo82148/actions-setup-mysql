@@ -1,27 +1,35 @@
-import {wait} from '../src/wait'
-import * as process from 'process'
-import * as cp from 'child_process'
+import * as io from '@actions/io'
+import * as os from 'os'
 import * as path from 'path'
+import * as fs from 'fs'
 
-test('throws invalid number', async () => {
-  const input = parseInt('foo', 10)
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number')
-})
+const toolDir = path.join(__dirname, 'runner', 'tools')
+const tempDir = path.join(__dirname, 'runner', 'temp')
 
-test('wait 500 ms', async () => {
-  const start = new Date()
-  await wait(500)
-  const end = new Date()
-  var delta = Math.abs(end.getTime() - start.getTime())
-  expect(delta).toBeGreaterThan(450)
-})
+process.env['RUNNER_TOOL_CACHE'] = toolDir
+process.env['RUNNER_TEMP'] = tempDir
+import * as installer from '../src/installer'
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-  process.env['INPUT_MILLISECONDS'] = '500'
-  const ip = path.join(__dirname, '..', 'lib', 'main.js')
-  const options: cp.ExecSyncOptions = {
-    env: process.env
-  }
-  console.log(cp.execSync(`node ${ip}`, options).toString())
+describe('installer tests', () => {
+  beforeAll(async () => {
+    await io.rmRF(toolDir)
+    await io.rmRF(tempDir)
+  }, 100000)
+
+  afterAll(async () => {
+    try {
+      await io.rmRF(toolDir)
+      await io.rmRF(tempDir)
+    } catch {
+      console.log('Failed to remove test directories')
+    }
+  }, 100000)
+
+  it('Acquires version of MySQL if no matching version is installed', async () => {
+    await installer.getMySQL('5.6')
+    const mysqlDir = path.join(toolDir, 'mysql', '5.6.50', os.arch())
+
+    expect(fs.existsSync(`${mysqlDir}.complete`)).toBe(true)
+    expect(fs.existsSync(path.join(mysqlDir, 'bin', 'mysqld'))).toBe(true)
+  }, 100000)
 })
