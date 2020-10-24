@@ -39,3 +39,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mysql.sh ${{ matrix.mysql }}
+      - name: upload
+        run: |
+          ACTIONS_VERSION=v$(cat "$GITHUB_WORKSPACE/package.json" | jq -r .version)
+          aws --region us-east-1 s3 cp --acl public-read "$RUNNER_TEMP/mysql.tar.gz" "s3://shogo82148-actions-setup-mysql/$ACTIONS_VERSION/mysql-$MYSQL_VERSION-linux-x64.tar.gz"
+        env:
+          MYSQL_VERSION: ${{ matrix.mysql }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
