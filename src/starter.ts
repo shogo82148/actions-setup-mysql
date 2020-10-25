@@ -24,15 +24,10 @@ tmpdir=${baseDir}${sep}tmp
   fs.writeFileSync(path.join(baseDir, 'etc', 'my.cnf'), myCnf)
 
   core.debug('setup MySQL database')
-  await exec.exec(
-    path.join(mysqlPath, 'scripts', 'mysql_install_db'),
-    [`--basedir=${baseDir}`],
-    {
-      env: {
-        PATH: process.env['PATH'] || path.join(mysqlPath, 'bin')
-      }
-    }
-  )
+  await exec.exec(path.join(mysqlPath, 'scripts', 'mysql_install_db'), [
+    `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+    `--basedir=${mysqlPath}`
+  ])
 }
 
 function mkdtemp(): Promise<string> {
