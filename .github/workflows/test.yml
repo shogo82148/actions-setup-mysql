@@ -1,4 +1,4 @@
-name: "build-test"
+name: "test"
 on:
   pull_request:
   push:
@@ -18,8 +18,16 @@ jobs:
         with:
           node-version: 12.x
 
-      - name: npm install
-        run: npm install
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-      - name: npm test
-        run: npm test
+      - run: npm ci
+      - run: npm test
