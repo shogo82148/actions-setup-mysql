@@ -45,7 +45,7 @@ echo "::group::build OpenSSL"
 (
     set -eux
     cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
-    ./Configure --prefix="$PREFIX" --openssldir="$PREFIX/ssl" --libdir="$PREFIX/lib" shared pic gcc
+    ./Configure --prefix="$PREFIX" --openssldir="$PREFIX/ssl" --libdir="$PREFIX/lib" shared pic
     make "-j$JOBS"
     make install_sw
 )
