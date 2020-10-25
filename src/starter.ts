@@ -1,18 +1,18 @@
 import * as fs from 'fs'
 import * as os from 'os'
 import * as path from 'path'
-import * as core from '@actions/core';
-import * as io from '@actions/io';
-import * as exec from '@actions/exec';
+import * as core from '@actions/core'
+import * as io from '@actions/io'
+import * as exec from '@actions/exec'
 
 export async function startMySQL(mysqlPath: string) {
   const baseDir = await mkdtemp()
   const sep = path.sep
 
   // (re)create directory structure
-  io.mkdirP(path.join(baseDir, "etc"))
-  io.mkdirP(path.join(baseDir, "var"))
-  io.mkdirP(path.join(baseDir, "tmp"))
+  await io.mkdirP(path.join(baseDir, 'etc'))
+  await io.mkdirP(path.join(baseDir, 'var'))
+  await io.mkdirP(path.join(baseDir, 'tmp'))
 
   const myCnf = `
 [mysqld]
@@ -21,10 +21,12 @@ datadir=${baseDir}${sep}var
 pid-file=${baseDir}${sep}tmp${sep}mysqld.pid
 tmpdir=${baseDir}${sep}tmp
 `
-  fs.writeFileSync(path.join(baseDir, "etc", "my.cnf"), myCnf)
+  fs.writeFileSync(path.join(baseDir, 'etc', 'my.cnf'), myCnf)
 
-  core.debug('setup MySQL database');
-  await exec.exec(path.join(mysqlPath, "mysql_install_db"), [`--basedir=${baseDir}`])
+  core.debug('setup MySQL database')
+  await exec.exec(path.join(mysqlPath, 'scripts', 'mysql_install_db'), [
+    `--basedir=${baseDir}`
+  ])
 }
 
 function mkdtemp(): Promise<string> {

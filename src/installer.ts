@@ -46,11 +46,10 @@ export async function getMySQL(version: string): Promise<string> {
     core.debug('redis tool is cached under ' + toolPath)
   }
 
-  toolPath = path.join(toolPath, 'bin')
   //
   // prepend the tools path. instructs the agent to prepend for future tasks
   //
-  core.addPath(toolPath)
+  core.addPath(path.join(toolPath, 'bin'))
   return toolPath
 }
 

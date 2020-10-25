@@ -9,6 +9,7 @@ const tempDir = path.join(__dirname, 'runner', 'temp')
 process.env['RUNNER_TOOL_CACHE'] = toolDir
 process.env['RUNNER_TEMP'] = tempDir
 import * as installer from '../src/installer'
+import * as starter from '../src/starter'
 
 describe('installer tests', () => {
   beforeAll(async () => {
@@ -31,5 +32,10 @@ describe('installer tests', () => {
 
     expect(fs.existsSync(`${mysqlDir}.complete`)).toBe(true)
     expect(fs.existsSync(path.join(mysqlDir, 'bin', 'mysqld'))).toBe(true)
-  }, 100000)
+  }, 1000000)
+
+  it('start and shutdown MySQL', async () => {
+    const mysqlDir = await installer.getMySQL('5.6')
+    await starter.startMySQL(mysqlDir)
+  }, 1000000)
 })
