@@ -11,13 +11,13 @@ PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/x64
 
 # detect the number of CPU Core
 JOBS=1
-if command -v sysctl > /dev/null; then
+if sysctl -n hw.logicalcpu_max > /dev/null 2>&1; then
     # on macOX
-    JOBS=$(sysctl -n hw.logicalcpu_max || echo "$JOBS")
+    JOBS=$(sysctl -n hw.logicalcpu_max)
 fi
-if command -v nproc > /dev/null; then
+if nproc > /dev/null 2>&1; then
     # on Linux
-    JOBS=$(nproc || echo "$JOBS")
+    JOBS=$(nproc)
 fi
 
 mkdir -p "$RUNNER_TEMP"
