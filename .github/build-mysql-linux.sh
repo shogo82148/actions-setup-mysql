@@ -10,15 +10,7 @@ ROOT=$(cd "$(dirname "$0")" && pwd)
 PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/x64
 
 # detect the number of CPU Core
-JOBS=1
-if sysctl -n hw.logicalcpu_max > /dev/null 2>&1; then
-    # on macOX
-    JOBS=$(sysctl -n hw.logicalcpu_max)
-fi
-if nproc > /dev/null 2>&1; then
-    # on Linux
-    JOBS=$(nproc)
-fi
+JOBS=$(nproc)
 
 mkdir -p "$RUNNER_TEMP"
 cd "$RUNNER_TEMP"
@@ -45,7 +37,7 @@ echo "::group::build OpenSSL"
 (
     set -eux
     cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
-    ./Configure --prefix="$PREFIX" --openssldir="$PREFIX/ssl" --libdir="$PREFIX/lib" shared pic
+    ./Configure --prefix="$PREFIX" --openssldir="$PREFIX/ssl" --libdir="$PREFIX/lib" linux-x86_64
     make "-j$JOBS"
     make install_sw
 )

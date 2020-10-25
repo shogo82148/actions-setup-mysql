@@ -37,7 +37,7 @@ jobs:
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v2
-      - run: .github/build-mysql.sh ${{ matrix.mysql }}
+      - run: .github/build-mysql-linux.sh ${{ matrix.mysql }}
       - name: upload
         run: |
           ACTIONS_VERSION=v$(cat "$GITHUB_WORKSPACE/package.json" | jq -r .version)
@@ -55,7 +55,7 @@ jobs:
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v2
-      - run: .github/build-mysql.sh ${{ matrix.mysql }}
+      - run: .github/build-mysql-darwin.sh ${{ matrix.mysql }}
       - name: upload
         run: |
           ACTIONS_VERSION=v$(cat "$GITHUB_WORKSPACE/package.json" | jq -r .version)
