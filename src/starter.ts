@@ -46,7 +46,7 @@ tmpdir=${baseDir}${sep}tmp
 }
 
 function mkdtemp(): Promise<string> {
-  const tmp = process.env['RUNNER_TEMP'] || os.tmpdir()
+  const tmp = os.tmpdir()
   const sep = path.sep
   return new Promise(function (resolve, reject) {
     fs.mkdtemp(`${tmp}${sep}actions-setup-mysql-`, (err, dir) => {
