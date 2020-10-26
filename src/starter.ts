@@ -42,6 +42,20 @@ tmpdir=${baseDir}${sep}tmp
       stdio: ['ignore', out, err]
     }
   )
+
+  core.debug('wait for MySQL ready')
+  for(;;) {
+    try {
+      fs.statSync(`${baseDir}${sep}tmp${sep}mysqld.pid`)
+      break
+    } catch {
+      await sleep(0.1)
+    }
+    if (subprocess.exitCode !== null) {
+      core.setFailed('failed to launch MySQL')
+      break
+    }
+  }
   subprocess.unref()
 }
 

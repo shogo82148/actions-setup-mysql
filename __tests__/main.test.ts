@@ -1,7 +1,8 @@
-import * as io from '@actions/io'
 import * as os from 'os'
 import * as path from 'path'
 import * as fs from 'fs'
+import * as io from '@actions/io'
+import * as exec from '@actions/exec'
 
 const toolDir = path.join(__dirname, 'runner', 'tools')
 const tempDir = path.join(__dirname, 'runner', 'temp')
@@ -36,6 +37,8 @@ describe('installer tests', () => {
 
   it('start and shutdown MySQL', async () => {
     const mysqlDir = await installer.getMySQL('5.6')
+    const sep = path.sep
     await starter.startMySQL(mysqlDir)
+    await exec.exec(`${mysqlDir}${sep}bin${sep}mysql`, ['--host=127.0.0.1', '--user=root', '--port=3306', '-e', 'select 1'])
   }, 1000000)
 })
