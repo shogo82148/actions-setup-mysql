@@ -17,7 +17,7 @@ export async function startMySQL(mysqlPath: string) {
 
   const myCnf = `
 [mysqld]
-lc-messages-dir=/Users/shogoichinose/src/github.com/shogo82148/actions-setup-mysql/__tests__/runner/tools/mysql/5.6.50/x64/share
+lc-messages-dir=${mysqlPath}${sep}share
 socket=${baseDir}${sep}tmp${sep}mysql.sock
 datadir=${baseDir}${sep}var
 pid-file=${baseDir}${sep}tmp${sep}mysqld.pid
