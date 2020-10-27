@@ -30,7 +30,7 @@ git merge -X theirs -m "Merge branch 'main' into releases/v$MAJOR" main || true
 npm ci
 npm run build
 npm run package
-perl -ne 'print unless m(^/dist/$)' -i .gitignore
+perl -ne 'print unless m(^/node_modules/|/lib/$)' -i .gitignore
 
 : publish to GitHub
 git add .

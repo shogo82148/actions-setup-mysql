@@ -6,7 +6,32 @@ import * as core from '@actions/core'
 import * as io from '@actions/io'
 import * as exec from '@actions/exec'
 
-export async function startMySQL(mysqlPath: string) {
+const BASEDIR = 'BASEDIR'
+const PID = 'PID'
+
+export interface MySQLState {
+  pid: number
+  baseDir: string
+}
+
+export function saveState(state: MySQLState) {
+  core.saveState(BASEDIR, state.baseDir)
+  core.saveState(PID, state.pid)
+}
+
+export function getState(): MySQLState | null {
+  const baseDir = core.getState(BASEDIR)
+  if (!baseDir) {
+    return null
+  }
+  const pid = parseInt(core.getState(PID))
+  return {
+    pid,
+    baseDir
+  }
+}
+
+export async function startMySQL(mysqlPath: string): Promise<MySQLState> {
   const baseDir = await mkdtemp()
   const sep = path.sep
 
@@ -42,9 +67,10 @@ tmpdir=${baseDir}${sep}tmp
       stdio: ['ignore', out, err]
     }
   )
+  const pid = subprocess.pid
 
   core.debug('wait for MySQL ready')
-  for(;;) {
+  for (;;) {
     try {
       fs.statSync(`${baseDir}${sep}tmp${sep}mysqld.pid`)
       break
@@ -52,11 +78,15 @@ tmpdir=${baseDir}${sep}tmp
       await sleep(0.1)
     }
     if (subprocess.exitCode !== null) {
-      core.setFailed('failed to launch MySQL')
-      break
+      throw new Error('failed to launch MySQL')
     }
   }
   subprocess.unref()
+
+  return {
+    pid,
+    baseDir
+  }
 }
 
 function mkdtemp(): Promise<string> {

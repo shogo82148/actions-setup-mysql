@@ -7,7 +7,9 @@ inputs:
     default: ""
 runs:
   using: "node12"
-  main: "dist/index.js"
+  main: "lib/setup-mysql.js"
+  post: "lib/cleanup-mysql.js"
+  post-if: "always()"
 branding:
   color: blue
   icon: database

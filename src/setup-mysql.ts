@@ -12,7 +12,8 @@ async function run(): Promise<void> {
     })
 
     if (autoStart) {
-      await starter.startMySQL(mysqlPath)
+      const state = await starter.startMySQL(mysqlPath)
+      starter.saveState(state)
     }
   } catch (error) {
     core.setFailed(error.message)

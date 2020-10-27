@@ -1,16 +1,18 @@
 import * as os from 'os'
 import * as path from 'path'
 import * as fs from 'fs'
-import * as io from '@actions/io'
-import * as exec from '@actions/exec'
 
 const toolDir = path.join(__dirname, 'runner', 'tools')
 const tempDir = path.join(__dirname, 'runner', 'temp')
 
 process.env['RUNNER_TOOL_CACHE'] = toolDir
 process.env['RUNNER_TEMP'] = tempDir
+
+import * as exec from '@actions/exec'
+import * as io from '@actions/io'
 import * as installer from '../src/installer'
 import * as starter from '../src/starter'
+import * as cleanup from '../src/cleanup'
 
 describe('installer tests', () => {
   beforeAll(async () => {
@@ -38,7 +40,14 @@ describe('installer tests', () => {
   it('start and shutdown MySQL', async () => {
     const mysqlDir = await installer.getMySQL('5.6')
     const sep = path.sep
-    await starter.startMySQL(mysqlDir)
-    await exec.exec(`${mysqlDir}${sep}bin${sep}mysql`, ['--host=127.0.0.1', '--user=root', '--port=3306', '-e', 'select 1'])
+    const state = await starter.startMySQL(mysqlDir)
+    await exec.exec(`${mysqlDir}${sep}bin${sep}mysql`, [
+      '--host=127.0.0.1',
+      '--user=root',
+      '--port=3306',
+      '-e',
+      'select 1'
+    ])
+    await cleanup.shutdownMySQL(state)
   }, 1000000)
 })
