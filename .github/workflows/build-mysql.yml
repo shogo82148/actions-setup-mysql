@@ -1,6 +1,6 @@
 name: "Build MySQL"
 on:
-  pull_request:
+  # pull_request:
   push:
     branches:
       - "releases/*"
