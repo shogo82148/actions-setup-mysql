@@ -77,7 +77,7 @@ async function acquireMySQL(version: string): Promise<string> {
 }
 
 function getFileName(version: string): string {
-  return `mysql-${version}-${osPlat}-${osArch}.tar.gz`
+  return `mysql-${version}-${osPlat}-${osArch}.tar.xz`
 }
 
 interface PackageVersion {
