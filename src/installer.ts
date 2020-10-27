@@ -69,15 +69,15 @@ async function acquireMySQL(version: string): Promise<string> {
   }
 
   //
-  // Extract
+  // Extract XZ compressed tar
   //
-  const extPath = await tc.extractTar(downloadPath)
+  const extPath = await tc.extractTar(downloadPath, "", "xJ")
 
   return await tc.cacheDir(extPath, 'mysql', version)
 }
 
 function getFileName(version: string): string {
-  return `mysql-${version}-${osPlat}-${osArch}.tar.gz`
+  return `mysql-${version}-${osPlat}-${osArch}.tar.xz`
 }
 
 interface PackageVersion {
