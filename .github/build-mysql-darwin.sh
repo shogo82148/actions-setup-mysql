@@ -86,6 +86,12 @@ echo "::group::archive"
 (
     set -eux
     cd "$PREFIX"
-    tar vczf "$RUNNER_TEMP/mysql.tar.gz" .
+
+    # remove extra files
+    rm -rf ./man
+    rm -rf ./mysql-test
+    rm -rf ./sql-bench
+
+    tar Jvcf "$RUNNER_TEMP/mysql.tar.xz" .
 )
 echo "::endgroup::"
