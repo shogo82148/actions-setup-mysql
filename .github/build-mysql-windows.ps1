@@ -39,12 +39,13 @@ Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
     }
 }
 
-nmake
+devenv MySQL.sln /build RelWithDebInfo
 Write-Host "::endgroup::"
 
 Write-Host "::group::install"
 Set-Location "$RUNNER_TEMP/build"
-make install
+devenv MySQL.sln /build RelWithDebInfo /project initial_database
+devenv MySQL.sln /build RelWithDebInfo /project package
 Write-Host "::endgroup::"
 
 # archive
