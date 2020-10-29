@@ -51,7 +51,7 @@ tmpdir=${baseDir}${sep}tmp
 `
   fs.writeFileSync(path.join(baseDir, 'etc', 'my.cnf'), myCnf)
 
-  core.group('setup MySQL Database', async () => {
+  await core.group('setup MySQL Database', async () => {
     const help = await verboseHelp(mysql)
     const useMysqldInitialize = help.match(/--initialize-insecure/)
     if (useMysqldInitialize) {
