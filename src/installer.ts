@@ -8,10 +8,16 @@ import * as semver from 'semver'
 const osPlat = os.platform()
 const osArch = os.arch()
 
-async function getAvailableVersions(): Promise<string[]> {
+export interface MySQL {
+  distribution: string
+  version: string
+  toolPath: string
+}
+
+async function getAvailableVersions(distribution: string): Promise<string[]> {
   return new Promise<string[]>((resolve, reject) => {
     fs.readFile(
-      path.join(__dirname, '..', 'versions', `mysql.json`),
+      path.join(__dirname, '..', 'versions', `${distribution}.json`),
       (err, data) => {
         if (err) {
           reject(err)
@@ -23,41 +29,65 @@ async function getAvailableVersions(): Promise<string[]> {
   })
 }
 
-async function determineVersion(version: string): Promise<string> {
-  const availableVersions = await getAvailableVersions()
+async function determineVersion(
+  distribution: string,
+  version: string
+): Promise<MySQL> {
+  if (version.startsWith('mysql-')) {
+    distribution = 'mysql'
+    version = version.substring('mysql-'.length)
+  } else if (version.startsWith('mariadb-')) {
+    distribution = 'mariadb'
+    version = version.substring('mariadb-'.length)
+  }
+  const availableVersions = await getAvailableVersions(distribution)
   for (let v of availableVersions) {
     if (semver.satisfies(v, version)) {
-      return v
+      return {
+        distribution: distribution,
+        version: v,
+        toolPath: ''
+      }
     }
   }
   throw new Error('unable to get latest version')
 }
 
-export async function getMySQL(version: string): Promise<string> {
-  const selected = await determineVersion(version)
+export async function getMySQL(
+  distribution: string,
+  version: string
+): Promise<MySQL> {
+  const selected = await determineVersion(distribution, version)
 
   // check cache
   let toolPath: string
-  toolPath = tc.find('mysql', selected)
+  toolPath = tc.find(selected.distribution, selected.version)
 
   if (!toolPath) {
     // download, extract, cache
-    toolPath = await acquireMySQL(selected)
-    core.debug('redis tool is cached under ' + toolPath)
+    toolPath = await acquireMySQL(selected.distribution, selected.version)
+    core.debug('MySQL tool is cached under ' + toolPath)
   }
 
   //
   // prepend the tools path. instructs the agent to prepend for future tasks
   //
   core.addPath(path.join(toolPath, 'bin'))
-  return toolPath
+  return {
+    distribution: selected.distribution,
+    version: selected.version,
+    toolPath: toolPath
+  }
 }
 
-async function acquireMySQL(version: string): Promise<string> {
+async function acquireMySQL(
+  distribution: string,
+  version: string
+): Promise<string> {
   //
   // Download - a tool installer intimately knows how to get the tool (and construct urls)
   //
-  const fileName = getFileName(version)
+  const fileName = getFileName(distribution, version)
   const downloadUrl = await getDownloadUrl(fileName)
   let downloadPath: string | null = null
   try {
@@ -71,13 +101,13 @@ async function acquireMySQL(version: string): Promise<string> {
   //
   // Extract XZ compressed tar
   //
-  const extPath = await tc.extractTar(downloadPath, "", "xJ")
+  const extPath = await tc.extractTar(downloadPath, '', 'xJ')
 
-  return await tc.cacheDir(extPath, 'mysql', version)
+  return await tc.cacheDir(extPath, distribution, version)
 }
 
-function getFileName(version: string): string {
-  return `mysql-${version}-${osPlat}-${osArch}.tar.xz`
+function getFileName(distribution: string, version: string): string {
+  return `${distribution}-${version}-${osPlat}-${osArch}.tar.xz`
 }
 
 interface PackageVersion {

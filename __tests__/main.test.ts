@@ -30,18 +30,32 @@ describe('installer tests', () => {
   }, 100000)
 
   it('Acquires version of MySQL if no matching version is installed', async () => {
-    await installer.getMySQL('5.6')
+    await installer.getMySQL('mysql', '5.6')
     const mysqlDir = path.join(toolDir, 'mysql', '5.6.50', os.arch())
 
     expect(fs.existsSync(`${mysqlDir}.complete`)).toBe(true)
     expect(fs.existsSync(path.join(mysqlDir, 'bin', 'mysqld'))).toBe(true)
   }, 1000000)
 
-  it('start and shutdown MySQL', async () => {
-    const mysqlDir = await installer.getMySQL('5.6')
+  it('start and shutdown MySQL 5.6', async () => {
+    const mysqlDir = await installer.getMySQL('','mysql-5.6')
     const sep = path.sep
     const state = await starter.startMySQL(mysqlDir)
-    await exec.exec(`${mysqlDir}${sep}bin${sep}mysql`, [
+    await exec.exec(`${mysqlDir.toolPath}${sep}bin${sep}mysql`, [
+      '--host=127.0.0.1',
+      '--user=root',
+      '--port=3306',
+      '-e',
+      'select 1'
+    ])
+    await cleanup.shutdownMySQL(state)
+  }, 1000000)
+
+  it('start and shutdown MySQL 5.7', async () => {
+    const mysqlDir = await installer.getMySQL('', 'mysql-5.7')
+    const sep = path.sep
+    const state = await starter.startMySQL(mysqlDir)
+    await exec.exec(`${mysqlDir.toolPath}${sep}bin${sep}mysql`, [
       '--host=127.0.0.1',
       '--user=root',
       '--port=3306',
