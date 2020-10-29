@@ -21,14 +21,6 @@ Write-Host "::endgroup::"
 
 Write-Host "::group::build MySQL"
 Set-Location "$RUNNER_TEMP"
-New-Item "boost" -ItemType Directory -Force
-$BOOST=Join-Path $RUNNER_TEMP "boost"
-New-Item "build" -ItemType Directory -Force
-Set-Location build
-cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
-    -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
-    -DCMAKE_INSTALL_PREFIX="$PREFIX" `
-    -DWITH_SSL="$PREFIX"
 
 # https://help.appveyor.com/discussions/questions/18777-how-to-use-vcvars64bat-from-powershell
 # https://stackoverflow.com/questions/2124753/how-can-i-use-powershell-with-the-visual-studio-command-prompt
@@ -38,6 +30,15 @@ Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
         Set-Content "env:\$($matches[1])" $matches[2]
     }
 }
+
+New-Item "boost" -ItemType Directory -Force
+$BOOST=Join-Path $RUNNER_TEMP "boost"
+New-Item "build" -ItemType Directory -Force
+Set-Location build
+cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
+    -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
+    -DCMAKE_INSTALL_PREFIX="$PREFIX" `
+    -DWITH_SSL="$PREFIX"
 
 devenv MySQL.sln /build RelWithDebInfo
 Write-Host "::endgroup::"
