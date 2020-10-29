@@ -9,19 +9,7 @@ New-Item $RUNNER_TEMP -ItemType Directory -Force
 Set-Location "$RUNNER_TEMP"
 Remove-Item -Path * -Recurse -Force
 
-Write-Host "::group::download MySQL source"
-Set-Location "$RUNNER_TEMP"
-Invoke-WebRequest "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.zip" -OutFile mysql-src.zip
-Write-Host "::endgroup::"
-
-Write-Host "::group::extract MySQL source"
-Set-Location "$RUNNER_TEMP"
-Expand-Archive -Path mysql-src.zip -DestinationPath .
-Write-Host "::endgroup::"
-
-Write-Host "::group::build MySQL"
-Set-Location "$RUNNER_TEMP"
-
+Write-Host "##[group]Set up Visual Studio 2019"
 # https://help.appveyor.com/discussions/questions/18777-how-to-use-vcvars64bat-from-powershell
 # https://stackoverflow.com/questions/2124753/how-can-i-use-powershell-with-the-visual-studio-command-prompt
 cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat`" x64 && set > %temp%\vcvars.txt"
@@ -30,6 +18,38 @@ Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
         Set-Content "env:\$($matches[1])" $matches[2]
     }
 }
+Write-Host "##[endgroup]"
+
+# system SSL/TLS library is too old. so we use custom build.
+Write-Host "##[group]download OpenSSL source"
+Set-Location "$RUNNER_TEMP"
+Invoke-WebRequest "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.zip" -OutFile "openssl.zip"
+Write-Host "##[endgroup]"
+
+Write-Host "##[group]extract OpenSSL source"
+Set-Location "$RUNNER_TEMP"
+Expand-Archive -Path "openssl.zip" -DestinationPath .
+Write-Host "##[endgroup]"
+
+Write-Host "##[group]build OpenSSL"
+Set-Location "openssl-OpenSSL_$OPENSSL_VERSION"
+perl Configure --prefix="$PREFIX" VC-WIN64A
+nmake
+nmake install_sw
+Write-Host "##[endgroup]"
+
+Write-Host "::group::download MySQL source"
+Set-Location "$RUNNER_TEMP"
+Invoke-WebRequest "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.zip" -OutFile "mysql-src.zip"
+Write-Host "::endgroup::"
+
+Write-Host "::group::extract MySQL source"
+Set-Location "$RUNNER_TEMP"
+Expand-Archive -Path "mysql-src.zip" -DestinationPath "."
+Write-Host "::endgroup::"
+
+Write-Host "::group::build MySQL"
+Set-Location "$RUNNER_TEMP"
 
 New-Item "boost" -ItemType Directory -Force
 $BOOST=Join-Path $RUNNER_TEMP "boost"
