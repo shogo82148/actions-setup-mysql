@@ -41,7 +41,7 @@ describe('installer tests', () => {
     const mysqlDir = await installer.getMySQL('','mysql-5.6')
     const sep = path.sep
     const state = await starter.startMySQL(mysqlDir)
-    await exec.exec(`${mysqlDir}${sep}bin${sep}mysql`, [
+    await exec.exec(`${mysqlDir.toolPath}${sep}bin${sep}mysql`, [
       '--host=127.0.0.1',
       '--user=root',
       '--port=3306',
@@ -55,7 +55,7 @@ describe('installer tests', () => {
     const mysqlDir = await installer.getMySQL('', 'mysql-5.7')
     const sep = path.sep
     const state = await starter.startMySQL(mysqlDir)
-    await exec.exec(`${mysqlDir}${sep}bin${sep}mysql`, [
+    await exec.exec(`${mysqlDir.toolPath}${sep}bin${sep}mysql`, [
       '--host=127.0.0.1',
       '--user=root',
       '--port=3306',
