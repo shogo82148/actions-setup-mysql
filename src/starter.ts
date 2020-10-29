@@ -96,6 +96,7 @@ tmpdir=${baseDir}${sep}tmp
     }
   }
   subprocess.unref()
+  core.debug('MySQL Server started')
 
   return {
     pid,
