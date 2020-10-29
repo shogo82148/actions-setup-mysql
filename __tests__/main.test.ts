@@ -14,7 +14,7 @@ import * as installer from '../src/installer'
 import * as starter from '../src/starter'
 import * as cleanup from '../src/cleanup'
 
-describe('installer tests', () => {
+describe('installer tests', async () => {
   beforeAll(async () => {
     await io.rmRF(toolDir)
     await io.rmRF(tempDir)
