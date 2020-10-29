@@ -29,7 +29,17 @@ cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
     -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
     -DCMAKE_INSTALL_PREFIX="$PREFIX" `
     -DWITH_SSL="$PREFIX"
-nmake "-j$JOBS"
+
+# https://help.appveyor.com/discussions/questions/18777-how-to-use-vcvars64bat-from-powershell
+# https://stackoverflow.com/questions/2124753/how-can-i-use-powershell-with-the-visual-studio-command-prompt
+cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat`" x64 && set > %temp%\vcvars.txt"
+Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
+    if ($_ -match "^(.*?)=(.*)$") {
+        Set-Content "env:\$($matches[1])" $matches[2]
+    }
+}
+
+nmake
 Write-Host "::endgroup::"
 
 Write-Host "::group::install"
