@@ -26,7 +26,7 @@ $BOOST=Join-Path $RUNNER_TEMP "boost"
 New-Item "build" -ItemType Directory -Force
 Set-Location build
 cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
-    -DDOWNLOAD_BOOST=1 -DWITH_BOOST=$BOOST `
+    -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
     -DCMAKE_INSTALL_PREFIX="$PREFIX" `
     -DWITH_SSL="$PREFIX"
 nmake "-j$JOBS"
