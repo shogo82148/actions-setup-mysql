@@ -5,14 +5,15 @@ import * as starter from './starter'
 async function run(): Promise<void> {
   try {
     const version = core.getInput('mysql-version')
+    const distribution = core.getInput('distribution')
     const autoStart = parseBoolean(core.getInput('auto-start'))
 
-    const mysqlPath = await core.group('install redis', async () => {
-      return installer.getMySQL(version)
+    const mysql = await core.group('install redis', async () => {
+      return installer.getMySQL(distribution, version)
     })
 
     if (autoStart) {
-      const state = await starter.startMySQL(mysqlPath)
+      const state = await starter.startMySQL(mysql)
       starter.saveState(state)
     }
   } catch (error) {

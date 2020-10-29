@@ -5,6 +5,7 @@ import * as child_process from 'child_process'
 import * as core from '@actions/core'
 import * as io from '@actions/io'
 import * as exec from '@actions/exec'
+import * as installer from './installer'
 
 const BASEDIR = 'BASEDIR'
 const PID = 'PID'
@@ -31,7 +32,7 @@ export function getState(): MySQLState | null {
   }
 }
 
-export async function startMySQL(mysqlPath: string): Promise<MySQLState> {
+export async function startMySQL(mysql: installer.MySQL): Promise<MySQLState> {
   const baseDir = await mkdtemp()
   const sep = path.sep
 
@@ -42,7 +43,7 @@ export async function startMySQL(mysqlPath: string): Promise<MySQLState> {
 
   const myCnf = `
 [mysqld]
-lc-messages-dir=${mysqlPath}${sep}share
+lc-messages-dir=${mysql.toolPath}${sep}share
 socket=${baseDir}${sep}tmp${sep}mysql.sock
 datadir=${baseDir}${sep}var
 pid-file=${baseDir}${sep}tmp${sep}mysqld.pid
@@ -50,17 +51,30 @@ tmpdir=${baseDir}${sep}tmp
 `
   fs.writeFileSync(path.join(baseDir, 'etc', 'my.cnf'), myCnf)
 
-  core.debug('setup MySQL database')
-  await exec.exec(path.join(mysqlPath, 'scripts', 'mysql_install_db'), [
-    `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-    `--basedir=${mysqlPath}`
-  ])
+  core.group('setup MySQL Database', async () => {
+    const help = await verboseHelp(mysql)
+    const useMysqldInitialize = help.match(/--initialize-insecure/)
+    if (useMysqldInitialize) {
+      await exec.exec(path.join(mysql.toolPath, 'bin', 'mysqld'), [
+        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+        `--initialize-insecure`
+      ])
+    } else {
+      await exec.exec(
+        path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
+        [
+          `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+          `--basedir=${mysql.toolPath}`
+        ]
+      )
+    }
+  })
 
   core.debug('start MySQL database')
   const out = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
   const err = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
   const subprocess = child_process.spawn(
-    path.join(mysqlPath, 'bin', 'mysqld'),
+    path.join(mysql.toolPath, 'bin', 'mysqld'),
     [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, '--user=root'],
     {
       detached: true,
@@ -87,6 +101,24 @@ tmpdir=${baseDir}${sep}tmp
     pid,
     baseDir
   }
+}
+
+async function verboseHelp(mysql: installer.MySQL): Promise<string> {
+  let myOutput = ''
+  const options = {
+    listeners: {
+      stdout: (data: Buffer) => {
+        myOutput += data.toString()
+      },
+      stderr: (_: Buffer) => {}
+    }
+  }
+  await exec.exec(
+    path.join(mysql.toolPath, 'bin', 'mysqld'),
+    ['--verbose', `--help`],
+    options
+  )
+  return myOutput
 }
 
 function mkdtemp(): Promise<string> {
