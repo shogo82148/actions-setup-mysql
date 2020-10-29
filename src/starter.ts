@@ -107,6 +107,7 @@ tmpdir=${baseDir}${sep}tmp
 async function verboseHelp(mysql: installer.MySQL): Promise<string> {
   let myOutput = ''
   const options = {
+    silent: true,
     listeners: {
       stdout: (data: Buffer) => {
         myOutput += data.toString()
