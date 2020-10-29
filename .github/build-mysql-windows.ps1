@@ -9,34 +9,34 @@ New-Item $RUNNER_TEMP -ItemType Directory -Force
 Set-Location "$RUNNER_TEMP"
 Remove-Item -Path * -Recurse -Force
 
-Write-Output "::group::download MySQL source"
+Write-Host "::group::download MySQL source"
 Set-Location "$RUNNER_TEMP"
 Invoke-WebRequest "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.zip" -OutFile mysql-src.zip
-Write-Output "::endgroup::"
+Write-Host "::endgroup::"
 
-Write-Output "::group::extract MySQL source"
+Write-Host "::group::extract MySQL source"
 Set-Location "$RUNNER_TEMP"
-tar zxvf mysql-src.tar.gz
-Write-Output "::endgroup::"
+Expand-Archive -Path mysql-src.zip -DestinationPath .
+Write-Host "::endgroup::"
 
-Write-Output "::group::build MySQL"
+Write-Host "::group::build MySQL"
 Set-Location "$RUNNER_TEMP"
-mkdir build
+New-Item "build" -ItemType Directory -Force
 Set-Location build
-cmake "../mysql-server-mysql-$MYSQL_VERSION" \
-    -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
-    -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+cmake "../mysql-server-mysql-$MYSQL_VERSION" `
+    -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost `
+    -DCMAKE_INSTALL_PREFIX="$PREFIX" `
     -DWITH_SSL="$PREFIX"
 make "-j$JOBS"
-Write-Output "::endgroup::"
+Write-Host "::endgroup::"
 
-Write-Output "::group::install"
+Write-Host "::group::install"
 Set-Location "$RUNNER_TEMP/build"
 make install
-Write-Output "::endgroup::"
+Write-Host "::endgroup::"
 
 # archive
-Write-Output "::group::archive"
+Write-Host "::group::archive"
 Set-Location "$PREFIX"
 
 # remove extra files
@@ -45,4 +45,4 @@ rm -rf ./mysql-test
 rm -rf ./sql-bench
 
 tar Jvcf "$RUNNER_TEMP/mysql.tar.xz" .
-Write-Output "::endgroup::"
+Write-Host "::endgroup::"

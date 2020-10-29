@@ -73,7 +73,7 @@ jobs:
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
     steps:
       - uses: actions/checkout@v2
-      - run: .github/build-mysql-windows.ps1 ${{ matrix.mysql }}
+      - run: .github\build-mysql-windows.ps1 ${{ matrix.mysql }}
       - name: upload
         run: |
           ACTIONS_VERSION=v$(cat "$GITHUB_WORKSPACE/package.json" | jq -r .version)
