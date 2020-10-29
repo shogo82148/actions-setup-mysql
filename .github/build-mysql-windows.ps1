@@ -21,13 +21,15 @@ Write-Host "::endgroup::"
 
 Write-Host "::group::build MySQL"
 Set-Location "$RUNNER_TEMP"
+New-Item "boost" -ItemType Directory -Force
+$BOOST=Join-Path $RUNNER_TEMP "boost"
 New-Item "build" -ItemType Directory -Force
 Set-Location build
 cmake "../mysql-server-mysql-$MYSQL_VERSION" `
-    -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost `
+    -DDOWNLOAD_BOOST=1 -DWITH_BOOST=$BOOST `
     -DCMAKE_INSTALL_PREFIX="$PREFIX" `
     -DWITH_SSL="$PREFIX"
-make "-j$JOBS"
+nmake "-j$JOBS"
 Write-Host "::endgroup::"
 
 Write-Host "::group::install"
