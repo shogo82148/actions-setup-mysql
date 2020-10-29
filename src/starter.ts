@@ -70,7 +70,7 @@ tmpdir=${baseDir}${sep}tmp
     }
   })
 
-  core.debug('start MySQL database')
+  core.info('start MySQL database')
   const out = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
   const err = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
   const subprocess = child_process.spawn(
@@ -83,7 +83,7 @@ tmpdir=${baseDir}${sep}tmp
   )
   const pid = subprocess.pid
 
-  core.debug('wait for MySQL ready')
+  core.info('wait for MySQL ready')
   for (;;) {
     try {
       fs.statSync(`${baseDir}${sep}tmp${sep}mysqld.pid`)
@@ -96,7 +96,7 @@ tmpdir=${baseDir}${sep}tmp
     }
   }
   subprocess.unref()
-  core.debug('MySQL Server started')
+  core.info('MySQL Server started')
 
   return {
     pid,
