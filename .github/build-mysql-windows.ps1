@@ -21,6 +21,9 @@ Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
 }
 Write-Host "::endgroup::"
 
+Write-Host "::group::Set up NASM"
+choco install nasm
+Write-Host "::endgroup::"
 
 # system SSL/TLS library is too old. so we use custom build.
 Write-Host "::group::download OpenSSL source"
