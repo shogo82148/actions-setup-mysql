@@ -5,15 +5,22 @@ $RUNNER_TEMP=$env:RUNNER_TEMP ?? ( Join-Path $ROOT "working" )
 $RUNNER_TOOL_CACHE=$env:RUNNER_TOOL_CACHE ?? ( Join-Path $RUNNER_TEMP "dist" )
 $PREFIX=Join-Path $RUNNER_TOOL_CACHE "mysql" $MYSQL_VERSION "x64"
 
+Write-Host "::group::Set up Visual Studio 2019"
 New-Item $RUNNER_TEMP -ItemType Directory -Force
 Set-Location "$RUNNER_TEMP"
 Remove-Item -Path * -Recurse -Force
 
-Write-Host "::group::Set up Visual Studio 2019"
 # https://help.appveyor.com/discussions/questions/18777-how-to-use-vcvars64bat-from-powershell
 # https://stackoverflow.com/questions/2124753/how-can-i-use-powershell-with-the-visual-studio-command-prompt
-Import-VisualStudioVars -VisualStudioVersion 2019
+cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat`" x64 && set > %temp%\vcvars.txt"
+Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
+    if ($_ -match "^(.*?)=(.*)$") {
+        Set-Content "env:\$($matches[1])" $matches[2]
+        Write-Host "::debug::$($matches[1])=$($matches[2])"
+    }
+}
 Write-Host "::endgroup::"
+
 
 # system SSL/TLS library is too old. so we use custom build.
 Write-Host "::group::download OpenSSL source"
