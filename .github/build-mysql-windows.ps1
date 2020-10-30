@@ -16,6 +16,7 @@ cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterpris
 Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
     if ($_ -match "^(.*?)=(.*)$") {
         Set-Content "env:\$($matches[1])" $matches[2]
+        Write-Host "::debug::\$($matches[1])=$($matches[2])"
     }
 }
 Write-Host "::endgroup::"
@@ -33,7 +34,7 @@ Write-Host "::endgroup::"
 
 Write-Host "::group::build OpenSSL"
 Set-Location "openssl-OpenSSL_$OPENSSL_VERSION"
-perl Configure --prefix="$PREFIX" VC-WIN64A
+perl Configure --prefix="$PREFIX"
 nmake
 nmake install_sw
 Write-Host "::endgroup::"
