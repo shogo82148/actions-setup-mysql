@@ -1,8 +1,14 @@
 Param($MYSQL_VERSION)
 $OPENSSL_VERSION="1_1_1h"
 $ROOT=Split-Path -Parent $MyInvocation.MyCommand.Path
-$RUNNER_TEMP=$env:RUNNER_TEMP ?? ( Join-Path $ROOT "working" )
-$RUNNER_TOOL_CACHE=$env:RUNNER_TOOL_CACHE ?? ( Join-Path $RUNNER_TEMP "dist" )
+$RUNNER_TEMP=$env:RUNNER_TEMP
+if ($null -eq $RUNNER_TEMP) {
+    $RUNNER_TEMP=Join-Path $ROOT "working"
+}
+$RUNNER_TOOL_CACHE=$env:RUNNER_TOOL_CACHE
+if ($null -eq $RUNNER_TOOL_CACHE) {
+    $RUNNER_TOOL_CACHE=Join-Path $RUNNER_TEMP "dist"
+}
 $PREFIX=Join-Path $RUNNER_TOOL_CACHE "mysql" $MYSQL_VERSION "x64"
 
 Write-Host "::group::Set up Visual Studio 2019"
