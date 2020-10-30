@@ -12,13 +12,7 @@ Remove-Item -Path * -Recurse -Force
 Write-Host "::group::Set up Visual Studio 2019"
 # https://help.appveyor.com/discussions/questions/18777-how-to-use-vcvars64bat-from-powershell
 # https://stackoverflow.com/questions/2124753/how-can-i-use-powershell-with-the-visual-studio-command-prompt
-cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat`" x64 && set > %temp%\vcvars.txt"
-Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
-    if ($_ -match "^(.*?)=(.*)$") {
-        Set-Content "env:\$($matches[1])" $matches[2]
-        Write-Host "::debug::\$($matches[1])=$($matches[2])"
-    }
-}
+Import-VisualStudioVars -VisualStudioVersion 2019
 Write-Host "::endgroup::"
 
 # system SSL/TLS library is too old. so we use custom build.
@@ -34,7 +28,7 @@ Write-Host "::endgroup::"
 
 Write-Host "::group::build OpenSSL"
 Set-Location "openssl-OpenSSL_$OPENSSL_VERSION"
-perl Configure --prefix="$PREFIX"
+C:\strawberry\perl\bin\perl.exe Configure --prefix="$PREFIX" VC-WIN64A
 nmake
 nmake install_sw
 Write-Host "::endgroup::"
