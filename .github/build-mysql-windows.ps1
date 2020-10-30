@@ -23,6 +23,7 @@ Write-Host "::endgroup::"
 
 Write-Host "::group::Set up NASM"
 choco install nasm
+Set-Item -Path "env:PATH" "C:\Program Files\NASM;$env:PATH"
 Write-Host "::endgroup::"
 
 # system SSL/TLS library is too old. so we use custom build.
