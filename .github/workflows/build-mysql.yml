@@ -77,7 +77,7 @@ jobs:
       - name: upload
         run: |
           $ACTIONS_VERSION="v$(Get-Content "$env:GITHUB_WORKSPACE\package.json" | jq -r .version)"
-          aws --region us-east-1 s3 cp --acl public-read "$RUNNER_TEMP\build\mysql-$env:MYSQL_VERSION-winx64.zip" "s3://shogo82148-actions-setup-mysql/$ACTIONS_VERSION/mysql-$env:MYSQL_VERSION-win32-x64.zip"
+          aws --region us-east-1 s3 cp --acl public-read "$env:RUNNER_TEMP\build\mysql-$env:MYSQL_VERSION-winx64.zip" "s3://shogo82148-actions-setup-mysql/$ACTIONS_VERSION/mysql-$env:MYSQL_VERSION-win32-x64.zip"
         env:
           MYSQL_VERSION: ${{ matrix.mysql }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
