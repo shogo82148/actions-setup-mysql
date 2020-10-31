@@ -73,16 +73,24 @@ export async function getMySQL(
   // prepend the tools path. instructs the agent to prepend for future tasks
   //
   core.addPath(path.join(toolPath, 'bin'))
-  core.exportVariable(
-    'LD_LIBRARY_PATH',
-    path.join(toolPath, 'lib') + path.delimiter + process.env['LD_LIBRARY_PATH']
-  )
-  core.exportVariable(
-    'DYLD_LIBRARY_PATH',
-    path.join(toolPath, 'lib') +
-      path.delimiter +
-      process.env['DYLD_LIBRARY_PATH']
-  )
+
+  // configure library path for windows
+  core.addPath(path.join(toolPath, 'lib'))
+
+  // configure library path for linux
+  let libraryPath = path.join(toolPath, 'lib')
+  if (process.env['LD_LIBRARY_PATH']) {
+    libraryPath += path.delimiter + process.env['LD_LIBRARY_PATH']
+  }
+  core.exportVariable('LD_LIBRARY_PATH', libraryPath)
+
+  // configure library path for macOS
+  libraryPath = path.join(toolPath, 'lib')
+  if (process.env['DYLD_LIBRARY_PATH']) {
+    libraryPath += path.delimiter + process.env['DYLD_LIBRARY_PATH']
+  }
+  core.exportVariable('DYLD_LIBRARY_PATH', libraryPath)
+
   return {
     distribution: selected.distribution,
     version: selected.version,
