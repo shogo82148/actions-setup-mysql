@@ -117,14 +117,22 @@ async function verboseHelp(mysql: installer.MySQL): Promise<string> {
       stdout: (data: Buffer) => {
         myOutput += data.toString()
       },
-      stderr: (_: Buffer) => {}
+      stderr: (data: Buffer) => {
+        myOutput += data.toString()
+      }
     }
   }
-  await exec.exec(
-    path.join(mysql.toolPath, 'bin', 'mysqld'),
-    ['--verbose', `--help`],
-    options
-  )
+  try {
+    await exec.exec(
+      path.join(mysql.toolPath, 'bin', 'mysqld'),
+      ['--verbose', `--help`],
+      options
+    )
+  } catch (e) {
+    core.error('fail to exec mysqld')
+    core.error(myOutput)
+    throw e
+  }
   return myOutput
 }
 
