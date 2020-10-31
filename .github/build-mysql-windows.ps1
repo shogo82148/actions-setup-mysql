@@ -101,14 +101,16 @@ devenv MySQL.sln /build RelWithDebInfo /project initial_database
 devenv MySQL.sln /build RelWithDebInfo /project package
 Write-Host "::endgroup::"
 
-# # archive
-# Write-Host "::group::archive"
-# Set-Location "$PREFIX"
+# archive
+Write-Host "::group::archive"
 
-# # remove extra files
-# rm -rf ./man
-# rm -rf ./mysql-test
-# rm -rf ./sql-bench
+Expand-Archive -Path "$env:RUNNER_TEMP\build\mysql-$env:MYSQL_VERSION-winx64.zip" -DestinationPath "$PREFIX" -Force
 
-# tar Jvcf "$RUNNER_TEMP/mysql.tar.xz" .
-# Write-Host "::endgroup::"
+Set-Location "$PREFIX"
+
+# remove extra files
+Remove-Item -Path mysql-test -Recurse -Force
+Remove-Item -Path sql-bench -Recurse -Force
+
+Compress-Archive -Path . -DestinationPath "$RUNNER_TEMP/mysql.zip"
+Write-Host "::endgroup::"
