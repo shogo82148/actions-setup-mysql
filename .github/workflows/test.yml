@@ -36,7 +36,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - run: npm ci
-      - run: npm test
+      - run: npm run test
 
   test:
     strategy:
@@ -73,7 +73,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - run: npm build
+      - run: npm ci
+      - run: npm run build
       - uses: ./
         with:
           mysql-version: ${{ matrix.mysql }}
