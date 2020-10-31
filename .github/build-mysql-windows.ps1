@@ -11,6 +11,7 @@ if ($null -eq $RUNNER_TOOL_CACHE) {
 }
 $PREFIX=Join-Path $RUNNER_TOOL_CACHE "mysql" $MYSQL_VERSION "x64"
 
+
 Write-Host "::group::Set up Visual Studio 2019"
 New-Item $RUNNER_TEMP -ItemType Directory -Force
 Set-Location "$RUNNER_TEMP"
@@ -27,36 +28,55 @@ Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
 }
 Write-Host "::endgroup::"
 
+
+# NASM is required by OpenSSL
 Write-Host "::group::Set up NASM"
 choco install nasm
 Set-Item -Path "env:PATH" "C:\Program Files\NASM;$env:PATH"
 Write-Host "::endgroup::"
 
-# system SSL/TLS library is too old. so we use custom build.
-Write-Host "::group::download OpenSSL source"
-Set-Location "$RUNNER_TEMP"
-Invoke-WebRequest "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.zip" -OutFile "openssl.zip"
-Write-Host "::endgroup::"
 
-Write-Host "::group::extract OpenSSL source"
+# system SSL/TLS library is too old. so we use custom build.
+Write-Host "::group::fetch OpenSSL source"
 Set-Location "$RUNNER_TEMP"
+Write-Host "Downloading zip archive..."
+Invoke-WebRequest "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.zip" -OutFile "openssl.zip"
+Write-Host "Unzipping..."
 Expand-Archive -Path "openssl.zip" -DestinationPath .
 Write-Host "::endgroup::"
 
+
 Write-Host "::group::build OpenSSL"
+Set-Location "$RUNNER_TEMP"
 Set-Location "openssl-OpenSSL_$OPENSSL_VERSION"
 C:\strawberry\perl\bin\perl.exe Configure --prefix="$PREFIX" VC-WIN64A
 nmake
 nmake install_sw
 Write-Host "::endgroup::"
 
-Write-Host "::group::download MySQL source"
+
+# Bison
+Write-Host "::group::Set up Bison"
+$BISON_VERSION="2.4.1"
+$BISON_PREFIX=Join-Path "C:" "GnuWin32"
 Set-Location "$RUNNER_TEMP"
-Invoke-WebRequest "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.zip" -OutFile "mysql-src.zip"
+Write-Host "Downloading zip archive of binary..."
+Invoke-WebRequest "https://versaweb.dl.sourceforge.net/project/gnuwin32/bison/$BISON_VERSION/bison-$BISON_VERSION-bin.zip" -OutFile "bison-bin.zip"
+Write-Host "Unzipping..."
+Expand-Archive -Path "bison-bin.zip" -DestinationPath "$BISON_PREFIX"
+Write-Host "Downloading zip archive of dependencies..."
+Invoke-WebRequest "https://versaweb.dl.sourceforge.net/project/gnuwin32/bison/$BISON_VERSION/bison-$BISON_VERSION-dep.zip" -OutFile "bison-dep.zip"
+Write-Host "Unzipping..."
+Expand-Archive -Path "bison-dep.zip" -DestinationPath "$BISON_PREFIX"
+Set-Item -Path "env:PATH" "$(Join-Path $BISON_PREFIX "bin");$env:PATH"
 Write-Host "::endgroup::"
 
-Write-Host "::group::extract MySQL source"
+
+Write-Host "::group::fetch MySQL source"
 Set-Location "$RUNNER_TEMP"
+Write-Host "Downloading zip archive..."
+Invoke-WebRequest "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.zip" -OutFile "mysql-src.zip"
+Write-Host "Unzipping..."
 Expand-Archive -Path "mysql-src.zip" -DestinationPath "."
 Write-Host "::endgroup::"
 
