@@ -36,6 +36,8 @@ export async function startMySQL(mysql: installer.MySQL): Promise<MySQLState> {
   const baseDir = await mkdtemp()
   const sep = path.sep
 
+  core.debug(`basedir: ${baseDir}`)
+
   // (re)create directory structure
   await io.mkdirP(path.join(baseDir, 'etc'))
   await io.mkdirP(path.join(baseDir, 'var'))
@@ -49,17 +51,20 @@ datadir=${baseDir}${sep}var
 pid-file=${baseDir}${sep}tmp${sep}mysqld.pid
 tmpdir=${baseDir}${sep}tmp
 `
+  core.debug(`writing my.cnf`)
   fs.writeFileSync(path.join(baseDir, 'etc', 'my.cnf'), myCnf)
 
   await core.group('setup MySQL Database', async () => {
     const help = await verboseHelp(mysql)
     const useMysqldInitialize = help.match(/--initialize-insecure/)
     if (useMysqldInitialize) {
+      core.debug(`mysqld has the --initialize-insecure option`)
       await exec.exec(path.join(mysql.toolPath, 'bin', 'mysqld'), [
         `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
         `--initialize-insecure`
       ])
     } else {
+      core.debug(`mysqld doesn't have the --initialize-insecure option`)
       await exec.exec(
         path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
         [
