@@ -102,15 +102,16 @@ devenv MySQL.sln /build RelWithDebInfo
 Write-Host "::endgroup::"
 
 Write-Host "::group::install"
-Set-Location "$RUNNER_TEMP/build"
+Set-Location "$RUNNER_TEMP\build"
 devenv MySQL.sln /build RelWithDebInfo /project initial_database
 devenv MySQL.sln /build RelWithDebInfo /project package
 Write-Host "::endgroup::"
 
+
 # archive
 Write-Host "::group::archive"
 
-Expand-Archive -Path "$env:RUNNER_TEMP\build\mysql-$env:MYSQL_VERSION-winx64.zip" -DestinationPath "$PREFIX" -Force
+Expand-Archive -Path "$RUNNER_TEMP\build\mysql-$MYSQL_VERSION-winx64.zip" -DestinationPath "$PREFIX" -Force
 
 Set-Location "$PREFIX"
 
@@ -118,5 +119,5 @@ Set-Location "$PREFIX"
 Remove-Item -Path mysql-test -Recurse -Force
 Remove-Item -Path sql-bench -Recurse -Force
 
-Compress-Archive -Path . -DestinationPath "$RUNNER_TEMP/mysql.zip"
+Compress-Archive -Path . -DestinationPath "$RUNNER_TEMP\mysql.zip"
 Write-Host "::endgroup::"
