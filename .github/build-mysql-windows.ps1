@@ -111,13 +111,20 @@ Write-Host "::endgroup::"
 # archive
 Write-Host "::group::archive"
 
-Expand-Archive -Path "$RUNNER_TEMP\build\mysql-$MYSQL_VERSION-winx64.zip" -DestinationPath "$PREFIX" -Force
-
-Set-Location "$PREFIX"
+Set-Location "$RUNNER_TEMP"
+Expand-Archive -Path ".\build\mysql-$MYSQL_VERSION-winx64.zip" -DestinationPath "."
+Set-Location "mysql-$MYSQL_VERSION-winx64"
 
 # remove extra files
-Remove-Item -Path mysql-test -Recurse -Force
-Remove-Item -Path sql-bench -Recurse -Force
+if (Test-Path mysql-test) {
+    Remove-Item -Path mysql-test -Recurse -Force
+}
+if (Test-Path sql-bench) {
+    Remove-Item -Path sql-bench -Recurse -Force
+}
+
+# copy libraries
+Copy-Item "$PREFIX\*" "."
 
 Compress-Archive -Path . -DestinationPath "$RUNNER_TEMP\mysql.zip"
 Write-Host "::endgroup::"
