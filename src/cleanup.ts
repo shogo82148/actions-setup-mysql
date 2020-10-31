@@ -8,6 +8,6 @@ export async function shutdownMySQL(state: starter.MySQLState) {
   core.group('shutdown MySQL Server', async () => {
     const shutdown = path.join(__dirname, '..', 'scripts', 'shutdown.sh')
     await exec.exec(shutdown, [`${state.pid}`])
-    await io.rmRF(state.baseDir)  
+    await io.rmRF(state.baseDir)
   })
 }

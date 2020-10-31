@@ -5,6 +5,12 @@ inputs:
   mysql-version:
     description: "The version of MySQL and MariaDB"
     default: ""
+  distribution:
+    description: "The distribution"
+    default: "mysql"
+  auto-start:
+    description: "Start MySQL server"
+    default: "true"
 runs:
   using: "node12"
   main: "lib/setup-mysql.js"
