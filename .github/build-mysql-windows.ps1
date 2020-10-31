@@ -124,7 +124,7 @@ if (Test-Path sql-bench) {
 }
 
 # copy libraries
-Copy-Item "$PREFIX\*" "."
+Copy-Item -Path "$PREFIX\*" -Recurse -Destination "." -Force
 
 Compress-Archive -Path . -DestinationPath "$RUNNER_TEMP\mysql.zip"
 Write-Host "::endgroup::"
