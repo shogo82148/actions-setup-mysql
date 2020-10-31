@@ -74,6 +74,6 @@ jobs:
             ${{ runner.os }}-node-
 
       - run: npm build
-      - use: ./
+      - uses: ./
         with:
           mysql-version: ${{ matrix.mysql }}
