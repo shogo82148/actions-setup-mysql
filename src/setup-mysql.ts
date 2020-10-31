@@ -8,7 +8,7 @@ async function run(): Promise<void> {
     const distribution = core.getInput('distribution')
     const autoStart = parseBoolean(core.getInput('auto-start'))
 
-    const mysql = await core.group('install redis', async () => {
+    const mysql = await core.group('install MySQL', async () => {
       return installer.getMySQL(distribution, version)
     })
 
