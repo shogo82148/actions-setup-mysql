@@ -43,6 +43,7 @@ Write-Host "Downloading zip archive..."
 Invoke-WebRequest "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.zip" -OutFile "openssl.zip"
 Write-Host "Unzipping..."
 Expand-Archive -Path "openssl.zip" -DestinationPath .
+Remove-Item -Path "openssl.zip"
 Write-Host "::endgroup::"
 
 
@@ -52,6 +53,8 @@ Set-Location "openssl-OpenSSL_$OPENSSL_VERSION"
 C:\strawberry\perl\bin\perl.exe Configure --prefix="$PREFIX" VC-WIN64A
 nmake
 nmake install_sw
+Set-Location "$RUNNER_TEMP"
+Remove-Item -Path "openssl-OpenSSL_$OPENSSL_VERSION" -Recurse -Force
 Write-Host "::endgroup::"
 
 
@@ -69,6 +72,8 @@ Invoke-WebRequest "https://versaweb.dl.sourceforge.net/project/gnuwin32/bison/$B
 Write-Host "Unzipping..."
 Expand-Archive -Path "bison-dep.zip" -DestinationPath "$BISON_PREFIX"
 Set-Item -Path "env:PATH" "$(Join-Path $BISON_PREFIX "bin");$env:PATH"
+Remove-Item -Path "bison-bin.zip"
+Remove-Item -Path "bison-dep.zip"
 Write-Host "::endgroup::"
 
 
@@ -78,6 +83,7 @@ Write-Host "Downloading zip archive..."
 Invoke-WebRequest "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.zip" -OutFile "mysql-src.zip"
 Write-Host "Unzipping..."
 Expand-Archive -Path "mysql-src.zip" -DestinationPath "."
+Remove-Item -Path "mysql-src.zip"
 Write-Host "::endgroup::"
 
 Write-Host "::group::build MySQL"
