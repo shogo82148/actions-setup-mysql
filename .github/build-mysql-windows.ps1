@@ -101,14 +101,14 @@ devenv MySQL.sln /build RelWithDebInfo /project initial_database
 devenv MySQL.sln /build RelWithDebInfo /project package
 Write-Host "::endgroup::"
 
-# archive
-Write-Host "::group::archive"
-Set-Location "$PREFIX"
+# # archive
+# Write-Host "::group::archive"
+# Set-Location "$PREFIX"
 
-# remove extra files
-rm -rf ./man
-rm -rf ./mysql-test
-rm -rf ./sql-bench
+# # remove extra files
+# rm -rf ./man
+# rm -rf ./mysql-test
+# rm -rf ./sql-bench
 
-tar Jvcf "$RUNNER_TEMP/mysql.tar.xz" .
-Write-Host "::endgroup::"
+# tar Jvcf "$RUNNER_TEMP/mysql.tar.xz" .
+# Write-Host "::endgroup::"
