@@ -132,7 +132,7 @@ if (Test-Path sql-bench) {
 }
 
 # remove debug information
-Get-ChildItem "$PREFIX" -Include *.pdb -Recurse | Remove-Item
+Get-ChildItem "." -Include *.pdb -Recurse | Remove-Item
 
 # copy libraries
 Copy-Item -Path "$PREFIX\*" -Recurse -Destination "." -Force
