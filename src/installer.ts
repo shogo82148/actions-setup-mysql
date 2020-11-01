@@ -119,13 +119,20 @@ async function acquireMySQL(
   //
   // Extract XZ compressed tar
   //
-  const extPath = await tc.extractTar(downloadPath, '', 'xJ')
+  const extPath = downloadUrl.endsWith('.zip')
+    ? await tc.extractZip(downloadPath)
+    : downloadUrl.endsWith('.tar.xz')
+    ? await tc.extractTar(downloadPath, '', 'xJ')
+    : downloadUrl.endsWith('.tar.bz2')
+    ? await tc.extractTar(downloadPath, '', 'xj')
+    : await tc.extractTar(downloadPath)
 
   return await tc.cacheDir(extPath, distribution, version)
 }
 
 function getFileName(distribution: string, version: string): string {
-  return `${distribution}-${version}-${osPlat}-${osArch}.tar.xz`
+  const ext = osPlat === 'win32' ? 'zip' : 'tar.xz'
+  return `${distribution}-${version}-${osPlat}-${osArch}.${ext}`
 }
 
 interface PackageVersion {
