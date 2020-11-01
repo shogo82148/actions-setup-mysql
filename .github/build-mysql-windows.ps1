@@ -80,6 +80,9 @@ Remove-Item -Path "bison-bin.zip"
 Remove-Item -Path "bison-dep.zip"
 Write-Host "::endgroup::"
 
+# use C drive to avoid disk full
+$RUNNER_TEMP="C:\Temp"
+New-Item "$RUNNER_TEMP" -ItemType Directory -Force
 
 Write-Host "::group::fetch MySQL source"
 Set-Location "$RUNNER_TEMP"
