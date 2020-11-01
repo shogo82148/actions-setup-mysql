@@ -100,13 +100,13 @@ cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
     -DINSTALL_MYSQLTESTDIR="" `
     -DINSTALL_DOCDIR=""
 
-devenv MySQL.sln /build RelWithDebInfo
+devenv MySQL.sln /build MinSizeRel
 Write-Host "::endgroup::"
 
 Write-Host "::group::install"
 Set-Location "$RUNNER_TEMP\build"
-devenv MySQL.sln /build RelWithDebInfo /project initial_database
-devenv MySQL.sln /build RelWithDebInfo /project package
+devenv MySQL.sln /build MinSizeRel /project initial_database
+devenv MySQL.sln /build MinSizeRel /project package
 Write-Host "::endgroup::"
 
 
