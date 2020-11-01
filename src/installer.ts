@@ -74,23 +74,6 @@ export async function getMySQL(
   //
   core.addPath(path.join(toolPath, 'bin'))
 
-  // configure library path for windows
-  core.addPath(path.join(toolPath, 'lib'))
-
-  // configure library path for linux
-  let libraryPath = path.join(toolPath, 'lib')
-  if (process.env['LD_LIBRARY_PATH']) {
-    libraryPath += path.delimiter + process.env['LD_LIBRARY_PATH']
-  }
-  core.exportVariable('LD_LIBRARY_PATH', libraryPath)
-
-  // configure library path for macOS
-  libraryPath = path.join(toolPath, 'lib')
-  if (process.env['DYLD_LIBRARY_PATH']) {
-    libraryPath += path.delimiter + process.env['DYLD_LIBRARY_PATH']
-  }
-  core.exportVariable('DYLD_LIBRARY_PATH', libraryPath)
-
   return {
     distribution: selected.distribution,
     version: selected.version,
