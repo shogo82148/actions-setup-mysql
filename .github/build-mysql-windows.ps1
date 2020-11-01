@@ -55,6 +55,10 @@ nmake
 nmake install_sw
 Set-Location "$RUNNER_TEMP"
 Remove-Item -Path "openssl-OpenSSL_$OPENSSL_VERSION" -Recurse -Force
+
+# remove debug information
+Get-ChildItem "$PREFIX" -Include *.pdb -Recurse | Remove-Item
+
 Write-Host "::endgroup::"
 
 
@@ -123,6 +127,9 @@ if (Test-Path mysql-test) {
 if (Test-Path sql-bench) {
     Remove-Item -Path sql-bench -Recurse -Force
 }
+
+# remove debug information
+Get-ChildItem "$PREFIX" -Include *.pdb -Recurse | Remove-Item
 
 # copy libraries
 Copy-Item -Path "$PREFIX\*" -Recurse -Destination "." -Force
