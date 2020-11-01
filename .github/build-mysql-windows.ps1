@@ -137,5 +137,5 @@ Get-ChildItem "." -Include *.pdb -Recurse | Remove-Item
 # copy libraries
 Copy-Item -Path "$PREFIX\*" -Recurse -Destination "." -Force
 
-Compress-Archive -Path . -DestinationPath "$RUNNER_TEMP\mysql.zip"
+Compress-Archive -Path * -DestinationPath "$RUNNER_TEMP\mysql.zip" -CompressionLevel Optimal
 Write-Host "::endgroup::"
