@@ -97,8 +97,8 @@ cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
     -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
     -DCMAKE_INSTALL_PREFIX="$PREFIX" `
     -DWITH_SSL="$PREFIX" `
-    -DWITHOUT_BENCH=1 `
-    -DWITHOUT_DOC=1
+    -DINSTALL_MYSQLTESTDIR="" `
+    -DINSTALL_DOCDIR=""
 
 devenv MySQL.sln /build RelWithDebInfo
 Write-Host "::endgroup::"
