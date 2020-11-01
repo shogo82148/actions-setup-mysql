@@ -74,23 +74,6 @@ export async function getMySQL(
   //
   core.addPath(path.join(toolPath, 'bin'))
 
-  // configure library path for windows
-  core.addPath(path.join(toolPath, 'lib'))
-
-  // configure library path for linux
-  let libraryPath = path.join(toolPath, 'lib')
-  if (process.env['LD_LIBRARY_PATH']) {
-    libraryPath += path.delimiter + process.env['LD_LIBRARY_PATH']
-  }
-  core.exportVariable('LD_LIBRARY_PATH', libraryPath)
-
-  // configure library path for macOS
-  libraryPath = path.join(toolPath, 'lib')
-  if (process.env['DYLD_LIBRARY_PATH']) {
-    libraryPath += path.delimiter + process.env['DYLD_LIBRARY_PATH']
-  }
-  core.exportVariable('DYLD_LIBRARY_PATH', libraryPath)
-
   return {
     distribution: selected.distribution,
     version: selected.version,
@@ -119,13 +102,20 @@ async function acquireMySQL(
   //
   // Extract XZ compressed tar
   //
-  const extPath = await tc.extractTar(downloadPath, '', 'xJ')
+  const extPath = downloadUrl.endsWith('.zip')
+    ? await tc.extractZip(downloadPath)
+    : downloadUrl.endsWith('.tar.xz')
+    ? await tc.extractTar(downloadPath, '', 'xJ')
+    : downloadUrl.endsWith('.tar.bz2')
+    ? await tc.extractTar(downloadPath, '', 'xj')
+    : await tc.extractTar(downloadPath)
 
   return await tc.cacheDir(extPath, distribution, version)
 }
 
 function getFileName(distribution: string, version: string): string {
-  return `${distribution}-${version}-${osPlat}-${osArch}.tar.xz`
+  const ext = osPlat === 'win32' ? 'zip' : 'tar.xz'
+  return `${distribution}-${version}-${osPlat}-${osArch}.${ext}`
 }
 
 interface PackageVersion {
