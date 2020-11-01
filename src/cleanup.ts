@@ -12,7 +12,7 @@ const sep = path.sep
 
 export async function shutdownMySQL(state: starter.MySQLState) {
   core.group('shutdown MySQL Server', async () => {
-    await exec.exec(path.join(state.toolPath, 'bin', `mysqldadmin${binExt}`), [
+    await exec.exec(path.join(state.toolPath, 'bin', `mysqladmin${binExt}`), [
       `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
       `--user=root`,
       `shutdown`
