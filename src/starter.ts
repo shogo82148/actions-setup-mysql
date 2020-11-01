@@ -10,6 +10,9 @@ import * as installer from './installer'
 const BASEDIR = 'BASEDIR'
 const PID = 'PID'
 
+// extension of executable files
+const binExt = os.platform() === 'win32' ? '.exe' : ''
+
 export interface MySQLState {
   pid: number
   baseDir: string
@@ -59,19 +62,30 @@ tmpdir=${baseDir}${sep}tmp
     const useMysqldInitialize = help.match(/--initialize-insecure/)
     if (useMysqldInitialize) {
       core.debug(`mysqld has the --initialize-insecure option`)
-      await exec.exec(path.join(mysql.toolPath, 'bin', 'mysqld'), [
+      await exec.exec(path.join(mysql.toolPath, 'bin', `mysqld${binExt}`), [
         `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
         `--initialize-insecure`
       ])
     } else {
       core.debug(`mysqld doesn't have the --initialize-insecure option`)
-      await exec.exec(
-        path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
-        [
-          `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-          `--basedir=${mysql.toolPath}`
-        ]
-      )
+      if (os.platform() === 'win32') {
+        await exec.exec(
+          "perl",
+          [
+            path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl'),
+            `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+            `--basedir=${mysql.toolPath}`
+          ]
+        )  
+      } else {
+        await exec.exec(
+          path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
+          [
+            `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+            `--basedir=${mysql.toolPath}`
+          ]
+        )  
+      }
     }
   })
 
@@ -79,7 +93,7 @@ tmpdir=${baseDir}${sep}tmp
   const out = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
   const err = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
   const subprocess = child_process.spawn(
-    path.join(mysql.toolPath, 'bin', 'mysqld'),
+    path.join(mysql.toolPath, 'bin', `mysqld${binExt}`),
     [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, '--user=root'],
     {
       detached: true,
@@ -124,7 +138,7 @@ async function verboseHelp(mysql: installer.MySQL): Promise<string> {
   }
   try {
     await exec.exec(
-      path.join(mysql.toolPath, 'bin', 'mysqld'),
+      path.join(mysql.toolPath, 'bin', `mysqld${binExt}`),
       ['--verbose', `--help`],
       options
     )
