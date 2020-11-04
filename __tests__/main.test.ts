@@ -8,11 +8,8 @@ const tempDir = path.join(__dirname, 'runner', 'temp')
 process.env['RUNNER_TOOL_CACHE'] = toolDir
 process.env['RUNNER_TEMP'] = tempDir
 
-import * as exec from '@actions/exec'
 import * as io from '@actions/io'
 import * as installer from '../src/installer'
-import * as starter from '../src/starter'
-import * as cleanup from '../src/cleanup'
 
 describe('installer tests', () => {
   beforeAll(async () => {
