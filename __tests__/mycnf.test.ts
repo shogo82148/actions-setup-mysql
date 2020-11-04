@@ -124,3 +124,14 @@ describe('parsing my.cnf', () => {
     })
   })
 })
+
+describe('stringify my.cnf', () => {
+  it('stringify', () => {
+    const ret = mycnf.stringify({
+      group1: {
+        key: '\n\r\t\b "\'\\'
+      }
+    })
+    expect(ret).toBe('[group1]\nkey="\\n\\r\\t\\b \\"\\\'\\\\"\n')
+  })
+})

@@ -11,7 +11,27 @@ export function parse(cnf: string): MyCnf {
 }
 
 export function stringify(cnf: MyCnf): string {
-  return ''
+  const lines: string[] = []
+  const keys = Object.keys(cnf)
+  keys.sort()
+  for (const key of keys) {
+    lines.push(`[${key}]`)
+    const obj = cnf[key]
+    const keys = Object.keys(obj)
+    for (const key of keys) {
+      let value = obj[key]
+      value = value.replace(/\\/g, '\\\\')
+      value = value.replace(/"/g, '\\"')
+      value = value.replace(/'/g, "\\'")
+      value = value.replace(/\n/g, '\\n')
+      value = value.replace(/\r/g, '\\r')
+      value = value.replace(/\t/g, '\\t')
+      value = value.replace(/[\b]/g, '\\b')
+      lines.push(`${key}="${value}"`)
+    }
+    lines.push('')
+  }
+  return lines.join('\n')
 }
 
 const EOF = 'EOF'
