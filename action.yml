@@ -11,6 +11,9 @@ inputs:
   auto-start:
     description: "Start MySQL server"
     default: "true"
+  my-cnf:
+    description: "my.cnf settings for mysqld"
+    default: ""
 runs:
   using: "node12"
   main: "lib/setup-mysql.js"

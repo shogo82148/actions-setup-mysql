@@ -6,9 +6,11 @@ import * as core from '@actions/core'
 import * as io from '@actions/io'
 import * as exec from '@actions/exec'
 import * as installer from './installer'
+import * as mycnf from './mycnf'
 
 const BASEDIR = 'BASEDIR'
 const PID = 'PID'
+const PID_FILE = 'PID_FILE'
 const TOOLPATH = 'TOOLPATH'
 
 // extension of executable files
@@ -16,6 +18,7 @@ const binExt = os.platform() === 'win32' ? '.exe' : ''
 
 export interface MySQLState {
   pid: number
+  pidFile: string
   baseDir: string
   toolPath: string
 }
@@ -23,6 +26,7 @@ export interface MySQLState {
 export function saveState(state: MySQLState) {
   core.saveState(BASEDIR, state.baseDir)
   core.saveState(PID, state.pid)
+  core.saveState(PID_FILE, state.pidFile)
 }
 
 export function getState(): MySQLState | null {
@@ -31,15 +35,17 @@ export function getState(): MySQLState | null {
     return null
   }
   const pid = parseInt(core.getState(PID))
+  const pidFile = core.getState(PID_FILE)
   const toolPath = core.getState(TOOLPATH)
   return {
     pid,
+    pidFile,
     baseDir,
     toolPath
   }
 }
 
-export async function startMySQL(mysql: installer.MySQL): Promise<MySQLState> {
+export async function startMySQL(mysql: installer.MySQL, cnf: string): Promise<MySQLState> {
   const baseDir = await mkdtemp()
   const sep = path.sep
 
@@ -50,16 +56,17 @@ export async function startMySQL(mysql: installer.MySQL): Promise<MySQLState> {
   await io.mkdirP(path.join(baseDir, 'var'))
   await io.mkdirP(path.join(baseDir, 'tmp'))
 
-  const myCnf = `
-[mysqld]
-lc-messages-dir=${mysql.toolPath}${sep}share
-socket=${baseDir}${sep}tmp${sep}mysql.sock
-datadir=${baseDir}${sep}var
-pid-file=${baseDir}${sep}tmp${sep}mysqld.pid
-tmpdir=${baseDir}${sep}tmp
-`
+  // configure my.cnf
   core.debug(`writing my.cnf`)
-  fs.writeFileSync(path.join(baseDir, 'etc', 'my.cnf'), myCnf)
+  const config = mycnf.parse(`[mysqld]\n${cnf}`)
+  config['mysqld'] ||= {}
+  const pidFile = config['mysqld']['pid-file'] || path.join(baseDir, 'tmp', 'mysqld.pid')
+  config['mysqld']['lc-messages-dir'] ||= path.join(mysql.toolPath, 'share')
+  config['mysqld']['socket'] ||= path.join(baseDir, 'tmp', 'mysql.sock')
+  config['mysqld']['datadir'] ||= path.join(baseDir, 'var')
+  config['mysqld']['pid-file'] = pidFile
+  config['mysqld']['tmpdir'] ||= path.join(baseDir, 'tmp')
+  fs.writeFileSync(path.join(baseDir, 'etc', 'my.cnf'), mycnf.stringify(config))
 
   await core.group('setup MySQL Database', async () => {
     const help = await verboseHelp(mysql)
@@ -106,7 +113,7 @@ tmpdir=${baseDir}${sep}tmp
   core.info('wait for MySQL ready')
   for (;;) {
     try {
-      fs.statSync(`${baseDir}${sep}tmp${sep}mysqld.pid`)
+      fs.statSync(pidFile)
       break
     } catch {
       await sleep(0.1)
@@ -120,6 +127,7 @@ tmpdir=${baseDir}${sep}tmp
 
   return {
     pid,
+    pidFile,
     baseDir,
     toolPath: mysql.toolPath
   }

@@ -6,7 +6,7 @@ async function run(): Promise<void> {
   try {
     const state = starter.getState()
     if (state) {
-      cleanup.shutdownMySQL(state)
+      await cleanup.shutdownMySQL(state)
     }
   } catch (error) {
     core.setFailed(error.message)
