@@ -21,7 +21,7 @@ export async function shutdownMySQL(state: starter.MySQLState) {
     core.info('wait for MySQL shutdown')
     for (let i = 0; i < 100; i++) {
       try {
-        fs.statSync(`${state.baseDir}${sep}tmp${sep}mysqld.pid`)
+        fs.statSync(state.pidFile)
         await sleep(0.1)
       } catch {
         break
