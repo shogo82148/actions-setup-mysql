@@ -16,33 +16,6 @@ mkdir -p "$RUNNER_TEMP"
 cd "$RUNNER_TEMP"
 rm -rf ./*
 
-# system SSL/TLS library is too old. so we use custom build.
-echo "::group::download OpenSSL source"
-(
-    set -eux
-    cd "$RUNNER_TEMP"
-    curl -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
-)
-echo "::endgroup::"
-
-echo "::group::extract OpenSSL source"
-(
-    set -eux
-    cd "$RUNNER_TEMP"
-    tar zxvf openssl.tar.gz
-)
-echo "::endgroup::"
-
-echo "::group::build OpenSSL"
-(
-    set -eux
-    cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
-    ./Configure --prefix="$PREFIX" darwin64-x86_64-cc
-    make "-j$JOBS"
-    make install_sw
-)
-echo "::endgroup::"
-
 echo "::group::download MariaDB source"
 (
     set -eux
@@ -66,9 +39,8 @@ echo "::group::build MariaDB"
     mkdir build
     cd build
     cmake "../mariadb-$MARIADB_VERSION" \
-        -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" \
-        -DWITH_SSL="$PREFIX"
+        -DWITH_SSL=bundled
     make "-j$JOBS"
 )
 echo "::endgroup::"
