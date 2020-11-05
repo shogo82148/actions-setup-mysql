@@ -16,6 +16,37 @@ mkdir -p "$RUNNER_TEMP"
 cd "$RUNNER_TEMP"
 rm -rf ./*
 
+# with MariaDB 5.5.x, use bundled SSL Library
+# so, skip installing OpenSSL
+if [[ ! ${MARIADB_VERSION} =~ ^5[.]5[.] ]]; then
+    # system SSL/TLS library is too old. so we use custom build.
+    echo "::group::download OpenSSL source"
+    (
+        set -eux
+        cd "$RUNNER_TEMP"
+        curl -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
+    )
+    echo "::endgroup::"
+
+    echo "::group::extract OpenSSL source"
+    (
+        set -eux
+        cd "$RUNNER_TEMP"
+        tar zxvf openssl.tar.gz
+    )
+    echo "::endgroup::"
+
+    echo "::group::build OpenSSL"
+    (
+        set -eux
+        cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
+        ./Configure --prefix="$PREFIX" linux-x86_64
+        make "-j$JOBS"
+        make install_sw
+    )
+    echo "::endgroup::"
+fi
+
 echo "::group::download MariaDB source"
 (
     set -eux
@@ -34,13 +65,21 @@ echo "::endgroup::"
 
 echo "::group::build MariaDB"
 (
+    WITH_SSL=$PREFIX
+
+    if [[ ${MARIADB_VERSION} =~ ^5[.]5[.] ]]; then
+        # with MariaDB 5.5.x, use bundled SSL Library
+        WITH_SSL=bundled
+    fi
+
     set -eux
     cd "$RUNNER_TEMP"
     mkdir build
     cd build
     cmake "../mariadb-$MARIADB_VERSION" \
+        -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" \
-        -DWITH_SSL=bundled
+        -DWITH_SSL="$WITH_SSL"
     make "-j$JOBS"
 )
 echo "::endgroup::"

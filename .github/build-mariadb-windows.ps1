@@ -29,6 +29,39 @@ Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
 Write-Host "::endgroup::"
 
 
+# NASM is required by OpenSSL
+Write-Host "::group::Set up NASM"
+choco install nasm
+Set-Item -Path "env:PATH" "C:\Program Files\NASM;$env:PATH"
+Write-Host "::endgroup::"
+
+
+# system SSL/TLS library is too old. so we use custom build.
+Write-Host "::group::fetch OpenSSL source"
+Set-Location "$RUNNER_TEMP"
+Write-Host "Downloading zip archive..."
+Invoke-WebRequest "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.zip" -OutFile "openssl.zip"
+Write-Host "Unzipping..."
+Expand-Archive -Path "openssl.zip" -DestinationPath .
+Remove-Item -Path "openssl.zip"
+Write-Host "::endgroup::"
+
+
+Write-Host "::group::build OpenSSL"
+Set-Location "$RUNNER_TEMP"
+Set-Location "openssl-OpenSSL_$OPENSSL_VERSION"
+C:\strawberry\perl\bin\perl.exe Configure --prefix="$PREFIX" VC-WIN64A
+nmake
+nmake install_sw
+Set-Location "$RUNNER_TEMP"
+Remove-Item -Path "openssl-OpenSSL_$OPENSSL_VERSION" -Recurse -Force
+
+# remove debug information
+Get-ChildItem "$PREFIX" -Include *.pdb -Recurse | Remove-Item
+
+Write-Host "::endgroup::"
+
+
 # Bison
 Write-Host "::group::Set up Bison"
 $BISON_VERSION="2.4.1"
@@ -63,11 +96,14 @@ Write-Host "::endgroup::"
 Write-Host "::group::build MariaDB"
 Set-Location "$RUNNER_TEMP"
 
+New-Item "boost" -ItemType Directory -Force
+$BOOST=Join-Path $RUNNER_TEMP "boost"
 New-Item "build" -ItemType Directory -Force
 Set-Location build
 cmake ( Join-Path $RUNNER_TEMP "mariadb-$MARIADB_VERSION" ) `
+    -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
     -DCMAKE_INSTALL_PREFIX="$PREFIX" `
-    -DWITH_SSL=bundled `
+    -DWITH_SSL="$PREFIX" `
     -DCMAKE_BUILD_TYPE=MinSizeRel
 
 devenv MySQL.sln /build RelWithDebInfo
