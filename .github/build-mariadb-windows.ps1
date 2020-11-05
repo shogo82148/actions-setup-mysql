@@ -100,7 +100,7 @@ New-Item "boost" -ItemType Directory -Force
 $BOOST=Join-Path $RUNNER_TEMP "boost"
 New-Item "build" -ItemType Directory -Force
 Set-Location build
-cmake ( Join-Path $RUNNER_TEMP "mariadb$MARIADB_VERSION" ) `
+cmake ( Join-Path $RUNNER_TEMP "mariadb-$MARIADB_VERSION" ) `
     -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
     -DCMAKE_INSTALL_PREFIX="$PREFIX" `
     -DWITH_SSL="$PREFIX" `
