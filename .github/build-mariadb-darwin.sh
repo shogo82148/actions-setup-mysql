@@ -16,36 +16,32 @@ mkdir -p "$RUNNER_TEMP"
 cd "$RUNNER_TEMP"
 rm -rf ./*
 
-# with MariaDB 5.5.x, use bundled SSL Library
-# so, skip installing OpenSSL
-if [[ ! ${MARIADB_VERSION} =~ ^5[.]5[.] ]]; then
-    # system SSL/TLS library is too old. so we use custom build.
-    echo "::group::download OpenSSL source"
-    (
-        set -eux
-        cd "$RUNNER_TEMP"
-        curl -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
-    )
-    echo "::endgroup::"
+# system SSL/TLS library is too old. so we use custom build.
+echo "::group::download OpenSSL source"
+(
+    set -eux
+    cd "$RUNNER_TEMP"
+    curl -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
+)
+echo "::endgroup::"
 
-    echo "::group::extract OpenSSL source"
-    (
-        set -eux
-        cd "$RUNNER_TEMP"
-        tar zxvf openssl.tar.gz
-    )
-    echo "::endgroup::"
+echo "::group::extract OpenSSL source"
+(
+    set -eux
+    cd "$RUNNER_TEMP"
+    tar zxvf openssl.tar.gz
+)
+echo "::endgroup::"
 
-    echo "::group::build OpenSSL"
-    (
-        set -eux
-        cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
-        ./Configure --prefix="$PREFIX" darwin64-x86_64-cc
-        make "-j$JOBS"
-        make install_sw
-    )
-    echo "::endgroup::"
-fi
+echo "::group::build OpenSSL"
+(
+    set -eux
+    cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
+    ./Configure --prefix="$PREFIX" darwin64-x86_64-cc
+    make "-j$JOBS"
+    make install_sw
+)
+echo "::endgroup::"
 
 echo "::group::download MariaDB source"
 (
@@ -65,13 +61,6 @@ echo "::endgroup::"
 
 echo "::group::build MariaDB"
 (
-    WITH_SSL=$PREFIX
-
-    if [[ ${MARIADB_VERSION} =~ ^5[.]5[.] ]]; then
-        # with MariaDB 5.5.x, use bundled SSL Library
-        WITH_SSL=bundled
-    fi
-
     set -eux
     cd "$RUNNER_TEMP"
     mkdir build
@@ -79,7 +68,7 @@ echo "::group::build MariaDB"
     cmake "../mariadb-$MARIADB_VERSION" \
         -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" \
-        -DWITH_SSL="$WITH_SSL" -DPLUGIN_TOKUDB=NO -DPLUGIN_MROONGA=NO -DPLUGIN_SPIDER=NO -DPLUGIN_OQGRAPH=NO -DPLUGIN_PERFSCHEMA=NO -DPLUGIN_SPHINX=NO -DPLUGIN_ARCHIVE=NO -DPLUGIN_ROCKSDB=NO
+        -DWITH_SSL="$PREFIX" -DPLUGIN_TOKUDB=NO -DPLUGIN_MROONGA=NO -DPLUGIN_SPIDER=NO -DPLUGIN_OQGRAPH=NO -DPLUGIN_PERFSCHEMA=NO -DPLUGIN_SPHINX=NO -DPLUGIN_ARCHIVE=NO -DPLUGIN_ROCKSDB=NO
     make "-j$JOBS"
 )
 echo "::endgroup::"
