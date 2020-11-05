@@ -79,15 +79,26 @@ export async function startMySQL(mysql: installer.MySQL, cnf: string): Promise<M
       ])
     } else {
       core.debug(`mysqld doesn't have the --initialize-insecure option`)
-      if (os.platform() === 'win32') {
+      if (fs.existsSync(path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl'))) {
+        // MySQL on Windows
         await exec.exec('perl', [
           path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl'),
           `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
           `--basedir=${mysql.toolPath}`
         ])
-      } else {
+      } else if (fs.existsSync(path.join(mysql.toolPath, 'scripts', 'mysql_install_db'))) {
+        // MySQL on Linux and macOS
         await exec.exec(
           path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
+          [
+            `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+            `--basedir=${mysql.toolPath}`
+          ]
+        )
+      } else if (fs.existsSync(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'))) {
+        // MariaDB on Windows
+        await exec.exec(
+          path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'),
           [
             `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
             `--basedir=${mysql.toolPath}`
@@ -132,6 +143,7 @@ export async function startMySQL(mysql: installer.MySQL, cnf: string): Promise<M
     toolPath: mysql.toolPath
   }
 }
+
 
 async function verboseHelp(mysql: installer.MySQL): Promise<string> {
   let myOutput = ''
