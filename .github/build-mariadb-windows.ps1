@@ -120,8 +120,8 @@ Write-Host "::endgroup::"
 Write-Host "::group::archive"
 
 Set-Location "$RUNNER_TEMP"
-Expand-Archive -Path ".\build\mysql-$MARIADB_VERSION-winx64.zip" -DestinationPath "."
-Set-Location "mysql-$MARIADB_VERSION-winx64"
+Expand-Archive -Path ".\build\mariadb-$MARIADB_VERSION-winx64.zip" -DestinationPath "."
+Set-Location "mariadb-$MARIADB_VERSION-winx64"
 
 # remove extra files
 if (Test-Path mysql-test) {
