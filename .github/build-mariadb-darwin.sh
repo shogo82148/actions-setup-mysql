@@ -76,6 +76,12 @@ echo "::group::build MariaDB"
     cd "$RUNNER_TEMP"
     mkdir build
     cd build
+
+    # use GCC instead of Clang
+    # old version of MariaDB can't be built with Clang
+    export CC=gcc-9
+    export CXX=g++-9
+
     cmake "../mariadb-$MARIADB_VERSION" \
         -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" \
