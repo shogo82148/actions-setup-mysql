@@ -27,6 +27,7 @@ export function saveState(state: MySQLState) {
   core.saveState(BASEDIR, state.baseDir)
   core.saveState(PID, state.pid)
   core.saveState(PID_FILE, state.pidFile)
+  core.saveState(TOOLPATH, state.toolPath)
 }
 
 export function getState(): MySQLState | null {
