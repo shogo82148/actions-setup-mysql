@@ -11,10 +11,11 @@ const binExt = os.platform() === 'win32' ? '.exe' : ''
 const sep = path.sep
 
 export async function shutdownMySQL(state: starter.MySQLState) {
-  core.group('shutdown MySQL Server', async () => {
+  await core.group('shutdown MySQL Server', async () => {
     await exec.exec(path.join(state.toolPath, 'bin', `mysqladmin${binExt}`), [
       `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
       `--user=root`,
+      `--host=127.0.0.1`,
       `shutdown`
     ])
 

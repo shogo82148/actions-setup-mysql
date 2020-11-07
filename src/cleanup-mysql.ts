@@ -9,7 +9,7 @@ async function run(): Promise<void> {
       await cleanup.shutdownMySQL(state)
     }
   } catch (error) {
-    core.setFailed(error.message)
+    core.warning(`failed to clean up: ${error.message}`)
   }
 }
 
