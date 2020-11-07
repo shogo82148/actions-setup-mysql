@@ -15,6 +15,7 @@ export async function shutdownMySQL(state: starter.MySQLState) {
     await exec.exec(path.join(state.toolPath, 'bin', `mysqladmin${binExt}`), [
       `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
       `--user=root`,
+      `--host=127.0.0.1`,
       `shutdown`
     ])
 
