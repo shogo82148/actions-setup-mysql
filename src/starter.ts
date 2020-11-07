@@ -45,30 +45,56 @@ export function getState(): MySQLState | null {
   }
 }
 
-export async function startMySQL(mysql: installer.MySQL, cnf: string): Promise<MySQLState> {
+export async function startMySQL(
+  mysql: installer.MySQL,
+  cnf: string
+): Promise<MySQLState> {
   const baseDir = await mkdtemp()
   const sep = path.sep
 
-  core.debug(`basedir: ${baseDir}`)
-
-  // (re)create directory structure
-  await io.mkdirP(path.join(baseDir, 'etc'))
-  await io.mkdirP(path.join(baseDir, 'var'))
-  await io.mkdirP(path.join(baseDir, 'tmp'))
-
-  // configure my.cnf
-  core.debug(`writing my.cnf`)
   const config = mycnf.parse(`[mysqld]\n${cnf}`)
   config['mysqld'] ||= {}
-  const pidFile = config['mysqld']['pid-file'] || path.join(baseDir, 'tmp', 'mysqld.pid')
+  const pidFile =
+    config['mysqld']['pid-file'] || path.join(baseDir, 'tmp', 'mysqld.pid')
   config['mysqld']['lc-messages-dir'] ||= path.join(mysql.toolPath, 'share')
   config['mysqld']['socket'] ||= path.join(baseDir, 'tmp', 'mysql.sock')
   config['mysqld']['datadir'] ||= path.join(baseDir, 'var')
   config['mysqld']['pid-file'] = pidFile
   config['mysqld']['tmpdir'] ||= path.join(baseDir, 'tmp')
-  fs.writeFileSync(path.join(baseDir, 'etc', 'my.cnf'), mycnf.stringify(config))
 
   await core.group('setup MySQL Database', async () => {
+    let initialized = false
+    core.debug(`basedir: ${baseDir}`)
+
+    // (re)create directory structure
+    await io.mkdirP(path.join(baseDir, 'etc'))
+    await io.mkdirP(path.join(baseDir, 'var'))
+    await io.mkdirP(path.join(baseDir, 'tmp'))
+
+    if (
+      fs.existsSync(path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'))
+    ) {
+      // MariaDB on Windows
+      // The mysql_install_db.exe utility is the Windows equivalent of mysql_install_db.
+      // https://mariadb.com/kb/en/mysql_install_dbexe/
+      await exec.exec(
+        path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
+        [`--datadir=${baseDir}${sep}var`]
+      )
+      initialized = true
+    }
+
+    // configure my.cnf
+    core.debug(`writing my.cnf`)
+    fs.writeFileSync(
+      path.join(baseDir, 'etc', 'my.cnf'),
+      mycnf.stringify(config)
+    )
+
+    if (initialized) {
+      return
+    }
+
     const help = await verboseHelp(mysql)
     const useMysqldInitialize = help.match(/--initialize-insecure/)
     if (useMysqldInitialize) {
@@ -79,23 +105,20 @@ export async function startMySQL(mysql: installer.MySQL, cnf: string): Promise<M
       ])
     } else {
       core.debug(`mysqld doesn't have the --initialize-insecure option`)
-      if (fs.existsSync(path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'))) {
-        // MariaDB on Windows
-        await exec.exec(
-          path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
-          [
-            `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-            `--basedir=${mysql.toolPath}`
-          ]
+      if (
+        fs.existsSync(
+          path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl')
         )
-      } else if (fs.existsSync(path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl'))) {
+      ) {
         // MySQL on Windows
         await exec.exec('perl', [
           path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl'),
           `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
           `--basedir=${mysql.toolPath}`
         ])
-      } else if (fs.existsSync(path.join(mysql.toolPath, 'scripts', 'mysql_install_db'))) {
+      } else if (
+        fs.existsSync(path.join(mysql.toolPath, 'scripts', 'mysql_install_db'))
+      ) {
         // MySQL on Linux and macOS
         await exec.exec(
           path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
@@ -143,7 +166,6 @@ export async function startMySQL(mysql: installer.MySQL, cnf: string): Promise<M
     toolPath: mysql.toolPath
   }
 }
-
 
 async function verboseHelp(mysql: installer.MySQL): Promise<string> {
   let myOutput = ''
