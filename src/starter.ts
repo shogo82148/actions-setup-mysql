@@ -64,26 +64,12 @@ export async function startMySQL(
   config['mysqld']['tmpdir'] ||= path.join(baseDir, 'tmp')
 
   await core.group('setup MySQL Database', async () => {
-    let initialized = false
     core.debug(`basedir: ${baseDir}`)
 
     // (re)create directory structure
     await io.mkdirP(path.join(baseDir, 'etc'))
     await io.mkdirP(path.join(baseDir, 'var'))
     await io.mkdirP(path.join(baseDir, 'tmp'))
-
-    if (
-      fs.existsSync(path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'))
-    ) {
-      // MariaDB on Windows
-      // The mysql_install_db.exe utility is the Windows equivalent of mysql_install_db.
-      // https://mariadb.com/kb/en/mysql_install_dbexe/
-      await exec.exec(
-        path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
-        [`--datadir=${baseDir}${sep}var`]
-      )
-      initialized = true
-    }
 
     // configure my.cnf
     core.debug(`writing my.cnf`)
@@ -92,13 +78,28 @@ export async function startMySQL(
       mycnf.stringify(config)
     )
 
-    if (initialized) {
-      return
-    }
-
     const help = await verboseHelp(mysql)
     const useMysqldInitialize = help.match(/--initialize-insecure/)
-    if (useMysqldInitialize) {
+    if (
+      fs.existsSync(path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'))
+    ) {
+      // MariaDB on Windows has mariadb-install-db.exe utility
+      // that is the Windows equivalent of mysql_install_db.exe
+      // https://mariadb.com/kb/en/mysql_install_dbexe/
+      await exec.exec(
+        path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
+        [`--datadir=${baseDir}${sep}var`]
+      )
+    } else if (fs.existsSync(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'))) {
+      // mysql_install_db.exe is old name of mariadb-install-db.exe
+      // https://mariadb.com/kb/en/mariadb-install-db/
+      await exec.exec(
+        path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'),
+        [`--datadir=${baseDir}${sep}var`]
+      )
+    } else if (useMysqldInitialize) {
+      // `mysql_install_db` command is obsoleted MySQL 5.7.6 or later and
+      // `mysqld --initialize-insecure` should be used.
       core.debug(`mysqld has the --initialize-insecure option`)
       await exec.exec(path.join(mysql.toolPath, 'bin', `mysqld${binExt}`), [
         `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
@@ -106,29 +107,33 @@ export async function startMySQL(
       ])
     } else {
       core.debug(`mysqld doesn't have the --initialize-insecure option`)
+      let command = path.join(mysql.toolPath, 'scripts', 'mysql_install_db')
+      let args: string[] = []
       if (
         fs.existsSync(
           path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl')
         )
       ) {
-        // MySQL on Windows
-        await exec.exec('perl', [
-          path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl'),
-          `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-          `--basedir=${mysql.toolPath}`
-        ])
-      } else if (
-        fs.existsSync(path.join(mysql.toolPath, 'scripts', 'mysql_install_db'))
-      ) {
-        // MySQL on Linux and macOS
-        await exec.exec(
-          path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
-          [
-            `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-            `--basedir=${mysql.toolPath}`
-          ]
-        )
+        // MySQL on Windows need to execute perl
+        command = 'perl'
+        args = [path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl')]
       }
+      const help = await installDbHelp(command, args)
+      const installArgs = [
+        ...args,
+        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+        `--basedir=${mysql.toolPath}`
+      ]
+
+      if (help.match(/--auth-root-authentication-method/)) {
+        // in MariaDB until 10.3, mysql_install_db has --auth-root-authentication-method option.
+        // and until 10.4, its default value changes from "normal" to "socket".
+        // With "socket" option, mysqld accepts only unix socket, and rejects TCP protocol.
+        // ref. https://mariadb.com/kb/en/authentication-from-mariadb-104/
+        // We set "normal" to revert to the previous authentication method.
+        installArgs.push('--auth-root-authentication-method=normal')
+      }
+      await exec.exec(command, installArgs)
     }
   })
 
@@ -168,6 +173,7 @@ export async function startMySQL(
   }
 }
 
+// execute "mysqld --verbose --help" and returns its result.
 async function verboseHelp(mysql: installer.MySQL): Promise<string> {
   let myOutput = ''
   const options = {
@@ -191,6 +197,29 @@ async function verboseHelp(mysql: installer.MySQL): Promise<string> {
     core.error('fail to exec mysqld')
     core.error(myOutput)
     throw e
+  }
+  return myOutput
+}
+
+// execute "mysql_install_db --help" and return its result
+async function installDbHelp(command: string, args: string[]): Promise<string> {
+  let myOutput = ''
+  const options = {
+    silent: true,
+    listeners: {
+      stdout: (data: Buffer) => {
+        myOutput += data.toString()
+      },
+      stderr: (data: Buffer) => {
+        myOutput += data.toString()
+      }
+    }
+  }
+  try {
+    await exec.exec(command, [...args, '--help'], options)
+  } catch (e) {
+    // suppress the exception.
+    // "mysql_install_db --help" returns exit code 1.
   }
   return myOutput
 }
