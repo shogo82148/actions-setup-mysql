@@ -84,4 +84,4 @@ jobs:
           mysql-version: ${{ matrix.mysql }}
       - name: connect to MySQL server
         run: |
-          mysql -h127.0.0.1 -uroot -e 'SELECT version()'
+          mysql --host=127.0.0.1 --user=root -e 'SELECT version()'
