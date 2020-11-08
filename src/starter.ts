@@ -100,39 +100,36 @@ export async function startMySQL(
       ])
     } else {
       core.debug(`mysqld doesn't have the --initialize-insecure option`)
+      let command = path.join(mysql.toolPath, 'scripts', 'mysql_install_db')
+      let args: string[] = []
       if (
         fs.existsSync(
           path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl')
         )
       ) {
-        // MySQL on Windows has .pl file extension
-        await exec.exec('perl', [
-          path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl'),
-          `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-          `--basedir=${mysql.toolPath}`
-        ])
-      } else if (
-        fs.existsSync(path.join(mysql.toolPath, 'scripts', 'mysql_install_db'))
-      ) {
-        // MySQL on Linux and macOS
-        const args = [
-          `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-          `--basedir=${mysql.toolPath}`
-        ]
-        const help = await installDbHelp(mysql)
-        if (help.match(/--auth-root-authentication-method/)) {
-          // in MariaDB until 10.3, mysql_install_db has --auth-root-authentication-method option.
-          // and until 10.4, its default value changes from "normal" to "socket".
-          // With "socket" option, mysqld accepts only unix socket, and rejects TCP protocol.
-          // ref. https://mariadb.com/kb/en/authentication-from-mariadb-104/
-          // We set "normal" to revert to the previous authentication method.
-          args.push('--auth-root-authentication-method=normal')
-        }
-        await exec.exec(
-          path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
-          args
-        )
+        // MySQL on Windows need to execute perl
+        command = 'perl'
+        args = [path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl')]
       }
+      const help = await installDbHelp(command, args)
+      const installArgs = [
+        ...args,
+        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+        `--basedir=${mysql.toolPath}`
+      ]
+
+      if (help.match(/--auth-root-authentication-method/)) {
+        // in MariaDB until 10.3, mysql_install_db has --auth-root-authentication-method option.
+        // and until 10.4, its default value changes from "normal" to "socket".
+        // With "socket" option, mysqld accepts only unix socket, and rejects TCP protocol.
+        // ref. https://mariadb.com/kb/en/authentication-from-mariadb-104/
+        // We set "normal" to revert to the previous authentication method.
+        installArgs.push('--auth-root-authentication-method=normal')
+      }
+      await exec.exec(
+        path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
+        installArgs
+      )
     }
   })
 
@@ -201,7 +198,7 @@ async function verboseHelp(mysql: installer.MySQL): Promise<string> {
 }
 
 // execute "mysql_install_db --help" and return its result
-async function installDbHelp(mysql: installer.MySQL): Promise<string> {
+async function installDbHelp(command: string, args: string[]): Promise<string> {
   let myOutput = ''
   const options = {
     silent: true,
@@ -215,11 +212,7 @@ async function installDbHelp(mysql: installer.MySQL): Promise<string> {
     }
   }
   try {
-    await exec.exec(
-      path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
-      ['--help'],
-      options
-    )
+    await exec.exec(command, [...args, '--help'], options)
   } catch (e) {
     // suppress the exception.
     // "mysql_install_db --help" returns exit code 1.
