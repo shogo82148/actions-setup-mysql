@@ -216,7 +216,7 @@ async function installDbHelp(mysql: installer.MySQL): Promise<string> {
   }
   try {
     await exec.exec(
-      path.join(mysql.toolPath, 'script', 'mysql_install_db'),
+      path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
       ['--help'],
       options
     )
