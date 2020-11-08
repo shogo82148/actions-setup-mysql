@@ -115,12 +115,22 @@ export async function startMySQL(
         fs.existsSync(path.join(mysql.toolPath, 'scripts', 'mysql_install_db'))
       ) {
         // MySQL on Linux and macOS
+        const args = [
+          `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+          `--basedir=${mysql.toolPath}`
+        ]
+        const help = await installDbHelp(mysql)
+        if (help.match(/--auth-root-authentication-method/)) {
+          // in MariaDB until 10.3, mysql_install_db has --auth-root-authentication-method option.
+          // and until 10.4, its default value changes from "normal" to "socket".
+          // With "socket" option, mysqld accepts only unix socket, and rejects TCP protocol.
+          // ref. https://mariadb.com/kb/en/authentication-from-mariadb-104/
+          // We set "normal" to revert to the previous authentication method.
+          args.push('--auth-root-authentication-method=normal')
+        }
         await exec.exec(
           path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
-          [
-            `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-            `--basedir=${mysql.toolPath}`
-          ]
+          args
         )
       }
     }
@@ -162,6 +172,7 @@ export async function startMySQL(
   }
 }
 
+// execute "mysqld --verbose --help" and returns its result.
 async function verboseHelp(mysql: installer.MySQL): Promise<string> {
   let myOutput = ''
   const options = {
@@ -183,6 +194,34 @@ async function verboseHelp(mysql: installer.MySQL): Promise<string> {
     )
   } catch (e) {
     core.error('fail to exec mysqld')
+    core.error(myOutput)
+    throw e
+  }
+  return myOutput
+}
+
+// execute "mysql_install_db --help" and return its result
+async function installDbHelp(mysql: installer.MySQL): Promise<string> {
+  let myOutput = ''
+  const options = {
+    silent: true,
+    listeners: {
+      stdout: (data: Buffer) => {
+        myOutput += data.toString()
+      },
+      stderr: (data: Buffer) => {
+        myOutput += data.toString()
+      }
+    }
+  }
+  try {
+    await exec.exec(
+      path.join(mysql.toolPath, 'script', 'mysql_install_db'),
+      ['--help'],
+      options
+    )
+  } catch (e) {
+    core.error('mysql_install_db')
     core.error(myOutput)
     throw e
   }
