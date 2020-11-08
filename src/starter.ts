@@ -221,9 +221,8 @@ async function installDbHelp(mysql: installer.MySQL): Promise<string> {
       options
     )
   } catch (e) {
-    core.error('mysql_install_db')
-    core.error(myOutput)
-    throw e
+    // suppress the exception.
+    // "mysql_install_db --help" returns exit code 1.
   }
   return myOutput
 }
