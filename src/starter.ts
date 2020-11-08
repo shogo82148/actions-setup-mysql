@@ -64,26 +64,12 @@ export async function startMySQL(
   config['mysqld']['tmpdir'] ||= path.join(baseDir, 'tmp')
 
   await core.group('setup MySQL Database', async () => {
-    let initialized = false
     core.debug(`basedir: ${baseDir}`)
 
     // (re)create directory structure
     await io.mkdirP(path.join(baseDir, 'etc'))
     await io.mkdirP(path.join(baseDir, 'var'))
     await io.mkdirP(path.join(baseDir, 'tmp'))
-
-    if (
-      fs.existsSync(path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'))
-    ) {
-      // MariaDB on Windows
-      // The mysql_install_db.exe utility is the Windows equivalent of mysql_install_db.
-      // https://mariadb.com/kb/en/mysql_install_dbexe/
-      await exec.exec(
-        path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
-        [`--datadir=${baseDir}${sep}var`]
-      )
-      initialized = true
-    }
 
     // configure my.cnf
     core.debug(`writing my.cnf`)
@@ -92,13 +78,21 @@ export async function startMySQL(
       mycnf.stringify(config)
     )
 
-    if (initialized) {
-      return
-    }
-
     const help = await verboseHelp(mysql)
     const useMysqldInitialize = help.match(/--initialize-insecure/)
-    if (useMysqldInitialize) {
+    if (
+      fs.existsSync(path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'))
+    ) {
+      // MariaDB on Windows has mariadb-install-db.exe utility
+      // that is the Windows equivalent of mysql_install_db.
+      // https://mariadb.com/kb/en/mysql_install_dbexe/
+      await exec.exec(
+        path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
+        [`--datadir=${baseDir}${sep}var`]
+      )
+    } else if (useMysqldInitialize) {
+      // `mysql_install_db` command is obsoleted MySQL 5.7.6 or later and
+      // `mysqld --initialize-insecure` should be used.
       core.debug(`mysqld has the --initialize-insecure option`)
       await exec.exec(path.join(mysql.toolPath, 'bin', `mysqld${binExt}`), [
         `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
@@ -111,7 +105,7 @@ export async function startMySQL(
           path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl')
         )
       ) {
-        // MySQL on Windows
+        // MySQL on Windows has .pl file extension
         await exec.exec('perl', [
           path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl'),
           `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
