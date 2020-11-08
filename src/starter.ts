@@ -126,10 +126,7 @@ export async function startMySQL(
         // We set "normal" to revert to the previous authentication method.
         installArgs.push('--auth-root-authentication-method=normal')
       }
-      await exec.exec(
-        path.join(mysql.toolPath, 'scripts', 'mysql_install_db'),
-        installArgs
-      )
+      await exec.exec(command, installArgs)
     }
   })
 
