@@ -84,10 +84,17 @@ export async function startMySQL(
       fs.existsSync(path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'))
     ) {
       // MariaDB on Windows has mariadb-install-db.exe utility
-      // that is the Windows equivalent of mysql_install_db.
+      // that is the Windows equivalent of mysql_install_db.exe
       // https://mariadb.com/kb/en/mysql_install_dbexe/
       await exec.exec(
         path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
+        [`--datadir=${baseDir}${sep}var`]
+      )
+    } else if (fs.existsSync(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'))) {
+      // mysql_install_db.exe is old name of mariadb-install-db.exe
+      // https://mariadb.com/kb/en/mariadb-install-db/
+      await exec.exec(
+        path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'),
         [`--datadir=${baseDir}${sep}var`]
       )
     } else if (useMysqldInitialize) {
