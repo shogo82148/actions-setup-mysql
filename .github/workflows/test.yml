@@ -82,3 +82,6 @@ jobs:
         uses: ./
         with:
           mysql-version: ${{ matrix.mysql }}
+      - name: connect to MySQL server
+        run: |
+          mysql -uroot -e 'SELECT version()'
