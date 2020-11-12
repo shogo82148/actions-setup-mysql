@@ -6,10 +6,10 @@ inputs:
     description: "The version of MySQL and MariaDB"
     default: ""
   distribution:
-    description: "The distribution"
+    description: "The distribution. valid values are mysql or mariadb."
     default: "mysql"
   auto-start:
-    description: "Start MySQL server"
+    description: "Start MySQL server if it is true."
     default: "true"
   my-cnf:
     description: "my.cnf settings for mysqld"
