@@ -8,10 +8,12 @@ import * as exec from '@actions/exec'
 import * as installer from './installer'
 import * as mycnf from './mycnf'
 
+const sep = path.sep
 const BASEDIR = 'BASEDIR'
 const PID = 'PID'
 const PID_FILE = 'PID_FILE'
 const TOOLPATH = 'TOOLPATH'
+const ROOT_PASSWORD = 'ROOT_PASSWORD'
 
 // extension of executable files
 const binExt = os.platform() === 'win32' ? '.exe' : ''
@@ -21,6 +23,7 @@ export interface MySQLState {
   pidFile: string
   baseDir: string
   toolPath: string
+  rootPassword: string
 }
 
 export function saveState(state: MySQLState) {
@@ -28,6 +31,7 @@ export function saveState(state: MySQLState) {
   core.saveState(PID, state.pid)
   core.saveState(PID_FILE, state.pidFile)
   core.saveState(TOOLPATH, state.toolPath)
+  core.saveState(ROOT_PASSWORD, state.rootPassword)
 }
 
 export function getState(): MySQLState | null {
@@ -38,21 +42,22 @@ export function getState(): MySQLState | null {
   const pid = parseInt(core.getState(PID))
   const pidFile = core.getState(PID_FILE)
   const toolPath = core.getState(TOOLPATH)
+  const rootPassword = core.getState(ROOT_PASSWORD)
   return {
     pid,
     pidFile,
     baseDir,
-    toolPath
+    toolPath,
+    rootPassword
   }
 }
 
 export async function startMySQL(
   mysql: installer.MySQL,
-  cnf: string
+  cnf: string,
+  rootPassword: string
 ): Promise<MySQLState> {
   const baseDir = await mkdtemp()
-  const sep = path.sep
-
   const config = mycnf.parse(`[mysqld]\n${cnf}`)
   config['mysqld'] ||= {}
   const pidFile =
@@ -90,7 +95,9 @@ export async function startMySQL(
         path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
         [`--datadir=${baseDir}${sep}var`]
       )
-    } else if (fs.existsSync(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'))) {
+    } else if (
+      fs.existsSync(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'))
+    ) {
       // mysql_install_db.exe is old name of mariadb-install-db.exe
       // https://mariadb.com/kb/en/mariadb-install-db/
       await exec.exec(
@@ -137,39 +144,99 @@ export async function startMySQL(
     }
   })
 
-  core.info('start MySQL database')
-  const out = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
-  const err = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
-  const subprocess = child_process.spawn(
-    path.join(mysql.toolPath, 'bin', `mysqld${binExt}`),
-    [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, '--user=root'],
-    {
-      detached: true,
-      stdio: ['ignore', out, err]
-    }
-  )
-  const pid = subprocess.pid
+  let pid: number = 0
+  await core.group('start MySQL database', async () => {
+    core.info('start MySQL database')
+    const out = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
+    const err = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
+    const subprocess = child_process.spawn(
+      path.join(mysql.toolPath, 'bin', `mysqld${binExt}`),
+      [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, '--user=root'],
+      {
+        detached: true,
+        stdio: ['ignore', out, err]
+      }
+    )
+    pid = subprocess.pid
 
-  core.info('wait for MySQL ready')
-  for (;;) {
-    try {
-      fs.statSync(pidFile)
-      break
-    } catch {
-      await sleep(0.1)
+    core.info('wait for MySQL ready')
+    for (;;) {
+      try {
+        fs.statSync(pidFile)
+        break
+      } catch {
+        await sleep(0.1)
+      }
+      if (subprocess.exitCode !== null) {
+        throw new Error('failed to launch MySQL')
+      }
     }
-    if (subprocess.exitCode !== null) {
-      throw new Error('failed to launch MySQL')
-    }
+    subprocess.unref()
+    core.info('MySQL Server started')
+  })
+
+  if (rootPassword) {
+    await core.group('configure root password', async () => {
+      await exec.exec(path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`), [
+        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+        `--user=root`,
+        `--host=127.0.0.1`,
+        `password`,
+        rootPassword
+      ])
+    })
   }
-  subprocess.unref()
-  core.info('MySQL Server started')
 
   return {
     pid,
     pidFile,
     baseDir,
-    toolPath: mysql.toolPath
+    toolPath: mysql.toolPath,
+    rootPassword
+  }
+}
+
+export async function createUser(
+  state: MySQLState,
+  user: string,
+  password: string
+): Promise<void> {
+  const mysql = path.join(state.toolPath, 'bin', `mysql${binExt}`)
+  const env: {[key: string]: string} = {}
+  const args = [
+    `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
+    `--user=root`,
+    `--host=127.0.0.1`
+  ]
+  if (state.rootPassword) {
+    env['MYSQL_PWD'] = state.rootPassword
+  }
+  if (core.isDebug()) {
+    env['MYSQL_DEBUG'] = '1'
+  }
+  for (let host of ['localhost', '127.0.0.1', '::1']) {
+    await exec.exec(
+      mysql,
+      [
+        ...args,
+        '-e',
+        `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`
+      ],
+      {
+        env: env
+      }
+    )
+    await exec.exec(
+      mysql,
+      [
+        ...args,
+        '-e',
+        `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`
+      ],
+      {
+        env: env
+      }
+    )
   }
 }
 
@@ -240,6 +307,6 @@ function mkdtemp(): Promise<string> {
 
 function sleep(waitSec: number) {
   return new Promise(function (resolve) {
-    setTimeout(() => resolve(), waitSec)
+    setTimeout(() => resolve(), waitSec * 1000)
   })
 }

@@ -12,29 +12,43 @@ const sep = path.sep
 
 export async function shutdownMySQL(state: starter.MySQLState) {
   await core.group('shutdown MySQL Server', async () => {
-    await exec.exec(path.join(state.toolPath, 'bin', `mysqladmin${binExt}`), [
+    const env: {[key: string]: string} = {}
+    const args = [
       `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
       `--user=root`,
-      `--host=127.0.0.1`,
-      `shutdown`
-    ])
+      `--host=127.0.0.1`
+    ]
+    if (state.rootPassword) {
+      env['MYSQL_PWD'] = state.rootPassword
+    }
+    if (core.isDebug()) {
+      env['MYSQL_DEBUG'] = '1'
+    }
+    await exec.exec(
+      path.join(state.toolPath, 'bin', `mysqladmin${binExt}`),
+      [...args, `shutdown`],
+      {
+        env: env
+      }
+    )
 
     core.info('wait for MySQL shutdown')
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 30; i++) {
       try {
         fs.statSync(state.pidFile)
-        await sleep(0.1)
+        await sleep(1)
       } catch {
         break
       }
     }
 
+    await sleep(1)
     await io.rmRF(state.baseDir)
   })
 }
 
 function sleep(waitSec: number) {
   return new Promise(function (resolve) {
-    setTimeout(() => resolve(), waitSec)
+    setTimeout(() => resolve(), waitSec * 1000)
   })
 }
