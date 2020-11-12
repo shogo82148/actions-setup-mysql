@@ -49,6 +49,6 @@ export async function shutdownMySQL(state: starter.MySQLState) {
 
 function sleep(waitSec: number) {
   return new Promise(function (resolve) {
-    setTimeout(() => resolve(), waitSec)
+    setTimeout(() => resolve(), waitSec * 1000)
   })
 }
