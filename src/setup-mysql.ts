@@ -18,6 +18,11 @@ async function run(): Promise<void> {
 
     if (autoStart) {
       const state = await starter.startMySQL(mysql, cnf, rootPassword)
+      if (user) {
+        await core.group('create new user', async () => {
+          await starter.createUser(state, user, password)
+        })
+      }
       starter.saveState(state)
     }
   } catch (error) {

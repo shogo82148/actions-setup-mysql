@@ -8,6 +8,7 @@ import * as exec from '@actions/exec'
 import * as installer from './installer'
 import * as mycnf from './mycnf'
 
+const sep = path.sep
 const BASEDIR = 'BASEDIR'
 const PID = 'PID'
 const PID_FILE = 'PID_FILE'
@@ -57,8 +58,6 @@ export async function startMySQL(
   rootPassword: string
 ): Promise<MySQLState> {
   const baseDir = await mkdtemp()
-  const sep = path.sep
-
   const config = mycnf.parse(`[mysqld]\n${cnf}`)
   config['mysqld'] ||= {}
   const pidFile =
@@ -177,14 +176,15 @@ export async function startMySQL(
   })
 
   if (rootPassword) {
-    core.debug('configure root password')
-    await exec.exec(path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`), [
-      `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-      `--user=root`,
-      `--host=127.0.0.1`,
-      `password`,
-      rootPassword
-    ])
+    await core.group('configure root password', async () => {
+      await exec.exec(path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`), [
+        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+        `--user=root`,
+        `--host=127.0.0.1`,
+        `password`,
+        rootPassword
+      ])
+    })
   }
 
   return {
@@ -193,6 +193,50 @@ export async function startMySQL(
     baseDir,
     toolPath: mysql.toolPath,
     rootPassword
+  }
+}
+
+export async function createUser(
+  state: MySQLState,
+  user: string,
+  password: string
+): Promise<void> {
+  const mysql = path.join(state.toolPath, 'bin', `mysql${binExt}`)
+  const env: {[key: string]: string} = {}
+  const args = [
+    `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
+    `--user=root`,
+    `--host=127.0.0.1`
+  ]
+  if (state.rootPassword) {
+    env['MYSQL_PWD'] = state.rootPassword
+  }
+  if (core.isDebug()) {
+    env['MYSQL_DEBUG'] = '1'
+  }
+  for (let host of ['localhost', '127.0.0.1', '::1']) {
+    await exec.exec(
+      mysql,
+      [
+        ...args,
+        '-e',
+        `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`
+      ],
+      {
+        env: env
+      }
+    )
+    await exec.exec(
+      mysql,
+      [
+        ...args,
+        '-e',
+        `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`
+      ],
+      {
+        env: env
+      }
+    )
   }
 }
 
