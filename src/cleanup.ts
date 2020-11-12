@@ -12,10 +12,16 @@ const sep = path.sep
 
 export async function shutdownMySQL(state: starter.MySQLState) {
   await core.group('shutdown MySQL Server', async () => {
-    await exec.exec(path.join(state.toolPath, 'bin', `mysqladmin${binExt}`), [
+    const args = [
       `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
       `--user=root`,
-      `--host=127.0.0.1`,
+      `--host=127.0.0.1`
+    ]
+    if (state.rootPassword) {
+      args.push(`--password=${state.rootPassword}`)
+    }
+    await exec.exec(path.join(state.toolPath, 'bin', `mysqladmin${binExt}`), [
+      ...args,
       `shutdown`
     ])
 

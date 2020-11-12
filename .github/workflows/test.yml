@@ -82,6 +82,7 @@ jobs:
         uses: ./
         with:
           mysql-version: ${{ matrix.mysql }}
+          root-password: very-very-secret
       - name: connect to MySQL server
         run: |
-          mysql --host=127.0.0.1 --user=root -e 'SELECT version()'
+          mysql --host=127.0.0.1 --user=root --password=very-very-secret -e 'SELECT version()'

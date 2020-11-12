@@ -8,13 +8,16 @@ async function run(): Promise<void> {
     const distribution = core.getInput('distribution')
     const autoStart = parseBoolean(core.getInput('auto-start'))
     const cnf = core.getInput('my-cnf')
+    const rootPassword = core.getInput('root-password')
+    const user = core.getInput('user')
+    const password = core.getInput('password')
 
     const mysql = await core.group('install MySQL', async () => {
       return installer.getMySQL(distribution, version)
     })
 
     if (autoStart) {
-      const state = await starter.startMySQL(mysql, cnf)
+      const state = await starter.startMySQL(mysql, cnf, rootPassword)
       starter.saveState(state)
     }
   } catch (error) {
