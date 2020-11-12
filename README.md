@@ -33,3 +33,14 @@ steps:
 | `root-password` | password for the root user |
 | `user` | name of a new user |
 | `password` | password for the new user |
+
+## Available Versions
+
+- MySQL
+    - 8.0
+    - 5.7
+    - 5.6
+- MariaDB
+    - 10.5.7
+    - 10.4.16
+    - 10.3.26
