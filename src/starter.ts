@@ -306,7 +306,7 @@ function mkdtemp(): Promise<string> {
 }
 
 function sleep(waitSec: number) {
-  return new Promise(function (resolve) {
+  return new Promise<void>(function (resolve) {
     setTimeout(() => resolve(), waitSec * 1000)
   })
 }
