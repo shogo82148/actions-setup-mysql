@@ -1,15 +1,15 @@
 Param($MYSQL_VERSION)
-$OPENSSL_VERSION="1_1_1h"
-$ROOT=Split-Path -Parent $MyInvocation.MyCommand.Path
-$RUNNER_TEMP=$env:RUNNER_TEMP
+$OPENSSL_VERSION = "1_1_1i"
+$ROOT = Split-Path -Parent $MyInvocation.MyCommand.Path
+$RUNNER_TEMP = $env:RUNNER_TEMP
 if ($null -eq $RUNNER_TEMP) {
-    $RUNNER_TEMP=Join-Path $ROOT "working"
+    $RUNNER_TEMP = Join-Path $ROOT "working"
 }
-$RUNNER_TOOL_CACHE=$env:RUNNER_TOOL_CACHE
+$RUNNER_TOOL_CACHE = $env:RUNNER_TOOL_CACHE
 if ($null -eq $RUNNER_TOOL_CACHE) {
-    $RUNNER_TOOL_CACHE=Join-Path $RUNNER_TEMP "dist"
+    $RUNNER_TOOL_CACHE = Join-Path $RUNNER_TEMP "dist"
 }
-$PREFIX=Join-Path $RUNNER_TOOL_CACHE "mysql" $MYSQL_VERSION "x64"
+$PREFIX = Join-Path $RUNNER_TOOL_CACHE "mysql" $MYSQL_VERSION "x64"
 
 
 Write-Host "::group::Set up Visual Studio 2019"
@@ -64,8 +64,8 @@ Write-Host "::endgroup::"
 
 # Bison
 Write-Host "::group::Set up Bison"
-$BISON_VERSION="2.4.1"
-$BISON_PREFIX=Join-Path "C:" "GnuWin32"
+$BISON_VERSION = "2.4.1"
+$BISON_PREFIX = Join-Path "C:" "GnuWin32"
 Set-Location "$RUNNER_TEMP"
 Write-Host "Downloading zip archive of binary..."
 Invoke-WebRequest "https://versaweb.dl.sourceforge.net/project/gnuwin32/bison/$BISON_VERSION/bison-$BISON_VERSION-bin.zip" -OutFile "bison-bin.zip"
@@ -81,7 +81,7 @@ Remove-Item -Path "bison-dep.zip"
 Write-Host "::endgroup::"
 
 # use C drive to avoid disk full
-$RUNNER_TEMP="C:\Temp"
+$RUNNER_TEMP = "C:\Temp"
 New-Item "$RUNNER_TEMP" -ItemType Directory -Force
 
 Write-Host "::group::fetch MySQL source"
@@ -97,7 +97,7 @@ Write-Host "::group::build MySQL"
 Set-Location "$RUNNER_TEMP"
 
 New-Item "boost" -ItemType Directory -Force
-$BOOST=Join-Path $RUNNER_TEMP "boost"
+$BOOST = Join-Path $RUNNER_TEMP "boost"
 New-Item "build" -ItemType Directory -Force
 Set-Location build
 cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
