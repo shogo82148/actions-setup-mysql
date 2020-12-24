@@ -79,7 +79,7 @@ export async function startMySQL(
     // configure my.cnf
     core.info(`writing my.cnf`)
     core.debug(`my.cnf path is ${path.join(baseDir, 'etc', 'my.cnf')}`)
-    dump(mycnf.stringify(config))
+    core.debug(mycnf.stringify(config))
     fs.writeFileSync(
       path.join(baseDir, 'etc', 'my.cnf'),
       mycnf.stringify(config)
@@ -326,10 +326,4 @@ function execute(
     core.debug(`execute: ${commandLine}`)
   }
   return exec.exec(commandLine, args, options)
-}
-
-function dump(str: string) {
-  str.split(/\n/).forEach(()=> {
-    core.debug(str)
-  })
 }
