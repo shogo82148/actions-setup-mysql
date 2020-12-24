@@ -57,9 +57,17 @@ export async function startMySQL(
   cnf: string,
   rootPassword: string
 ): Promise<MySQLState> {
-  const env: {[key: string]: string} = {}
-  if (core.isDebug()) {
-    env['MYSQL_DEBUG'] = '1'
+  const execOptions: exec.ExecOptions = {}
+  const debug = core.isDebug()
+  if (debug) {
+    execOptions.env = {
+      MYSQL_DEBUG: '1'
+    }
+    execOptions.listeners = {
+      debug: message => {
+        core.debug(message)
+      }
+    }
   }
 
   const baseDir = await mkdtemp()
@@ -98,7 +106,8 @@ export async function startMySQL(
       // https://mariadb.com/kb/en/mysql_install_dbexe/
       await exec.exec(
         path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
-        [`--datadir=${baseDir}${sep}var`]
+        [`--datadir=${baseDir}${sep}var`],
+        execOptions
       )
     } else if (
       fs.existsSync(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'))
@@ -107,7 +116,8 @@ export async function startMySQL(
       // https://mariadb.com/kb/en/mariadb-install-db/
       await exec.exec(
         path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'),
-        [`--datadir=${baseDir}${sep}var`]
+        [`--datadir=${baseDir}${sep}var`],
+        execOptions
       )
     } else if (useMysqldInitialize) {
       // `mysql_install_db` command is obsoleted MySQL 5.7.6 or later and
@@ -145,7 +155,7 @@ export async function startMySQL(
         // We set "normal" to revert to the previous authentication method.
         installArgs.push('--auth-root-authentication-method=normal')
       }
-      await exec.exec(command, installArgs)
+      await exec.exec(command, installArgs, execOptions)
     }
   })
 
@@ -191,9 +201,7 @@ export async function startMySQL(
           `password`,
           rootPassword
         ],
-        {
-          env: env
-        }
+        execOptions
       )
     })
   }
