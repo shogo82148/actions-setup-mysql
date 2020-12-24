@@ -57,6 +57,11 @@ export async function startMySQL(
   cnf: string,
   rootPassword: string
 ): Promise<MySQLState> {
+  const env: {[key: string]: string} = {}
+  if (core.isDebug()) {
+    env['MYSQL_DEBUG'] = '1'
+  }
+
   const baseDir = await mkdtemp()
   const config = mycnf.parse(`[mysqld]\n${cnf}`)
   config['mysqld'] ||= {}
@@ -179,24 +184,36 @@ export async function startMySQL(
     core.info('MySQL Server started')
   })
 
-  await exec.exec(path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`), [
-    `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-    '--user=root',
-    '--host=127.0.0.1',
-    'flush-privileges',
-    'password',
-    '*'
-  ])
+  await exec.exec(
+    path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`),
+    [
+      `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+      '--user=root',
+      '--host=127.0.0.1',
+      'flush-privileges',
+      'password',
+      '*'
+    ],
+    {
+      env: env
+    }
+  )
 
   if (rootPassword) {
     await core.group('configure root password', async () => {
-      await exec.exec(path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`), [
-        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-        `--user=root`,
-        `--host=127.0.0.1`,
-        `password`,
-        rootPassword
-      ])
+      await exec.exec(
+        path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`),
+        [
+          `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+          `--user=root`,
+          `--host=127.0.0.1`,
+          `password`,
+          rootPassword
+        ],
+        {
+          env: env
+        }
+      )
     })
   }
 
