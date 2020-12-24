@@ -151,7 +151,11 @@ export async function startMySQL(
     const err = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
     const subprocess = child_process.spawn(
       path.join(mysql.toolPath, 'bin', `mysqld${binExt}`),
-      [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, '--user=root'],
+      [
+        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+        '--skip-grant-tables',
+        '--user=root'
+      ],
       {
         detached: true,
         stdio: ['ignore', out, err]
