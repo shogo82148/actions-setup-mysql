@@ -259,15 +259,15 @@ async function verboseHelp(mysql: installer.MySQL): Promise<string> {
     }
   }
   try {
-    await exec.exec(
+    await execute(
       path.join(mysql.toolPath, 'bin', `mysqld${binExt}`),
-      ['--verbose', `--help`],
+      ['--no-defaults', '--verbose', '--help'],
       options
     )
   } catch (e) {
-    core.error('fail to exec mysqld')
+    core.error('fail to get mysqld options')
     core.error(myOutput)
-    throw e
+    return ''
   }
   return myOutput
 }
