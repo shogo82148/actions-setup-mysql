@@ -156,11 +156,7 @@ export async function startMySQL(
     const err = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
     const subprocess = child_process.spawn(
       path.join(mysql.toolPath, 'bin', `mysqld${binExt}`),
-      [
-        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-        '--skip-grant-tables',
-        '--user=root'
-      ],
+      [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`],
       {
         detached: true,
         stdio: ['ignore', out, err]
@@ -183,21 +179,6 @@ export async function startMySQL(
     subprocess.unref()
     core.info('MySQL Server started')
   })
-
-  await exec.exec(
-    path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`),
-    [
-      `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-      '--user=root',
-      '--host=127.0.0.1',
-      'flush-privileges',
-      'password',
-      '*'
-    ],
-    {
-      env: env
-    }
-  )
 
   if (rootPassword) {
     await core.group('configure root password', async () => {
