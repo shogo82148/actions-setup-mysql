@@ -58,7 +58,7 @@ export async function startMySQL(
   rootPassword: string
 ): Promise<MySQLState> {
   const execOptions: exec.ExecOptions = {}
-  const debug = core.isDebug()
+  const debug = true
   if (debug) {
     execOptions.env = {
       MYSQL_DEBUG: '1'
@@ -166,7 +166,7 @@ export async function startMySQL(
     const err = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
     const subprocess = child_process.spawn(
       path.join(mysql.toolPath, 'bin', `mysqld${binExt}`),
-      [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`],
+      [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, '--user=root'],
       {
         detached: true,
         stdio: ['ignore', out, err]
