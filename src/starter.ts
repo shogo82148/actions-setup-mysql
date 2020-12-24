@@ -179,6 +179,15 @@ export async function startMySQL(
     core.info('MySQL Server started')
   })
 
+  await exec.exec(path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`), [
+    `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+    '--user=root',
+    '--host=127.0.0.1',
+    'flush-privileges',
+    'password',
+    '*'
+  ])
+
   if (rootPassword) {
     await core.group('configure root password', async () => {
       await exec.exec(path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`), [
