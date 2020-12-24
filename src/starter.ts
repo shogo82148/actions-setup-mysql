@@ -95,17 +95,16 @@ export async function startMySQL(
       // https://mariadb.com/kb/en/mysql_install_dbexe/
       await execute(
         path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
-        [`--datadir=${baseDir}${sep}var`],
+        [`--datadir=${baseDir}${sep}var`]
       )
     } else if (
       fs.existsSync(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'))
     ) {
       // mysql_install_db.exe is old name of mariadb-install-db.exe
       // https://mariadb.com/kb/en/mariadb-install-db/
-      await execute(
-        path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'),
-        [`--datadir=${baseDir}${sep}var`],
-      )
+      await execute(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'), [
+        `--datadir=${baseDir}${sep}var`
+      ])
     } else if (useMysqldInitialize) {
       // `mysql_install_db` command is obsoleted MySQL 5.7.6 or later and
       // `mysqld --initialize-insecure` should be used.
@@ -178,16 +177,13 @@ export async function startMySQL(
 
   if (rootPassword) {
     await core.group('configure root password', async () => {
-      await execute(
-        path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`),
-        [
-          `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-          `--user=root`,
-          `--host=127.0.0.1`,
-          `password`,
-          rootPassword
-        ]
-      )
+      await execute(path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`), [
+        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+        `--user=root`,
+        `--host=127.0.0.1`,
+        `password`,
+        rootPassword
+      ])
     })
   }
 
