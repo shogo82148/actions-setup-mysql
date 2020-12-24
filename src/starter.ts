@@ -321,7 +321,7 @@ function execute(
   options?: exec.ExecOptions
 ): Promise<number> {
   if (args) {
-    core.debug(`execute: ${commandLine} ${args.join( )}`)
+    core.debug(`execute: ${commandLine} ${args.join(' ')}`)
   } else {
     core.debug(`execute: ${commandLine}`)
   }
