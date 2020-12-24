@@ -57,19 +57,6 @@ export async function startMySQL(
   cnf: string,
   rootPassword: string
 ): Promise<MySQLState> {
-  const execOptions: exec.ExecOptions = {}
-  const debug = true
-  if (debug) {
-    execOptions.env = {
-      MYSQL_DEBUG: '1'
-    }
-    execOptions.listeners = {
-      debug: message => {
-        core.debug(message)
-      }
-    }
-  }
-
   const baseDir = await mkdtemp()
   const config = mycnf.parse(`[mysqld]\n${cnf}`)
   config['mysqld'] ||= {}
@@ -82,7 +69,7 @@ export async function startMySQL(
   config['mysqld']['tmpdir'] ||= path.join(baseDir, 'tmp')
 
   await core.group('setup MySQL Database', async () => {
-    core.debug(`basedir: ${baseDir}`)
+    core.info(`creating the directory structure on ${baseDir}`)
 
     // (re)create directory structure
     await io.mkdirP(path.join(baseDir, 'etc'))
@@ -90,7 +77,9 @@ export async function startMySQL(
     await io.mkdirP(path.join(baseDir, 'tmp'))
 
     // configure my.cnf
-    core.debug(`writing my.cnf`)
+    core.info(`writing my.cnf`)
+    core.debug(`my.cnf path is ${path.join(baseDir, 'etc', 'my.cnf')}`)
+    dump(mycnf.stringify(config))
     fs.writeFileSync(
       path.join(baseDir, 'etc', 'my.cnf'),
       mycnf.stringify(config)
@@ -104,26 +93,23 @@ export async function startMySQL(
       // MariaDB on Windows has mariadb-install-db.exe utility
       // that is the Windows equivalent of mysql_install_db.exe
       // https://mariadb.com/kb/en/mysql_install_dbexe/
-      await exec.exec(
+      await execute(
         path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
         [`--datadir=${baseDir}${sep}var`],
-        execOptions
       )
     } else if (
       fs.existsSync(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'))
     ) {
       // mysql_install_db.exe is old name of mariadb-install-db.exe
       // https://mariadb.com/kb/en/mariadb-install-db/
-      await exec.exec(
+      await execute(
         path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'),
         [`--datadir=${baseDir}${sep}var`],
-        execOptions
       )
     } else if (useMysqldInitialize) {
       // `mysql_install_db` command is obsoleted MySQL 5.7.6 or later and
       // `mysqld --initialize-insecure` should be used.
-      core.debug(`mysqld has the --initialize-insecure option`)
-      await exec.exec(path.join(mysql.toolPath, 'bin', `mysqld${binExt}`), [
+      await execute(path.join(mysql.toolPath, 'bin', `mysqld${binExt}`), [
         `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
         `--initialize-insecure`
       ])
@@ -155,7 +141,7 @@ export async function startMySQL(
         // We set "normal" to revert to the previous authentication method.
         installArgs.push('--auth-root-authentication-method=normal')
       }
-      await exec.exec(command, installArgs, execOptions)
+      await execute(command, installArgs)
     }
   })
 
@@ -192,7 +178,7 @@ export async function startMySQL(
 
   if (rootPassword) {
     await core.group('configure root password', async () => {
-      await exec.exec(
+      await execute(
         path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`),
         [
           `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
@@ -200,8 +186,7 @@ export async function startMySQL(
           `--host=127.0.0.1`,
           `password`,
           rootPassword
-        ],
-        execOptions
+        ]
       )
     })
   }
@@ -234,7 +219,7 @@ export async function createUser(
     env['MYSQL_DEBUG'] = '1'
   }
   for (let host of ['localhost', '127.0.0.1', '::1']) {
-    await exec.exec(
+    await execute(
       mysql,
       [
         ...args,
@@ -245,7 +230,7 @@ export async function createUser(
         env: env
       }
     )
-    await exec.exec(
+    await execute(
       mysql,
       [
         ...args,
@@ -327,5 +312,24 @@ function mkdtemp(): Promise<string> {
 function sleep(waitSec: number) {
   return new Promise<void>(function (resolve) {
     setTimeout(() => resolve(), waitSec * 1000)
+  })
+}
+
+function execute(
+  commandLine: string,
+  args?: string[],
+  options?: exec.ExecOptions
+): Promise<number> {
+  if (args) {
+    core.debug(`execute: ${commandLine} ${args.join( )}`)
+  } else {
+    core.debug(`execute: ${commandLine}`)
+  }
+  return exec.exec(commandLine, args, options)
+}
+
+function dump(str: string) {
+  str.split(/\n/).forEach(()=> {
+    core.debug(str)
   })
 }
