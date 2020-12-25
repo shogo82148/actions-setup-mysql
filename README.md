@@ -8,7 +8,7 @@ This action sets by MySQL database for use in actions by:
 ## Motivation
 
 - GitHub-Hosted Runners have MySQL Server, but only Linux.
-- GitHub Actions supports Docker services, and there is the official [MySQL image](). but it works on only Linux.
+- GitHub Actions supports Docker services, and there is the official [MySQL image](https://hub.docker.com/_/mysql). but it works on only Linux.
 - Some utils for MySQL (such as [MySQL::Partition](https://metacpan.org/pod/MySQL::Partition), [App::Prove::Plugin::MySQLPool](https://metacpan.org/pod/App::Prove::Plugin::MySQLPool), [Test::mysqld](https://metacpan.org/pod/Test::mysqld)) requires MySQL installed on the local host.
 
 ## Usage

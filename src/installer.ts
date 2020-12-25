@@ -92,9 +92,10 @@ async function acquireMySQL(
   const downloadUrl = await getDownloadUrl(fileName)
   let downloadPath: string | null = null
   try {
+    core.info(`downloading from ${downloadUrl}`)
     downloadPath = await tc.downloadTool(downloadUrl)
   } catch (error) {
-    core.debug(error)
+    core.info(error)
 
     throw `Failed to download version ${version}: ${error}`
   }
