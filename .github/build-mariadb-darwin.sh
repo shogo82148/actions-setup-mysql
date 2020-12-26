@@ -14,7 +14,8 @@ JOBS=$(sysctl -n hw.logicalcpu_max)
 
 mkdir -p "$RUNNER_TEMP"
 cd "$RUNNER_TEMP"
-rm -rf ./*
+
+ACTION_VERSION=$(jq -r '.version' < "$ROOT/../package.json")
 
 # system SSL/TLS library is too old. so we use custom build.
 echo "::group::download OpenSSL source"
@@ -66,6 +67,7 @@ echo "::group::build MariaDB"
     mkdir build
     cd build
     cmake "../mariadb-$MARIADB_VERSION" \
+        -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
         -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" \
         -DWITH_SSL="$PREFIX" -DPLUGIN_TOKUDB=NO -DPLUGIN_MROONGA=NO -DPLUGIN_SPIDER=NO -DPLUGIN_OQGRAPH=NO -DPLUGIN_PERFSCHEMA=NO -DPLUGIN_SPHINX=NO -DPLUGIN_ARCHIVE=NO -DPLUGIN_ROCKSDB=NO

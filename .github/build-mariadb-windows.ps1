@@ -11,6 +11,7 @@ if ($null -eq $RUNNER_TOOL_CACHE) {
 }
 $PREFIX = Join-Path $RUNNER_TOOL_CACHE "mariadb" $MARIADB_VERSION "x64"
 
+$ACTION_VERSION = Get-Content (Join-Path $ROOT ".." "package.json") | jq -r ".version"
 
 Write-Host "::group::Set up Visual Studio 2019"
 New-Item $RUNNER_TEMP -ItemType Directory -Force
@@ -101,6 +102,7 @@ $BOOST = Join-Path $RUNNER_TEMP "boost"
 New-Item "build" -ItemType Directory -Force
 Set-Location build
 cmake ( Join-Path $RUNNER_TEMP "mariadb-$MARIADB_VERSION" ) `
+    -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" `
     -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
     -DCMAKE_INSTALL_PREFIX="$PREFIX" `
     -DWITH_SSL="$PREFIX" `
