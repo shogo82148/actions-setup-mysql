@@ -6,7 +6,7 @@ use utf8;
 use IPC::Open3;
 
 use Exporter 'import';
-our @EXPORT_OK = qw(run);
+our @EXPORT_OK = qw(run detect_version);
 
 use Carp qw/croak/;
 
@@ -22,6 +22,19 @@ sub run {
         croak "`$cmd` exit code: $code, message: $result";
     }
     return $result;
+}
+
+sub detect_version {
+    my ($user, $password) = @_;
+    local $ENV{MYSQL_PWD} = $password;
+    my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '-e', 'SELECT VERSION()');
+    if ($version =~ /mariadb-([0-9]*)/i) {
+        return $1, 'mariadb';
+    }
+    if ($version =~ /^([0-9.]*)$/mi) {
+        return $1, 'mysql';
+    }
+    croak "unknown distribution: $version";
 }
 
 "NoSQL + SQL = MySQL"
