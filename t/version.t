@@ -10,7 +10,7 @@ plan skip_all => 'expected version is not set' unless $ENV{MYSQL_VERSION};
 
 my $want_dist = 'mysql';
 my $want_ver = $ENV{MYSQL_VERSION};
-if ($want_ver =~ /^mariadb-([0-9.])$/i) {
+if ($want_ver =~ /^mariadb-([0-9.]+)$/i) {
     $want_ver = $1;
     $want_dist = 'mariadb';
 }
