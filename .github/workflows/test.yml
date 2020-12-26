@@ -85,9 +85,8 @@ jobs:
           root-password: very-very-secret
           user: my
           password: secret
-      - name: connect to MySQL server
+      - name: test
         run: |
-          # test of the root user
-          mysql --host=127.0.0.1 --user=root --password=very-very-secret -e 'SELECT version()'
-          # test of new user
-          mysql --host=127.0.0.1 --user=my --password=secret -e 'SELECT user, host FROM mysql.user'
+          prove -v t
+        env:
+          MYSQL_VERSION: ${{ matrix.mysql }}
