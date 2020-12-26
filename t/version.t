@@ -25,9 +25,9 @@ is $got_dist, $want_dist, 'the server distribution';
 my $client = run('mysql', '--no-defaults', '--version');
 diag "client version: $client";
 if ($want_dist eq 'mysql') {
-    like $client, qr/Ver\s+\Q$want_ver\E\.[0-9]+\s/, 'the client version';
+    like $client, qr/\s+\Q$want_ver\E\.[0-9]+/, 'the client version';
 } elsif ($want_dist eq 'mariadb') {
-    like $client, qr/Distrib\s+\Q$want_ver\E\.[0-9]+-MariaDB/, 'the client version';
+    like $client, qr/\Q$want_ver\E\.[0-9]+-MariaDB/, 'the client version';
 }
 
 done_testing;

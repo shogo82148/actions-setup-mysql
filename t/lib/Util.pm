@@ -28,7 +28,7 @@ sub detect_version {
     my ($user, $password) = @_;
     local $ENV{MYSQL_PWD} = $password;
     my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '-e', 'SELECT VERSION()');
-    if ($version =~ /mariadb-([0-9]*)/i) {
+    if ($version =~ /([0-9]*)-MariaDB/i) {
         return $1, 'mariadb';
     }
     if ($version =~ /^([0-9.]*)$/mi) {
