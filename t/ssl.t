@@ -4,7 +4,7 @@ use utf8;
 use Test::More;
 use FindBin;
 use lib "$FindBin::Bin/lib";
-use Util qw(run);
+use Util qw(run detect_version);
 
 my ($version, $distribution) = detect_version('root', 'very-very-secret');
 my @ssl_options = ('--ssl');
