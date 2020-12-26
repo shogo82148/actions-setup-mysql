@@ -72,25 +72,25 @@ export async function getMySQL(
   //
   // prepend the tools path. instructs the agent to prepend for future tasks
   //
-  const bin = path.join(toolPath, 'bin');
-  const lib = path.join(toolPath, 'lib');
-  core.addPath(bin);
+  const bin = path.join(toolPath, 'bin')
+  const lib = path.join(toolPath, 'lib')
+  core.addPath(bin)
 
   // configure library path
   if (osPlat === 'linux') {
-    let path = lib;
-    const pre = process.env['LD_LIBRARY_PATH'];
+    let path = lib
+    const pre = process.env['LD_LIBRARY_PATH']
     if (pre) {
-      path += ':' + pre;
+      path += ':' + pre
     }
-    core.exportVariable('LD_LIBRARY_PATH', path);
+    core.exportVariable('LD_LIBRARY_PATH', path)
   } else if (osPlat === 'darwin') {
-    let path = lib;
-    const pre = process.env['DYLD_LIBRARY_PATH'];
+    let path = lib
+    const pre = process.env['DYLD_LIBRARY_PATH']
     if (pre) {
-      path += ':' + pre;
+      path += ':' + pre
     }
-    core.exportVariable('DYLD_LIBRARY_PATH', path);
+    core.exportVariable('DYLD_LIBRARY_PATH', path)
   }
 
   return {

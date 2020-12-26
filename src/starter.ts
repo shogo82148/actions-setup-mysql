@@ -67,6 +67,9 @@ export async function startMySQL(
   config['mysqld']['datadir'] ||= path.join(baseDir, 'var')
   config['mysqld']['pid-file'] = pidFile
   config['mysqld']['tmpdir'] ||= path.join(baseDir, 'tmp')
+  config['mysqld']['ssl_ca'] ||= path.join(baseDir, 'var', 'ca.pem')
+  config['mysqld']['ssl_cert'] ||= path.join(baseDir, 'var', 'server-cert.pem')
+  config['mysqld']['ssl_key'] ||= path.join(baseDir, 'var', 'server-key.pem')
 
   await core.group('setup MySQL Database', async () => {
     core.info(`creating the directory structure on ${baseDir}`)
@@ -75,6 +78,9 @@ export async function startMySQL(
     await io.mkdirP(path.join(baseDir, 'etc'))
     await io.mkdirP(path.join(baseDir, 'var'))
     await io.mkdirP(path.join(baseDir, 'tmp'))
+
+    // configure ssl
+    await setupTls(mysql, baseDir)
 
     // configure my.cnf
     core.info(`writing my.cnf`)
@@ -268,6 +274,83 @@ async function verboseHelp(mysql: installer.MySQL): Promise<string> {
   return myOutput
 }
 
+// TypeScript port of mysql_ssl_rsa_setup which is available from MySQL 5.7.6.
+// It is for better compatibility.
+// based on https://dev.mysql.com/doc/refman/8.0/en/creating-ssl-files-using-openssl.html
+async function setupTls(
+  mysql: installer.MySQL,
+  baseDir: string
+): Promise<void> {
+  const datadir = `${baseDir}${sep}var`
+  const openssl = `${mysql.toolPath}${sep}bin${sep}openssl${binExt}`
+
+  // Create CA certificate
+  let key: string = ''
+  exec.exec(openssl, ['genrsa', '2048', '-out', `${datadir}{$sep}ca-key.pem`])
+  exec.exec(openssl, [
+    'req',
+    '-new',
+    '-x509',
+    '-nodes',
+    '-days',
+    '3600',
+    '-key',
+    `${datadir}{$sep}ca-key.pem`,
+    '-out',
+    `${datadir}{$sep}ca.pem`
+  ])
+
+  // Create server certificate, remove passphrase, and sign it
+  // server-cert.pem = public key, server-key.pem = private key
+  exec.exec(openssl, [
+    'req',
+    '-newkey',
+    'rsa:2048',
+    '-days',
+    '3600',
+    '-nodes',
+    '-keyout',
+    `${datadir}{$sep}server-key.pem`,
+    '-out',
+    `${datadir}{$sep}server-req.pem`
+  ])
+  exec.exec(openssl, [
+    'req',
+    '-newkey',
+    'rsa:2048',
+    '-days',
+    '3600',
+    '-nodes',
+    '-keyout',
+    `${datadir}{$sep}server-key.pem`,
+    '-out',
+    `${datadir}{$sep}server-req.pem`
+  ])
+  exec.exec(openssl, [
+    'rsa',
+    '-in',
+    `${datadir}{$sep}server-key.pem`,
+    '-out',
+    `${datadir}{$sep}server-key.pem`
+  ])
+  exec.exec(openssl, [
+    'x509',
+    '-req',
+    '-in',
+    `${datadir}{$sep}server-req.pem`,
+    '-days',
+    '3600',
+    '-CA',
+    `${datadir}{$sep}ca.pem`,
+    '-CAkey',
+    `${datadir}{$sep}ca-key.pem`,
+    '-set_serial',
+    '01',
+    '-out',
+    `${datadir}{$sep}server-cert.pem`
+  ])
+}
+
 // execute "mysql_install_db --help" and return its result
 async function installDbHelp(command: string, args: string[]): Promise<string> {
   let myOutput = ''
@@ -293,7 +376,6 @@ async function installDbHelp(command: string, args: string[]): Promise<string> {
 
 function mkdtemp(): Promise<string> {
   const tmp = os.tmpdir()
-  const sep = path.sep
   return new Promise(function (resolve, reject) {
     fs.mkdtemp(`${tmp}${sep}actions-setup-mysql-`, (err, dir) => {
       if (err) {
