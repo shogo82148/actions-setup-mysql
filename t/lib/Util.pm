@@ -28,10 +28,10 @@ sub detect_version {
     my ($user, $password) = @_;
     local $ENV{MYSQL_PWD} = $password;
     my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '-e', 'SELECT VERSION()');
-    if ($version =~ /([0-9]*)-MariaDB/i) {
+    if ($version =~ /([0-9.]*)-MariaDB/i) {
         return $1, 'mariadb';
     }
-    if ($version =~ /^([0-9.]*)$/mi) {
+    if ($version =~ /^\s*([0-9.]*)\s*$/mi) {
         return $1, 'mysql';
     }
     croak "unknown distribution: $version";
