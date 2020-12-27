@@ -79,15 +79,16 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: use the action
+        id: action
         uses: ./
         with:
           mysql-version: ${{ matrix.mysql }}
           root-password: very-very-secret
           user: my
           password: secret
-      - name: connect to MySQL server
+      - name: test
         run: |
-          # test of the root user
-          mysql --host=127.0.0.1 --user=root --password=very-very-secret -e 'SELECT version()'
-          # test of new user
-          mysql --host=127.0.0.1 --user=my --password=secret -e 'SELECT user, host FROM mysql.user'
+          prove -v t
+        env:
+          MYSQL_VERSION: ${{ matrix.mysql }}
+          BASE_DIR: ${{ steps.action.outputs.base-dir }}
