@@ -316,6 +316,8 @@ async function setupTls(
     '-nodes',
     '-keyout',
     `${datadir}${sep}server-key.pem`,
+    '-subj',
+    '/CN=Actions_Setup_MySQL_Auto_Generated_CA_Certificate',
     '-out',
     `${datadir}${sep}server-req.pem`
   ])
