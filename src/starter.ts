@@ -315,18 +315,6 @@ async function setupTls(
     `${datadir}${sep}server-req.pem`
   ])
   exec.exec(openssl, [
-    'req',
-    '-newkey',
-    'rsa:2048',
-    '-days',
-    '3600',
-    '-nodes',
-    '-keyout',
-    `${datadir}${sep}server-key.pem`,
-    '-out',
-    `${datadir}${sep}server-req.pem`
-  ])
-  exec.exec(openssl, [
     'rsa',
     '-in',
     `${datadir}${sep}server-key.pem`,
