@@ -16,6 +16,6 @@ if ($distribution eq 'mysql' && $version =~ /^(?:8\.0\.|5\.7\.)/) {
 $ENV{MYSQL_PWD} = 'very-very-secret';
 my @command = ('mysql', '--host=127.0.0.1', '--user=root', @ssl_options, '-e', "SHOW SESSION STATUS LIKE 'Ssl_cipher'");
 my $cipher = run(@command);
-like $cipher, qr/^Ssl_cipher\s+\S+$/m, 'Ssl_cipher is set';
+like $cipher, qr/^Ssl_cipher\s+\S+\s*$/m, 'Ssl_cipher is set';
 
 done_testing;
