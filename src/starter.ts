@@ -286,8 +286,13 @@ async function setupTls(
 
   // Create CA certificate
   let key: string = ''
-  exec.exec(openssl, ['genrsa', '-out', `${datadir}${sep}ca-key.pem`, '2048'])
-  exec.exec(openssl, [
+  await exec.exec(openssl, [
+    'genrsa',
+    '-out',
+    `${datadir}${sep}ca-key.pem`,
+    '2048'
+  ])
+  await exec.exec(openssl, [
     'req',
     '-new',
     '-x509',
@@ -302,7 +307,7 @@ async function setupTls(
 
   // Create server certificate, remove passphrase, and sign it
   // server-cert.pem = public key, server-key.pem = private key
-  exec.exec(openssl, [
+  await exec.exec(openssl, [
     'req',
     '-newkey',
     'rsa:2048',
@@ -314,14 +319,14 @@ async function setupTls(
     '-out',
     `${datadir}${sep}server-req.pem`
   ])
-  exec.exec(openssl, [
+  await exec.exec(openssl, [
     'rsa',
     '-in',
     `${datadir}${sep}server-key.pem`,
     '-out',
     `${datadir}${sep}server-key.pem`
   ])
-  exec.exec(openssl, [
+  await exec.exec(openssl, [
     'x509',
     '-req',
     '-in',
