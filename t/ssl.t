@@ -5,12 +5,20 @@ use Test::More;
 use FindBin;
 use lib "$FindBin::Bin/lib";
 use Util qw(run detect_version);
+use File::Spec;
 
 my ($version, $distribution) = detect_version('root', 'very-very-secret');
 my @ssl_options = ('--ssl');
-if ($distribution eq 'mysql' && $version =~ /^(?:8\.0\.|5\.7\.)/) {
-    # --ssl-mode is available from MySQL 5.7
-    @ssl_options = ('--ssl-mode=REQUIRED');
+if ($distribution eq 'mysql') {
+    if ($version =~ /^(?:8\.0\.|5\.7\.)/) {
+        # --ssl-mode is available from MySQL 5.7
+        @ssl_options = ('--ssl-mode=REQUIRED');
+    } else {
+        my $basedir = $ENV{BASE_DIR};
+        plan skip_all => 'base-dir is not set' unless $ENV{$basedir};
+        my $capath = File::Spec->catfile($basedir, 'var', 'ca.pem');
+        @ssl_options = ('--ssl', "--ssl-ca=$capath");
+    }
 }
 
 $ENV{MYSQL_PWD} = 'very-very-secret';

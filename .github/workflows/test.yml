@@ -79,6 +79,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: use the action
+        id: action
         uses: ./
         with:
           mysql-version: ${{ matrix.mysql }}
@@ -90,3 +91,4 @@ jobs:
           prove -v t
         env:
           MYSQL_VERSION: ${{ matrix.mysql }}
+          BASE_DIR: ${{ steps.action.base-dir }}

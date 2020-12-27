@@ -194,6 +194,8 @@ export async function startMySQL(
     })
   }
 
+  core.setOutput("base-dir", baseDir)
+
   return {
     pid,
     pidFile,
