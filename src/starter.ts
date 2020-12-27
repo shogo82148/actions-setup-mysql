@@ -286,7 +286,7 @@ async function setupTls(
 
   // Create CA certificate
   let key: string = ''
-  exec.exec(openssl, ['genrsa', '2048', '-out', `${datadir}{$sep}ca-key.pem`])
+  exec.exec(openssl, ['genrsa', '-out', `${datadir}${sep}ca-key.pem`, '2048'])
   exec.exec(openssl, [
     'req',
     '-new',
@@ -295,9 +295,9 @@ async function setupTls(
     '-days',
     '3600',
     '-key',
-    `${datadir}{$sep}ca-key.pem`,
+    `${datadir}${sep}ca-key.pem`,
     '-out',
-    `${datadir}{$sep}ca.pem`
+    `${datadir}${sep}ca.pem`
   ])
 
   // Create server certificate, remove passphrase, and sign it
@@ -310,9 +310,9 @@ async function setupTls(
     '3600',
     '-nodes',
     '-keyout',
-    `${datadir}{$sep}server-key.pem`,
+    `${datadir}${sep}server-key.pem`,
     '-out',
-    `${datadir}{$sep}server-req.pem`
+    `${datadir}${sep}server-req.pem`
   ])
   exec.exec(openssl, [
     'req',
@@ -322,32 +322,32 @@ async function setupTls(
     '3600',
     '-nodes',
     '-keyout',
-    `${datadir}{$sep}server-key.pem`,
+    `${datadir}${sep}server-key.pem`,
     '-out',
-    `${datadir}{$sep}server-req.pem`
+    `${datadir}${sep}server-req.pem`
   ])
   exec.exec(openssl, [
     'rsa',
     '-in',
-    `${datadir}{$sep}server-key.pem`,
+    `${datadir}${sep}server-key.pem`,
     '-out',
-    `${datadir}{$sep}server-key.pem`
+    `${datadir}${sep}server-key.pem`
   ])
   exec.exec(openssl, [
     'x509',
     '-req',
     '-in',
-    `${datadir}{$sep}server-req.pem`,
+    `${datadir}${sep}server-req.pem`,
     '-days',
     '3600',
     '-CA',
-    `${datadir}{$sep}ca.pem`,
+    `${datadir}${sep}ca.pem`,
     '-CAkey',
-    `${datadir}{$sep}ca-key.pem`,
+    `${datadir}${sep}ca-key.pem`,
     '-set_serial',
     '01',
     '-out',
-    `${datadir}{$sep}server-cert.pem`
+    `${datadir}${sep}server-cert.pem`
   ])
 }
 
