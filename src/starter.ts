@@ -79,9 +79,6 @@ export async function startMySQL(
     await io.mkdirP(path.join(baseDir, 'var'))
     await io.mkdirP(path.join(baseDir, 'tmp'))
 
-    // configure ssl
-    await setupTls(mysql, baseDir)
-
     // configure my.cnf
     core.info(`writing my.cnf`)
     core.debug(`my.cnf path is ${path.join(baseDir, 'etc', 'my.cnf')}`)
@@ -148,6 +145,10 @@ export async function startMySQL(
       }
       await execute(command, installArgs)
     }
+
+    // configure ssl
+    await setupTls(mysql, baseDir)
+
   })
 
   let pid: number = 0
