@@ -53,7 +53,7 @@ Set-Location "$RUNNER_TEMP"
 Set-Location "openssl-OpenSSL_$OPENSSL_VERSION"
 C:\strawberry\perl\bin\perl.exe Configure --prefix="$PREFIX" VC-WIN64A
 nmake
-nmake install_sw
+nmake install_sw install_ssldirs
 Set-Location "$RUNNER_TEMP"
 Remove-Item -Path "openssl-OpenSSL_$OPENSSL_VERSION" -Recurse -Force
 
