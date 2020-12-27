@@ -91,4 +91,4 @@ jobs:
           prove -v t
         env:
           MYSQL_VERSION: ${{ matrix.mysql }}
-          BASE_DIR: ${{ steps.action.base-dir }}
+          BASE_DIR: ${{ steps.action.outputs.base-dir }}
