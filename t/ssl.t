@@ -15,7 +15,7 @@ if ($distribution eq 'mysql') {
         @ssl_options = ('--ssl-mode=REQUIRED');
     } else {
         my $basedir = $ENV{BASE_DIR};
-        plan skip_all => 'base-dir is not set' unless $ENV{$basedir};
+        plan skip_all => 'base-dir is not set' unless $basedir;
         my $capath = File::Spec->catfile($basedir, 'var', 'ca.pem');
         @ssl_options = ('--ssl', "--ssl-ca=$capath");
     }
