@@ -284,29 +284,38 @@ async function setupTls(
   const datadir = `${baseDir}${sep}var`
   const openssl = `${mysql.toolPath}${sep}bin${sep}openssl${binExt}`
 
-  // Create CA certificate
-  let key: string = ''
-  await exec.exec(openssl, [
-    'genrsa',
-    '-out',
-    `${datadir}${sep}ca-key.pem`,
-    '2048'
-  ])
+  // Generate CA Key and Certificate
   await exec.exec(openssl, [
     'req',
-    '-new',
-    '-x509',
-    '-nodes',
+    '-newkey',
+    'rsa:2048',
     '-days',
     '3600',
-    '-key',
+    '-nodes',
+    '-keyout',
+    `${datadir}${sep}ca-key.pem`,
+    '-subj',
+    '/CN=Actions_Setup_MySQL_Auto_Generated_CA_Certificate',
+    '-out',
+    `${datadir}${sep}ca-req.pem`
+  ])
+  await exec.exec(openssl, [
+    'x509',
+    '-sha256',
+    '-req',
+    '-in',
+    `${datadir}${sep}ca-req.pem`,
+    '-days',
+    '3650',
+    '-set_serial',
+    '01',
+    '-signkey',
     `${datadir}${sep}ca-key.pem`,
     '-out',
     `${datadir}${sep}ca.pem`
   ])
 
-  // Create server certificate, remove passphrase, and sign it
-  // server-cert.pem = public key, server-key.pem = private key
+  // Generate Server Key and Certificate
   await exec.exec(openssl, [
     'req',
     '-newkey',
@@ -317,7 +326,7 @@ async function setupTls(
     '-keyout',
     `${datadir}${sep}server-key.pem`,
     '-subj',
-    '/CN=Actions_Setup_MySQL_Auto_Generated_CA_Certificate',
+    '/CN=Actions_Setup_MySQL_Auto_Generated_Certificate',
     '-out',
     `${datadir}${sep}server-req.pem`
   ])
@@ -330,11 +339,12 @@ async function setupTls(
   ])
   await exec.exec(openssl, [
     'x509',
+    '-sha256',
     '-req',
     '-in',
     `${datadir}${sep}server-req.pem`,
     '-days',
-    '3600',
+    '3650',
     '-CA',
     `${datadir}${sep}ca.pem`,
     '-CAkey',
