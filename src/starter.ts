@@ -148,7 +148,6 @@ export async function startMySQL(
 
     // configure ssl
     await setupTls(mysql, baseDir)
-
   })
 
   let pid: number = 0
@@ -194,7 +193,7 @@ export async function startMySQL(
     })
   }
 
-  core.setOutput("base-dir", baseDir)
+  core.setOutput('base-dir', baseDir)
 
   return {
     pid,
@@ -286,37 +285,48 @@ async function setupTls(
 ): Promise<void> {
   const datadir = `${baseDir}${sep}var`
   const openssl = `${mysql.toolPath}${sep}bin${sep}openssl${binExt}`
+  const options: exec.ExecOptions = {}
+  process.env['LD_LIBRARY_PATH'] = `${mysql.toolPath}${sep}lib`
+  process.env['DYLD_LIBRARY_PATH'] = `${mysql.toolPath}${sep}lib`
 
   // Generate CA Key and Certificate
-  await exec.exec(openssl, [
-    'req',
-    '-newkey',
-    'rsa:2048',
-    '-days',
-    '3650',
-    '-nodes',
-    '-keyout',
-    `${datadir}${sep}ca-key.pem`,
-    '-subj',
-    '/CN=Actions_Setup_MySQL_Auto_Generated_CA_Certificate',
-    '-out',
-    `${datadir}${sep}ca-req.pem`
-  ])
-  await exec.exec(openssl, [
-    'x509',
-    '-sha256',
-    '-req',
-    '-in',
-    `${datadir}${sep}ca-req.pem`,
-    '-days',
-    '3650',
-    '-set_serial',
-    '01',
-    '-signkey',
-    `${datadir}${sep}ca-key.pem`,
-    '-out',
-    `${datadir}${sep}ca.pem`
-  ])
+  await exec.exec(
+    openssl,
+    [
+      'req',
+      '-newkey',
+      'rsa:2048',
+      '-days',
+      '3650',
+      '-nodes',
+      '-keyout',
+      `${datadir}${sep}ca-key.pem`,
+      '-subj',
+      '/CN=Actions_Setup_MySQL_Auto_Generated_CA_Certificate',
+      '-out',
+      `${datadir}${sep}ca-req.pem`
+    ],
+    options
+  )
+  await exec.exec(
+    openssl,
+    [
+      'x509',
+      '-sha256',
+      '-req',
+      '-in',
+      `${datadir}${sep}ca-req.pem`,
+      '-days',
+      '3650',
+      '-set_serial',
+      '01',
+      '-signkey',
+      `${datadir}${sep}ca-key.pem`,
+      '-out',
+      `${datadir}${sep}ca.pem`
+    ],
+    options
+  )
 
   // Generate Server Key and Certificate
   await exec.exec(openssl, [
@@ -333,30 +343,38 @@ async function setupTls(
     '-out',
     `${datadir}${sep}server-req.pem`
   ])
-  await exec.exec(openssl, [
-    'rsa',
-    '-in',
-    `${datadir}${sep}server-key.pem`,
-    '-out',
-    `${datadir}${sep}server-key.pem`
-  ])
-  await exec.exec(openssl, [
-    'x509',
-    '-sha256',
-    '-req',
-    '-in',
-    `${datadir}${sep}server-req.pem`,
-    '-days',
-    '3650',
-    '-CA',
-    `${datadir}${sep}ca.pem`,
-    '-CAkey',
-    `${datadir}${sep}ca-key.pem`,
-    '-set_serial',
-    '01',
-    '-out',
-    `${datadir}${sep}server-cert.pem`
-  ])
+  await exec.exec(
+    openssl,
+    [
+      'rsa',
+      '-in',
+      `${datadir}${sep}server-key.pem`,
+      '-out',
+      `${datadir}${sep}server-key.pem`
+    ],
+    options
+  )
+  await exec.exec(
+    openssl,
+    [
+      'x509',
+      '-sha256',
+      '-req',
+      '-in',
+      `${datadir}${sep}server-req.pem`,
+      '-days',
+      '3650',
+      '-CA',
+      `${datadir}${sep}ca.pem`,
+      '-CAkey',
+      `${datadir}${sep}ca-key.pem`,
+      '-set_serial',
+      '01',
+      '-out',
+      `${datadir}${sep}server-cert.pem`
+    ],
+    options
+  )
 }
 
 // execute "mysql_install_db --help" and return its result
