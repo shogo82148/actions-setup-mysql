@@ -167,7 +167,7 @@ export async function startMySQL(
     pid = subprocess.pid
 
     core.info('wait for MySQL ready')
-    for (;;) {
+    for (; ;) {
       try {
         fs.statSync(pidFile)
         break
@@ -211,7 +211,7 @@ export async function createUser(
   password: string
 ): Promise<void> {
   const mysql = path.join(state.toolPath, 'bin', `mysql${binExt}`)
-  const env: {[key: string]: string} = {}
+  const env: { [key: string]: string } = {}
   const args = [
     `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
     `--user=root`,
@@ -286,6 +286,12 @@ async function setupTls(
 ): Promise<void> {
   const datadir = `${baseDir}${sep}var`
   const openssl = `${mysql.toolPath}${sep}bin${sep}openssl${binExt}`
+  const options: exec.ExecOptions = {
+    env: {
+      "LD_LIBRARY_PATH": `${mysql.toolPath}${sep}lib`,
+      "DYLD_LIBRARY_PATH": `${mysql.toolPath}${sep}lib`,
+    }
+  }
 
   // Generate CA Key and Certificate
   await exec.exec(openssl, [
@@ -301,7 +307,7 @@ async function setupTls(
     '/CN=Actions_Setup_MySQL_Auto_Generated_CA_Certificate',
     '-out',
     `${datadir}${sep}ca-req.pem`
-  ])
+  ], options)
   await exec.exec(openssl, [
     'x509',
     '-sha256',
@@ -316,7 +322,7 @@ async function setupTls(
     `${datadir}${sep}ca-key.pem`,
     '-out',
     `${datadir}${sep}ca.pem`
-  ])
+  ], options)
 
   // Generate Server Key and Certificate
   await exec.exec(openssl, [
@@ -339,7 +345,7 @@ async function setupTls(
     `${datadir}${sep}server-key.pem`,
     '-out',
     `${datadir}${sep}server-key.pem`
-  ])
+  ], options)
   await exec.exec(openssl, [
     'x509',
     '-sha256',
@@ -356,7 +362,7 @@ async function setupTls(
     '01',
     '-out',
     `${datadir}${sep}server-cert.pem`
-  ])
+  ], options)
 }
 
 // execute "mysql_install_db --help" and return its result
