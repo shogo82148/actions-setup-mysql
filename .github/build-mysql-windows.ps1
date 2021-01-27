@@ -92,6 +92,10 @@ Invoke-WebRequest "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VE
 Write-Host "Unzipping..."
 Expand-Archive -Path "mysql-src.zip" -DestinationPath "."
 Remove-Item -Path "mysql-src.zip"
+if (Test-Path ( Join-Path $ROOT .. "patches" "mysql" $MYSQL_VERSION )) {
+    Set-Location "mysql-server-mysql-$MYSQL_VERSION"
+    Get-Content ( Join-Path $ROOT .. "patches" "mysql" $MYSQL_VERSION *.patch ) | patch -s -f -p1
+}
 Write-Host "::endgroup::"
 
 Write-Host "::group::build MySQL"
