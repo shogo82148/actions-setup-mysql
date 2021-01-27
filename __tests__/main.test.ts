@@ -28,7 +28,7 @@ describe('installer tests', () => {
 
   it('Acquires version of MySQL if no matching version is installed', async () => {
     await installer.getMySQL('mysql', '5.6')
-    const mysqlDir = path.join(toolDir, 'mysql', '5.6.50', os.arch())
+    const mysqlDir = path.join(toolDir, 'mysql', '5.6.51', os.arch())
 
     expect(fs.existsSync(`${mysqlDir}.complete`)).toBe(true)
     expect(fs.existsSync(path.join(mysqlDir, 'bin', 'mysqld'))).toBe(true)

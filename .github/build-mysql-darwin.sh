@@ -57,6 +57,13 @@ echo "::group::extract MySQL source"
     set -eux
     cd "$RUNNER_TEMP"
     tar zxvf mysql-src.tar.gz
+
+    # apply patches
+    if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION" ]]
+    then
+        cd "mysql-server-mysql-$MYSQL_VERSION"
+        cat "$ROOT/../patches/mysql/$MYSQL_VERSION"/*.patch | patch -s -f -p1
+    fi
 )
 echo "::endgroup::"
 
