@@ -135,6 +135,6 @@ async function getDownloadUrl(filename: string): Promise<string> {
     })
   }).then(info => {
     const actionsVersion = info.version
-    return `https://shogo82148-actions-setup-mysql.s3.amazonaws.com/v${actionsVersion}/${filename}`
+    return `https://setupmysql.blob.core.windows.net/actions-setup-mysql/v${actionsVersion}/${filename}`
   })
 }
