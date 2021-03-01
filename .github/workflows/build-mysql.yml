@@ -35,9 +35,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
+    env:
+      MYSQL_VERSION: ${{ matrix.mysql }}
     steps:
       - uses: actions/checkout@v2
-      - run: .github/build-mysql-linux.sh ${{ matrix.mysql }}
+      - run: .github/build-mysql-linux.sh "$MYSQL_VERSION"
       - uses: kheiakiyama/install-azcopy-action@v1
         with:
           version: "v10"
@@ -57,9 +59,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
+    env:
+      MYSQL_VERSION: ${{ matrix.mysql }}
     steps:
       - uses: actions/checkout@v2
-      - run: .github/build-mysql-darwin.sh ${{ matrix.mysql }}
+      - run: .github/build-mysql-darwin.sh "$MYSQL_VERSION"
       - uses: kheiakiyama/install-azcopy-action@v1
         with:
           version: "v10"
@@ -79,9 +83,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
+    env:
+      MYSQL_VERSION: ${{ matrix.mysql }}
     steps:
       - uses: actions/checkout@v2
-      - run: .github\build-mysql-windows.ps1 ${{ matrix.mysql }}
+      - run: .github\build-mysql-windows.ps1 $env:MYSQL_VERSION
       - uses: kheiakiyama/install-azcopy-action@v1
         with:
           version: "v10"
