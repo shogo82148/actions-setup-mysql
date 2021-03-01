@@ -38,14 +38,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mysql-linux.sh ${{ matrix.mysql }}
+      - uses: kheiakiyama/install-azcopy-action@v1
+        with:
+          version: "v10"
       - name: upload
         run: |
           ACTIONS_VERSION=v$(cat "$GITHUB_WORKSPACE/package.json" | jq -r .version)
-          aws --region us-east-1 s3 cp --acl public-read "$RUNNER_TEMP/mysql.tar.xz" "s3://shogo82148-actions-setup-mysql/$ACTIONS_VERSION/mysql-$MYSQL_VERSION-linux-x64.tar.xz"
+          azcopy_v10 login --service-principal --application-id "$AZCOPY_SPA_APPLICATION_ID" --tenant-id "$AZCOPY_TENANT_ID"
+          azcopy_v10 cp "$RUNNER_TEMP/mysql.tar.xz" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/$ACTIONS_VERSION/mysql-$MYSQL_VERSION-linux-x64.tar.xz"
         env:
-          MYSQL_VERSION: ${{ matrix.mysql }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
+          AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
+          AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
 
   build-darwin:
     runs-on: macos-10.15
@@ -56,14 +60,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mysql-darwin.sh ${{ matrix.mysql }}
+      - uses: kheiakiyama/install-azcopy-action@v1
+        with:
+          version: "v10"
       - name: upload
         run: |
           ACTIONS_VERSION=v$(cat "$GITHUB_WORKSPACE/package.json" | jq -r .version)
-          aws --region us-east-1 s3 cp --acl public-read "$RUNNER_TEMP/mysql.tar.xz" "s3://shogo82148-actions-setup-mysql/$ACTIONS_VERSION/mysql-$MYSQL_VERSION-darwin-x64.tar.xz"
+          azcopy_v10 login --service-principal --application-id "$AZCOPY_SPA_APPLICATION_ID" --tenant-id "$AZCOPY_TENANT_ID"
+          azcopy_v10 cp "$RUNNER_TEMP/mysql.tar.xz" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/$ACTIONS_VERSION/mysql-$MYSQL_VERSION-darwin-x64.tar.xz"
         env:
-          MYSQL_VERSION: ${{ matrix.mysql }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
+          AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
+          AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
 
   build-windows:
     runs-on: windows-2019
@@ -74,11 +82,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github\build-mysql-windows.ps1 ${{ matrix.mysql }}
+      - uses: kheiakiyama/install-azcopy-action@v1
+        with:
+          version: "v10"
       - name: upload
+        shell: pwsh
         run: |
-          $ACTIONS_VERSION="v$(Get-Content "$env:GITHUB_WORKSPACE\package.json" | jq -r .version)"
-          aws --region us-east-1 s3 cp --acl public-read "C:\Temp\mysql.zip" "s3://shogo82148-actions-setup-mysql/$ACTIONS_VERSION/mysql-$env:MYSQL_VERSION-win32-x64.zip"
+          Set-Location ${env:RUNNER_TEMP}
+          $pkg = Get-Content "${env:GITHUB_WORKSPACE}/package.json" -Encoding UTF8 -Raw | ConvertFrom-Json
+          $version = $pkg.version
+          azcopy_v10 login --service-principal --application-id $env:AZCOPY_SPA_APPLICATION_ID --tenant-id $env:AZCOPY_TENANT_ID
+          azcopy_v10 cp "C:\Temp\mysql.zip" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/v$version/mysql-${env:MYSQL_VERSION}-win32-x64.zip"
         env:
-          MYSQL_VERSION: ${{ matrix.mysql }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          PERL_VERSION: ${{ matrix.perl }}
+          AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
+          AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
+          AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
