@@ -163,7 +163,7 @@ export async function startMySQL(
         stdio: ['ignore', out, err]
       }
     )
-    pid = subprocess.pid
+    pid = subprocess.pid || 0
 
     core.info('wait for MySQL ready')
     for (;;) {
