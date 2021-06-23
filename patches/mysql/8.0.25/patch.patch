@@ -1,17 +1,13 @@
 diff --git a/cmake/boost.cmake b/cmake/boost.cmake
-index e906f827c17..20c85a76546 100644
+index e906f827c17..31d99f5be06 100644
 --- a/cmake/boost.cmake
 +++ b/cmake/boost.cmake
-@@ -38,10 +38,10 @@
- # we assume that the correct version (see below)
- # is installed on the compile host in the standard location.
- 
--SET(BOOST_PACKAGE_NAME "boost_1_73_0")
-+SET(BOOST_PACKAGE_NAME "boost-1.73.0")
+@@ -41,7 +41,7 @@
+ SET(BOOST_PACKAGE_NAME "boost_1_73_0")
  SET(BOOST_TARBALL "${BOOST_PACKAGE_NAME}.tar.gz")
  SET(BOOST_DOWNLOAD_URL
 -  "https://dl.bintray.com/boostorg/release/1.73.0/source/${BOOST_TARBALL}"
-+  "https://github.com/boostorg/boost/archive/refs/tags/${BOOST_TARBALL}"
++  "https://boostorg.jfrog.io/artifactory/main/release/1.76.0/source/${BOOST_TARBALL}"
    )
  
  SET(OLD_PACKAGE_NAMES
