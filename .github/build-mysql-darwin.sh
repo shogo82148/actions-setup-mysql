@@ -101,6 +101,6 @@ echo "::group::archive"
     rm -rf ./mysql-test
     rm -rf ./sql-bench
 
-    tar Jcf "$RUNNER_TEMP/mysql.tar.xz" .
+    tar --options xz:compression-level=9 Jcf "$RUNNER_TEMP/mysql.tar.xz" .
 )
 echo "::endgroup::"
