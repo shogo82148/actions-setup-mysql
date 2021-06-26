@@ -43,6 +43,16 @@ index 0efb0b07feb..20a95262f2f 100644
  
 +CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
 +               ${CMAKE_CURRENT_BINARY_DIR}/config_auth_pam.h)
+diff --git a/plugin/auth_pam/config.h.cmake b/plugin/auth_pam/config.h.cmake
+new file mode 100644
+index 00000000000..a186150408b
+--- /dev/null
++++ b/plugin/auth_pam/config.h.cmake
+@@ -0,0 +1,4 @@
++#cmakedefine HAVE_POSIX_GETGROUPLIST 1
++#cmakedefine HAVE_PAM_SYSLOG 1
++#cmakedefine HAVE_PAM_EXT_H 1
++#cmakedefine HAVE_PAM_APPL_H 1
 diff --git a/plugin/auth_pam/mapper/pam_user_map.c b/plugin/auth_pam/mapper/pam_user_map.c
 index e1d11acabb9..e12d6be814e 100644
 --- a/plugin/auth_pam/mapper/pam_user_map.c
