@@ -1,7 +1,7 @@
 diff --git a/libmariadb/cmake/ConnectorName.cmake b/libmariadb/cmake/ConnectorName.cmake
 index b7bbbad8c..357b8ac08 100644
---- a/cmake/ConnectorName.cmake
-+++ b/cmake/ConnectorName.cmake
+--- a/libmariadb/cmake/ConnectorName.cmake
++++ b/libmariadb/cmake/ConnectorName.cmake
 @@ -22,7 +22,7 @@ IF(CMAKE_SYSTEM_NAME MATCHES "Windows")
      SET(MACHINE_NAME "x64")
    ELSE()
