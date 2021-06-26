@@ -30,7 +30,7 @@ echo "::group::extract OpenSSL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    tar zxvf openssl.tar.gz
+    tar zxf openssl.tar.gz
 )
 echo "::endgroup::"
 
@@ -57,7 +57,7 @@ echo "::group::extract MariaDB source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    tar zxvf mariadb-src.tar.gz
+    tar zxf mariadb-src.tar.gz
 )
 echo "::endgroup::"
 
@@ -95,6 +95,6 @@ echo "::group::archive"
     rm -rf ./mysql-test
     rm -rf ./sql-bench
 
-    tar Jvcf "$RUNNER_TEMP/mariadb.tar.xz" .
+    tar Jcf "$RUNNER_TEMP/mariadb.tar.xz" .
 )
 echo "::endgroup::"

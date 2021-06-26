@@ -30,7 +30,7 @@ echo "::group::extract OpenSSL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    tar zxvf openssl.tar.gz
+    tar zxf openssl.tar.gz
 )
 echo "::endgroup::"
 
@@ -56,7 +56,7 @@ echo "::group::extract MySQL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    tar zxvf mysql-src.tar.gz
+    tar zxf mysql-src.tar.gz
 
     # apply patches
     if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION" ]]
@@ -101,6 +101,6 @@ echo "::group::archive"
     rm -rf ./mysql-test
     rm -rf ./sql-bench
 
-    tar Jvcf "$RUNNER_TEMP/mysql.tar.xz" .
+    tar Jcf "$RUNNER_TEMP/mysql.tar.xz" .
 )
 echo "::endgroup::"
