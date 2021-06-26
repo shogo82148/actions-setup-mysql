@@ -1,5 +1,7 @@
---- plugin/auth_pam/mapper/pam_user_map.c.orig  2020-01-26 20:43:53 UTC
-+++ plugin/auth_pam/mapper/pam_user_map.c
+diff --git a/lplugin/auth_pam/mapper/pam_user_map.c b/plugin/auth_pam/mapper/pam_user_map.c
+index b7bbbad8c..357b8ac08 100644
+--- a/plugin/auth_pam/mapper/pam_user_map.c
++++ b/plugin/auth_pam/mapper/pam_user_map.c
 @@ -39,7 +39,11 @@ and usually end up in /var/log/secure file.
  #include <grp.h>
  #include <pwd.h>
