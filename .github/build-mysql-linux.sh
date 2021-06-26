@@ -22,7 +22,7 @@ echo "::group::download OpenSSL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
+    curl --retry 3 -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
 )
 echo "::endgroup::"
 
@@ -30,7 +30,7 @@ echo "::group::extract OpenSSL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    tar zxvf openssl.tar.gz
+    tar zxf openssl.tar.gz
 )
 echo "::endgroup::"
 
@@ -48,7 +48,7 @@ echo "::group::download MySQL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl -sSL "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.tar.gz" -o mysql-src.tar.gz
+    curl --retry 3 -sSL "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.tar.gz" -o mysql-src.tar.gz
 )
 echo "::endgroup::"
 
@@ -56,7 +56,7 @@ echo "::group::extract MySQL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    tar zxvf mysql-src.tar.gz
+    tar zxf mysql-src.tar.gz
 
     # apply patches
     if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION" ]]
@@ -101,6 +101,7 @@ echo "::group::archive"
     rm -rf ./mysql-test
     rm -rf ./sql-bench
 
-    tar Jvcf "$RUNNER_TEMP/mysql.tar.xz" .
+    export XZ_OPT=-9
+    tar Jcf "$RUNNER_TEMP/mysql.tar.xz" .
 )
 echo "::endgroup::"

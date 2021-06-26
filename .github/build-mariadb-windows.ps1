@@ -92,6 +92,10 @@ Invoke-WebRequest "https://downloads.mariadb.com/MariaDB/mariadb-$MARIADB_VERSIO
 Write-Host "Untar..."
 tar zxvf mariadb-src.tar.gz
 Remove-Item -Path "mariadb-src.tar.gz"
+if (Test-Path ( Join-Path $ROOT .. "patches" "mariadb" $MARIADB_VERSION )) {
+    Set-Location "mariadb-$MARIADB_VERSION"
+    Get-Content ( Join-Path $ROOT .. "patches" "mariadb" $MARIADB_VERSION *.patch ) | patch -s -f -p1
+}
 Write-Host "::endgroup::"
 
 Write-Host "::group::build MariaDB"

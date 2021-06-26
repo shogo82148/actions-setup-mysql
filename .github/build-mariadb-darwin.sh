@@ -22,7 +22,7 @@ echo "::group::download OpenSSL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
+    curl --retry 3 -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
 )
 echo "::endgroup::"
 
@@ -30,7 +30,7 @@ echo "::group::extract OpenSSL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    tar zxvf openssl.tar.gz
+    tar zxf openssl.tar.gz
 )
 echo "::endgroup::"
 
@@ -48,15 +48,29 @@ echo "::group::download MariaDB source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl -sSL "https://downloads.mariadb.com/MariaDB/mariadb-$MARIADB_VERSION/source/mariadb-$MARIADB_VERSION.tar.gz" -o mariadb-src.tar.gz
+    curl --retry 3 -sSL "https://downloads.mariadb.com/MariaDB/mariadb-$MARIADB_VERSION/source/mariadb-$MARIADB_VERSION.tar.gz" -o mariadb-src.tar.gz
 )
+echo "::endgroup::"
+
+# system bison is too old (2.x). we need bison 3.x
+echo "::group::install bison"
+brew install bison
+PATH=$(brew --prefix bison)/bin:$PATH
+export PATH
 echo "::endgroup::"
 
 echo "::group::extract MariaDB source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    tar zxvf mariadb-src.tar.gz
+    tar zxf mariadb-src.tar.gz
+
+    # apply patches
+    if [[ -d "$ROOT/../patches/mariadb/$MARIADB_VERSION" ]]
+    then
+        cd "mariadb-$MARIADB_VERSION"
+        cat "$ROOT/../patches/mariadb/$MARIADB_VERSION"/*.patch | patch -s -f -p1
+    fi
 )
 echo "::endgroup::"
 
@@ -94,6 +108,7 @@ echo "::group::archive"
     rm -rf ./mysql-test
     rm -rf ./sql-bench
 
-    tar Jvcf "$RUNNER_TEMP/mariadb.tar.xz" .
+    export XZ_OPT=-9
+    tar Jcf "$RUNNER_TEMP/mariadb.tar.xz" .
 )
 echo "::endgroup::"

@@ -6,7 +6,7 @@ async function run(): Promise<void> {
   try {
     const version = core.getInput('mysql-version')
     const distribution = core.getInput('distribution')
-    const autoStart = parseBoolean(core.getInput('auto-start'))
+    const autoStart = core.getBooleanInput('auto-start')
     const cnf = core.getInput('my-cnf')
     const rootPassword = core.getInput('root-password')
     const user = core.getInput('user')
@@ -30,27 +30,4 @@ async function run(): Promise<void> {
   }
 }
 
-function parseBoolean(s: string): boolean {
-  switch (s) {
-    case 'y':
-    case 'Y':
-    case 'yes':
-    case 'Yes':
-    case 'YES':
-    case 'true':
-    case 'True':
-    case 'TRUE':
-      return true
-    case 'n':
-    case 'N':
-    case 'no':
-    case 'No':
-    case 'NO':
-    case 'false':
-    case 'False':
-    case 'FALSE':
-      return false
-  }
-  throw `invalid boolean value: ${s}`
-}
 run()
