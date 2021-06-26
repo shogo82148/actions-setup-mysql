@@ -1,16 +1,154 @@
-diff --git a/lplugin/auth_pam/mapper/pam_user_map.c b/plugin/auth_pam/mapper/pam_user_map.c
-index b7bbbad8c..357b8ac08 100644
+diff --git a/plugin/auth_pam/CMakeLists.txt b/plugin/auth_pam/CMakeLists.txt
+index 0efb0b07feb..20a95262f2f 100644
+--- a/plugin/auth_pam/CMakeLists.txt
++++ b/plugin/auth_pam/CMakeLists.txt
+@@ -1,8 +1,34 @@
+ INCLUDE (CheckIncludeFiles)
+ INCLUDE (CheckFunctionExists)
+ 
++CHECK_INCLUDE_FILES (security/pam_ext.h  HAVE_PAM_EXT_H)
+ CHECK_INCLUDE_FILES (security/pam_appl.h HAVE_PAM_APPL_H)
+ CHECK_FUNCTION_EXISTS (strndup HAVE_STRNDUP)
++CHECK_FUNCTION_EXISTS (getgrouplist HAVE_GETGROUPLIST)
++
++INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
++
++# Check whether getgrouplist uses gtid_t for second and third arguments.
++SET(CMAKE_REQUIRED_FLAGS -Werror)
++CHECK_C_SOURCE_COMPILES(
++"
++#include <grp.h>
++#include <unistd.h>
++int main() {
++  char *arg_1= 0;
++  gid_t arg_2=0, arg_3;
++  int arg_4;
++  (void)getgrouplist(arg_1,arg_2,&arg_3,&arg_4);
++  return 0;
++}
++"
++HAVE_POSIX_GETGROUPLIST
++)
++SET(CMAKE_REQUIRED_FLAGS)
++
++SET(CMAKE_REQUIRED_LIBRARIES pam)
++CHECK_FUNCTION_EXISTS(pam_syslog HAVE_PAM_SYSLOG)
++SET(CMAKE_REQUIRED_LIBRARIES)
+ 
+ IF(HAVE_PAM_APPL_H)
+   IF(HAVE_STRNDUP)
+@@ -22,3 +48,5 @@ IF(HAVE_PAM_APPL_H)
+   ENDIF()
+ ENDIF(HAVE_PAM_APPL_H)
+ 
++CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake
++               ${CMAKE_CURRENT_BINARY_DIR}/config_auth_pam.h)
+diff --git a/plugin/auth_pam/mapper/pam_user_map.c b/plugin/auth_pam/mapper/pam_user_map.c
+index e1d11acabb9..e12d6be814e 100644
 --- a/plugin/auth_pam/mapper/pam_user_map.c
 +++ b/plugin/auth_pam/mapper/pam_user_map.c
-@@ -39,7 +39,11 @@ and usually end up in /var/log/secure file.
+@@ -31,6 +31,7 @@ These comments are written to the syslog as 'authpriv.debug'
+ and usually end up in /var/log/secure file.
+ */
+ 
++#include <config_auth_pam.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <ctype.h>
+@@ -39,19 +40,45 @@ and usually end up in /var/log/secure file.
  #include <grp.h>
  #include <pwd.h>
  
-+#ifdef __FreeBSD__
-+#include <security/pam_appl.h>
-+#else
++#ifdef HAVE_PAM_EXT_H
  #include <security/pam_ext.h>
 +#endif
++
++#ifdef HAVE_PAM_APPL_H
++#include <unistd.h>
++#include <security/pam_appl.h>
++#endif
++
  #include <security/pam_modules.h>
  
++#ifndef HAVE_PAM_SYSLOG
++#include <stdarg.h>
++static void
++pam_syslog (const pam_handle_t *pamh, int priority,
++      const char *fmt, ...)
++{
++  va_list args;
++  va_start (args, fmt);
++  vsyslog (priority, fmt, args);
++  va_end (args);
++}
++#endif
++
  #define FILENAME "/etc/security/user_map.conf"
+ #define skip(what) while (*s && (what)) s++
+ 
+ #define GROUP_BUFFER_SIZE 100
+ 
++#ifdef HAVE_POSIX_GETGROUPLIST
++typedef gid_t my_gid_t;
++#else
++typedef int my_gid_t;
++#endif
+ 
+-static int populate_user_groups(const char *user, gid_t **groups)
++static int populate_user_groups(const char *user, my_gid_t **groups)
+ {
+-  gid_t user_group_id;
+-  gid_t *loc_groups= *groups;
++  my_gid_t user_group_id;
++  my_gid_t *loc_groups= *groups;
+   int ng;
+ 
+   {
+@@ -66,22 +93,22 @@ static int populate_user_groups(const char *user, gid_t **groups)
+   {
+     /* The rare case when the user is present in more than */
+     /* GROUP_BUFFER_SIZE groups.                           */
+-    loc_groups= (gid_t *) malloc(ng * sizeof (gid_t));
++    loc_groups= (my_gid_t *) malloc(ng * sizeof (my_gid_t));
+     if (!loc_groups)
+       return 0;
+ 
+     (void) getgrouplist(user, user_group_id, loc_groups, &ng);
+-    *groups= loc_groups;
++    *groups= (my_gid_t*)loc_groups;
+   }
+ 
+   return ng;
+ }
+ 
+ 
+-static int user_in_group(const gid_t *user_groups, int ng,const char *group)
++static int user_in_group(const my_gid_t *user_groups, int ng,const char *group)
+ {
+-  gid_t group_id;
+-  const gid_t *groups_end = user_groups + ng;
++  my_gid_t group_id;
++  const my_gid_t *groups_end = user_groups + ng;
+ 
+   {
+     struct group *g= getgrnam(group);
+@@ -100,7 +127,7 @@ static int user_in_group(const gid_t *user_groups, int ng,const char *group)
+ }
+ 
+ 
+-static void print_groups(pam_handle_t *pamh, const gid_t *user_groups, int ng)
++static void print_groups(pam_handle_t *pamh, const my_gid_t *user_groups, int ng)
+ {
+   char buf[256];
+   char *c_buf= buf, *buf_end= buf+sizeof(buf)-2;
+@@ -140,8 +167,8 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
+   const char *username;
+   char buf[256];
+   FILE *f;
+-  gid_t group_buffer[GROUP_BUFFER_SIZE];
+-  gid_t *groups= group_buffer;
++  my_gid_t group_buffer[GROUP_BUFFER_SIZE];
++  my_gid_t *groups= group_buffer;
+   int n_groups= -1;
+ 
+   for (; argc > 0; argc--) 
