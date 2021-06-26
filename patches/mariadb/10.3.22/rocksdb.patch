@@ -2,7 +2,7 @@ diff --git a/storage/rocksdb/rocksdb/util/autovector.h b/storage/rocksdb/rocksdb
 index 5843fa8a1..cea6877e0 100644
 --- a/storage/rocksdb/rocksdb/util/autovector.h
 +++ b/storage/rocksdb/rocksdb/util/autovector.h
-@@ -120,26 +120,19 @@ class autovector {
+@@ -120,27 +120,20 @@ class autovector {
      }
  
      // -- Reference
@@ -18,18 +18,19 @@ index 5843fa8a1..cea6877e0 100644
 -    }
 -
 -    pointer operator->() {
--      assert(vect_->size() >= index_);
--      return &(*vect_)[index_];
--    }
--
-     const_pointer operator->() const {
++    pointer operator->() const {
        assert(vect_->size() >= index_);
        return &(*vect_)[index_];
      }
  
+-    const_pointer operator->() const {
+-      assert(vect_->size() >= index_);
+-      return &(*vect_)[index_];
 +    reference operator[](difference_type len) const {
 +      return *(*this + len);
-+    }
+     }
  
+-
      // -- Logical Operators
      bool operator==(const self_type& other) const {
+       assert(vect_ == other.vect_);
