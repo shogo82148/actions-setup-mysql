@@ -8,7 +8,7 @@ index b7bbbad8c..357b8ac08 100644
  
 +#ifdef __FreeBSD__
 +#include <security/pam_appl.h>
-+#elif
++#else
  #include <security/pam_ext.h>
 +#endif
  #include <security/pam_modules.h>
