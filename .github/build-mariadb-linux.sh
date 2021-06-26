@@ -102,6 +102,7 @@ echo "::group::archive"
     rm -rf ./mysql-test
     rm -rf ./sql-bench
 
-    tar Jcf "$RUNNER_TEMP/mariadb.tar.xz" --options xz:compression-level=9 .
+    export XZ_OPT=-9
+    tar Jcf "$RUNNER_TEMP/mariadb.tar.xz" .
 )
 echo "::endgroup::"
