@@ -52,6 +52,13 @@ echo "::group::download MariaDB source"
 )
 echo "::endgroup::"
 
+# system bison is too old (2.x). we need bison 3.x
+echo "::group::install bison"
+brew install bison
+PATH=$(brew --prefix bison)/bin:$PATH
+export PATH
+echo "::endgroup::"
+
 echo "::group::extract MariaDB source"
 (
     set -eux
