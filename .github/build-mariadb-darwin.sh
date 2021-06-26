@@ -64,6 +64,13 @@ echo "::group::extract MariaDB source"
     set -eux
     cd "$RUNNER_TEMP"
     tar zxf mariadb-src.tar.gz
+
+    # apply patches
+    if [[ -d "$ROOT/../patches/mariadb/$MARIADB_VERSION" ]]
+    then
+        cd "mariadb-$MARIADB_VERSION"
+        cat "$ROOT/../patches/mariadb/$MARIADB_VERSION"/*.patch | patch -s -f -p1
+    fi
 )
 echo "::endgroup::"
 
