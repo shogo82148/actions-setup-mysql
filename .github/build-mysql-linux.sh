@@ -22,7 +22,7 @@ echo "::group::download OpenSSL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
+    curl --retry 3 -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
 )
 echo "::endgroup::"
 
@@ -48,7 +48,7 @@ echo "::group::download MySQL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl -sSL "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.tar.gz" -o mysql-src.tar.gz
+    curl --retry 3 -sSL "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.tar.gz" -o mysql-src.tar.gz
 )
 echo "::endgroup::"
 

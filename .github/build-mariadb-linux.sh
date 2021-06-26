@@ -22,7 +22,7 @@ echo "::group::download OpenSSL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
+    curl --retry 3 -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
 )
 echo "::endgroup::"
 
@@ -49,7 +49,7 @@ echo "::group::download MariaDB source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl -sSL "https://downloads.mariadb.com/MariaDB/mariadb-$MARIADB_VERSION/source/mariadb-$MARIADB_VERSION.tar.gz" -o mariadb-src.tar.gz
+    curl --retry 3 -sSL "https://downloads.mariadb.com/MariaDB/mariadb-$MARIADB_VERSION/source/mariadb-$MARIADB_VERSION.tar.gz" -o mariadb-src.tar.gz
 )
 echo "::endgroup::"
 
