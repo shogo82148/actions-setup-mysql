@@ -38,6 +38,9 @@ jobs:
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
     steps:
+      - name: install gcc
+        run: |
+          sudo apt-get install gcc-8 g++-8
       - uses: actions/checkout@v2
       - run: .github/build-mysql-linux.sh "$MYSQL_VERSION"
       - uses: kheiakiyama/install-azcopy-action@v1
