@@ -110,7 +110,9 @@ cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
     -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
     -DCMAKE_INSTALL_PREFIX="$PREFIX" `
     -DWITH_SSL="$PREFIX" `
-    -DCMAKE_BUILD_TYPE=MinSizeRel
+    -DCMAKE_BUILD_TYPE=MinSizeRel `
+    -DCMAKE_CXX_FLAGS="/MP1" `
+    -DCMAKE_C_FLAGS="/MP1"
 
 devenv MySQL.sln /build RelWithDebInfo
 Write-Host "::endgroup::"
