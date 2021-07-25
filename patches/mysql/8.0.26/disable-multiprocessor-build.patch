@@ -1,0 +1,17 @@
+diff --git a/cmake/os/Windows.cmake b/cmake/os/Windows.cmake
+index 6267faf2335..0bc4b7e5eea 100644
+--- a/cmake/os/Windows.cmake
++++ b/cmake/os/Windows.cmake
+@@ -185,9 +185,9 @@ IF(MSVC)
+   ENDFOREACH()
+ 
+   IF(NOT WIN32_CLANG)
+-    # Speed up multiprocessor build (not supported by the Clang driver)
+-    STRING_APPEND(CMAKE_C_FLAGS " /MP")
+-    STRING_APPEND(CMAKE_CXX_FLAGS " /MP")
++    # disable multiprocessor build (not supported by the Clang driver)
++    STRING_APPEND(CMAKE_C_FLAGS " /MP1")
++    STRING_APPEND(CMAKE_CXX_FLAGS " /MP1")
+   ENDIF()
+ 
+   #TODO: update the code and remove the disabled warnings
