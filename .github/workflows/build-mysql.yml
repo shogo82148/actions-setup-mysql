@@ -43,14 +43,11 @@ jobs:
           sudo apt-get install gcc-8 g++-8
       - uses: actions/checkout@v2
       - run: .github/build-mysql-linux.sh "$MYSQL_VERSION"
-      - uses: kheiakiyama/install-azcopy-action@v1
-        with:
-          version: "v10"
       - name: upload
         run: |
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
-          azcopy_v10 login --service-principal --application-id "$AZCOPY_SPA_APPLICATION_ID" --tenant-id "$AZCOPY_TENANT_ID"
-          azcopy_v10 cp "$RUNNER_TEMP/mysql.tar.xz" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/$ACTIONS_VERSION/mysql-$MYSQL_VERSION-linux-x64.tar.xz"
+          ./.github/retry.pl azcopy login --service-principal --application-id "$AZCOPY_SPA_APPLICATION_ID" --tenant-id "$AZCOPY_TENANT_ID"
+          ./.github/retry.pl azcopy cp "$RUNNER_TEMP/mysql.tar.xz" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/$ACTIONS_VERSION/mysql-$MYSQL_VERSION-linux-x64.tar.xz"
         env:
           AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
           AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
@@ -67,14 +64,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mysql-darwin.sh "$MYSQL_VERSION"
-      - uses: kheiakiyama/install-azcopy-action@v1
-        with:
-          version: "v10"
       - name: upload
         run: |
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
-          azcopy_v10 login --service-principal --application-id "$AZCOPY_SPA_APPLICATION_ID" --tenant-id "$AZCOPY_TENANT_ID"
-          azcopy_v10 cp "$RUNNER_TEMP/mysql.tar.xz" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/$ACTIONS_VERSION/mysql-$MYSQL_VERSION-darwin-x64.tar.xz"
+          ./.github/retry.pl azcopy login --service-principal --application-id "$AZCOPY_SPA_APPLICATION_ID" --tenant-id "$AZCOPY_TENANT_ID"
+          ./.github/retry.pl azcopy cp "$RUNNER_TEMP/mysql.tar.xz" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/$ACTIONS_VERSION/mysql-$MYSQL_VERSION-darwin-x64.tar.xz"
         env:
           AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
           AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
@@ -91,17 +85,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github\build-mysql-windows.ps1 $env:MYSQL_VERSION
-      - uses: kheiakiyama/install-azcopy-action@v1
-        with:
-          version: "v10"
       - name: upload
         shell: pwsh
         run: |
           Set-Location ${env:RUNNER_TEMP}
           $pkg = Get-Content "${env:GITHUB_WORKSPACE}/package.json" -Encoding UTF8 -Raw | ConvertFrom-Json
           $version = $pkg.version
-          azcopy_v10 login --service-principal --application-id $env:AZCOPY_SPA_APPLICATION_ID --tenant-id $env:AZCOPY_TENANT_ID
-          azcopy_v10 cp "C:\Temp\mysql.zip" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/v$version/mysql-${env:MYSQL_VERSION}-win32-x64.zip"
+          perl ${env:GITHUB_WORKSPACE}/.github/retry.pl azcopy login --service-principal --application-id $env:AZCOPY_SPA_APPLICATION_ID --tenant-id $env:AZCOPY_TENANT_ID
+          perl ${env:GITHUB_WORKSPACE}/.github/retry.pl azcopy cp "C:\Temp\mysql.zip" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/v$version/mysql-${env:MYSQL_VERSION}-win32-x64.zip"
         env:
           PERL_VERSION: ${{ matrix.perl }}
           AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
