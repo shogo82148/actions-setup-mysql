@@ -6,8 +6,8 @@ use warnings;
 use Time::HiRes qw(sleep);
 
 use constant MIN_SLEEP => 1;
-use constant MAX_SLEEP => 30;
-use constant MAX_RETRY => 10;
+use constant MAX_SLEEP => 60;
+use constant MAX_RETRY => 20;
 
 my @command = @ARGV;
 my $sleep = MIN_SLEEP;
@@ -23,7 +23,7 @@ while(1) {
     print STDERR "the command exits with status code $exit\n";
     if ($retry >= MAX_RETRY) {
         print STDERR "give up :(\n";
-        exit $exit;
+        exit 1;
     }
 
     print STDERR "sleep $sleep seconds before retrying\n";
