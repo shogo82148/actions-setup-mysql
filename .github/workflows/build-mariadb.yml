@@ -97,8 +97,8 @@ jobs:
           Set-Location ${env:RUNNER_TEMP}
           $pkg = Get-Content "${env:GITHUB_WORKSPACE}/package.json" -Encoding UTF8 -Raw | ConvertFrom-Json
           $version = $pkg.version
-          perl .github\retry.pl azcopy_v10 login --service-principal --application-id $env:AZCOPY_SPA_APPLICATION_ID --tenant-id $env:AZCOPY_TENANT_ID
-          perl .github\retry.pl azcopy_v10 cp "C:\Temp\mariadb.zip" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/v$version/mariadb-${env:MARIADB_VERSION}-win32-x64.zip"
+          perl .github/retry.pl azcopy_v10 login --service-principal --application-id $env:AZCOPY_SPA_APPLICATION_ID --tenant-id $env:AZCOPY_TENANT_ID
+          perl .github/retry.pl azcopy_v10 cp "C:\Temp\mariadb.zip" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/v$version/mariadb-${env:MARIADB_VERSION}-win32-x64.zip"
         env:
           PERL_VERSION: ${{ matrix.perl }}
           AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
