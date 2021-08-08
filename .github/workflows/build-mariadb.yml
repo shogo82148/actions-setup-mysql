@@ -40,6 +40,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mariadb-linux.sh "$MARIADB_VERSION"
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mariadb-${{ matrix.mariadb }}-linux
+          path: ${{ runner.temp }}/mariadb.tar.xz
       - name: upload
         run: |
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
@@ -61,6 +65,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mariadb-${{ matrix.mariadb }}-darwin
+          path: ${{ runner.temp }}/mariadb.tar.xz
       - name: upload
         run: |
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
@@ -82,6 +90,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github\build-mariadb-windows.ps1 $env:MARIADB_VERSION
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mariadb-${{ matrix.mariadb }}-windows
+          path: "C:\Temp\mariadb.zip"
       - name: upload
         shell: pwsh
         run: |
@@ -95,3 +107,19 @@ jobs:
           AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
           AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
           AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
+
+  upload:
+    needs:
+      - build-linux
+      - build-darwin
+      - build-windows
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: artifacts
