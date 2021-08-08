@@ -62,3 +62,17 @@ index 206dea179a2..262a068c871 100644
  ENDFUNCTION()
  
  
+diff --git a/router/cmake/Plugin.cmake b/router/cmake/Plugin.cmake
+index 89d0f36ae73..5491b475f86 100644
+--- a/router/cmake/Plugin.cmake
++++ b/router/cmake/Plugin.cmake
+@@ -150,9 +150,6 @@ FUNCTION(add_harness_plugin NAME)
+       INSTALL(TARGETS ${NAME}
+         RUNTIME DESTINATION ${_option_DESTINATION}
+         COMPONENT Router)
+-      INSTALL(FILES $<TARGET_PDB_FILE:${NAME}>
+-        DESTINATION ${_option_DESTINATION}
+-        COMPONENT Router)
+     ELSE()
+       INSTALL(TARGETS ${NAME}
+         LIBRARY DESTINATION ${_option_DESTINATION}
