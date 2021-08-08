@@ -110,15 +110,15 @@ cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
     -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
     -DCMAKE_INSTALL_PREFIX="$PREFIX" `
     -DWITH_SSL="$PREFIX" `
-    -DCMAKE_BUILD_TYPE=MinSizeRel
+    -DCMAKE_BUILD_TYPE=Release
 
-devenv MySQL.sln /build RelWithDebInfo
+devenv MySQL.sln /build Release
 Write-Host "::endgroup::"
 
 Write-Host "::group::install"
 Set-Location "$RUNNER_TEMP\build"
-devenv MySQL.sln /build RelWithDebInfo /project initial_database
-devenv MySQL.sln /build RelWithDebInfo /project package
+devenv MySQL.sln /build Release /project initial_database
+devenv MySQL.sln /build Release /project package
 Write-Host "::endgroup::"
 
 
