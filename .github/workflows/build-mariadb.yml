@@ -40,15 +40,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mariadb-linux.sh "$MARIADB_VERSION"
-      - name: upload
-        run: |
-          ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
-          ./.github/retry.pl azcopy login --service-principal --application-id "$AZCOPY_SPA_APPLICATION_ID" --tenant-id "$AZCOPY_TENANT_ID"
-          ./.github/retry.pl azcopy cp "$RUNNER_TEMP/mariadb.tar.xz" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/$ACTIONS_VERSION/mariadb-$MARIADB_VERSION-linux-x64.tar.xz"
-        env:
-          AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
-          AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
-          AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mariadb-${{ matrix.mariadb }}-linux-x64.tar.xz
+          path: ${{ runner.temp }}/mariadb.tar.xz
 
   build-darwin:
     runs-on: macos-10.15
@@ -61,15 +56,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
-      - name: upload
-        run: |
-          ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
-          ./.github/retry.pl azcopy login --service-principal --application-id "$AZCOPY_SPA_APPLICATION_ID" --tenant-id "$AZCOPY_TENANT_ID"
-          ./.github/retry.pl azcopy cp "$RUNNER_TEMP/mariadb.tar.xz" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/$ACTIONS_VERSION/mariadb-$MARIADB_VERSION-darwin-x64.tar.xz"
-        env:
-          AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
-          AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
-          AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mariadb-${{ matrix.mariadb }}-darwin-x64.tar.xz
+          path: ${{ runner.temp }}/mariadb.tar.xz
 
   build-windows:
     runs-on: windows-2019
@@ -82,16 +72,28 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github\build-mariadb-windows.ps1 $env:MARIADB_VERSION
-      - name: upload
-        shell: pwsh
+      - uses: actions/upload-artifact@v2
+        with:
+          name: mariadb-${{ matrix.mariadb }}-win32-x64.zip
+          path: "C:\\Temp\\mariadb.zip"
+
+  upload:
+    needs:
+      - build-linux
+      - build-darwin
+      - build-windows
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+      - name: upload to azure
         run: |
-          Set-Location ${env:RUNNER_TEMP}
-          $pkg = Get-Content "${env:GITHUB_WORKSPACE}/package.json" -Encoding UTF8 -Raw | ConvertFrom-Json
-          $version = $pkg.version
-          perl ${env:GITHUB_WORKSPACE}/.github/retry.pl azcopy login --service-principal --application-id $env:AZCOPY_SPA_APPLICATION_ID --tenant-id $env:AZCOPY_TENANT_ID
-          perl ${env:GITHUB_WORKSPACE}/.github/retry.pl azcopy cp "C:\Temp\mariadb.zip" "https://setupmysql.blob.core.windows.net/actions-setup-mysql/v$version/mariadb-${env:MARIADB_VERSION}-win32-x64.zip"
+          "$GITHUB_WORKSPACE/.github/upload-to-azure.sh"
         env:
-          PERL_VERSION: ${{ matrix.perl }}
           AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
           AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
           AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
+        working-directory: artifacts
