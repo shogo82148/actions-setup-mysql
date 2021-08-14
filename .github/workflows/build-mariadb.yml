@@ -14,6 +14,7 @@ on:
 jobs:
   list:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v2
       - id: set-matrix
@@ -37,6 +38,7 @@ jobs:
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
     env:
       MARIADB_VERSION: ${{ matrix.mariadb }}
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mariadb-linux.sh "$MARIADB_VERSION"
@@ -53,6 +55,7 @@ jobs:
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
     env:
       MARIADB_VERSION: ${{ matrix.mariadb }}
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
@@ -69,6 +72,7 @@ jobs:
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
     env:
       MARIADB_VERSION: ${{ matrix.mariadb }}
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v2
       - run: .github\build-mariadb-windows.ps1 $env:MARIADB_VERSION
@@ -84,6 +88,7 @@ jobs:
       - build-windows
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2

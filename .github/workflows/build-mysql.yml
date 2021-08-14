@@ -14,6 +14,7 @@ on:
 jobs:
   list:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v2
       - id: set-matrix
@@ -37,6 +38,7 @@ jobs:
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
+    timeout-minutes: 180
     steps:
       - name: install gcc
         run: |
@@ -56,6 +58,7 @@ jobs:
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mysql-darwin.sh "$MYSQL_VERSION"
@@ -72,6 +75,7 @@ jobs:
       matrix: ${{fromJson(needs.list.outputs.matrix)}}
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v2
       - run: .github\build-mysql-windows.ps1 $env:MYSQL_VERSION
@@ -87,6 +91,7 @@ jobs:
       - build-windows
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v2
       - uses: actions/download-artifact@v2
