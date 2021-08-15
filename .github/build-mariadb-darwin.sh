@@ -74,6 +74,20 @@ echo "::group::extract MariaDB source"
 )
 echo "::endgroup::"
 
+XZ_SOURCE_DIR="$RUNNER_TEMP/mariadb-$MARIADB_VERSION/storage/tokudb/PerconaFT/third_party/xz-4.999.9beta"
+if [[ -f "$XZ_SOURCE_DIR/autogen.sh" ]]; then
+echo "::group::re-generate configure script of xz"
+(
+    # the pre-built configure sctipt is too old, and fails to configure.
+    # so re-generate it with newer autoconf.
+    set -eux
+    brew install automake autoconf
+    cd "$XZ_SOURCE_DIR"
+    ./autogen.sh
+)
+echo "::endgroup::"
+fi
+
 echo "::group::build MariaDB"
 (
     set -eux
