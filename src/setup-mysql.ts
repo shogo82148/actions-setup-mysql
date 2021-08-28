@@ -26,7 +26,11 @@ async function run(): Promise<void> {
       starter.saveState(state)
     }
   } catch (error) {
-    core.setFailed(error.message)
+    if (error instanceof Error) {
+      core.setFailed(error.message)
+    } else {
+      core.setFailed(`${error}`)
+    }
   }
 }
 
