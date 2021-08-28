@@ -9,7 +9,11 @@ async function run(): Promise<void> {
       await cleanup.shutdownMySQL(state)
     }
   } catch (error) {
-    core.warning(`failed to clean up: ${error.message}`)
+    if (error instanceof Error) {
+      core.warning(`failed to clean up: ${error.message}`)
+    } else {
+      core.warning(`failed to clean up: ${error}`)
+    }
   }
 }
 

@@ -96,7 +96,11 @@ async function acquireMySQL(
     core.info(`downloading from ${downloadUrl}`)
     downloadPath = await tc.downloadTool(downloadUrl)
   } catch (error) {
-    core.info(error)
+    if (error instanceof Error) {
+      core.info(error.message)
+    } else {
+      core.info(`${error}`)
+    }
 
     throw `Failed to download version ${version}: ${error}`
   }
