@@ -38,6 +38,7 @@ jobs:
           - ubuntu-18.04
           - macos-11
           - macos-10.15
+          - windows-2022
           - windows-2019
         mysql:
           - "8.0"
@@ -58,6 +59,10 @@ jobs:
         with:
           node-version: 12.x
           cache: npm
+      - name: Set up perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: '5.34'
 
       - run: npm ci
       - run: npm run build
