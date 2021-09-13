@@ -24,24 +24,78 @@ steps:
 
 ## Configuration
 
-| Name | Description |
-| --- | --- |
-| `mysql-version` | The version of MySQL and MariaDB |
-| `distribution` | The distribution. valid values are mysql or mariadb. |
-| `auto-start` | Start MySQL server if it is true. |
-| `my-cnf` | my.cnf settings for mysqld |
-| `root-password` | password for the root user |
-| `user` | name of a new user |
-| `password` | password for the new user |
+### `mysql-version`
 
-## Available Versions
+The version of MySQL or MariaDB.
+
+Available Versions are:
 
 - MySQL
-    - 8.0
-    - 5.7
-    - 5.6
+    - `8.0`
+    - `5.7`
+    - `5.6`
 - MariaDB
-    - 10.6
-    - 10.5
-    - 10.4
-    - 10.3
+    - `10.6`
+    - `10.5`
+    - `10.4`
+    - `10.3`
+
+### `distribution`
+
+The distribution. The valid values are `mysql` or `mariadb`.
+The default value is `mysql`.
+
+You can use `mysql-` and `mariadb-` prefixes in `mysql-version` instead of the `distribution` input.
+For example, the following two workflows install MariaDB 10.6.
+
+```yaml
+- uses: shogo82148/actions-setup-mysql@v1
+  with:
+    distribution: 'mariadb'
+    mysql-version: '10.6'
+```
+
+```yaml
+- uses: shogo82148/actions-setup-mysql@v1
+  with:
+    mysql-version: 'mariadb-10.6'
+```
+
+### `auto-start`
+
+If it is `true`, the action starts the MySQL server.
+If it is `false`, the action doesn't start the MySQL sever.
+You need to execute the `mysqld` command yourself.
+
+The default value is `true`.
+
+### `my-cnf`
+
+`my.cnf` settings for mysqld.
+It is same syntax with `my.cnf`.
+
+Example:
+
+```yaml
+- uses: shogo82148/actions-setup-mysql@v1
+  with:
+    mysql-version: '8.0'
+    my-cnf: |
+      innodb_log_file_size=256MB
+      innodb_buffer_pool_size=512MB
+      max_allowed_packet=16MB
+      max_connections=50
+      local_infile=1
+```
+
+### `root-password`
+
+The password for the root user.
+
+### `user`
+
+The name of the new user.
+
+### `password`
+
+The password for the new user.
