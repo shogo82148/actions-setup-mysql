@@ -1,55 +1,55 @@
-import * as fs from 'fs'
-import * as os from 'os'
-import * as path from 'path'
-import * as child_process from 'child_process'
-import * as core from '@actions/core'
-import * as io from '@actions/io'
-import * as exec from '@actions/exec'
-import * as installer from './installer'
-import * as mycnf from './mycnf'
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
+import * as child_process from "child_process";
+import * as core from "@actions/core";
+import * as io from "@actions/io";
+import * as exec from "@actions/exec";
+import * as installer from "./installer";
+import * as mycnf from "./mycnf";
 
-const sep = path.sep
-const BASEDIR = 'BASEDIR'
-const PID = 'PID'
-const PID_FILE = 'PID_FILE'
-const TOOLPATH = 'TOOLPATH'
-const ROOT_PASSWORD = 'ROOT_PASSWORD'
+const sep = path.sep;
+const BASEDIR = "BASEDIR";
+const PID = "PID";
+const PID_FILE = "PID_FILE";
+const TOOLPATH = "TOOLPATH";
+const ROOT_PASSWORD = "ROOT_PASSWORD";
 
 // extension of executable files
-const binExt = os.platform() === 'win32' ? '.exe' : ''
+const binExt = os.platform() === "win32" ? ".exe" : "";
 
 export interface MySQLState {
-  pid: number
-  pidFile: string
-  baseDir: string
-  toolPath: string
-  rootPassword: string
+  pid: number;
+  pidFile: string;
+  baseDir: string;
+  toolPath: string;
+  rootPassword: string;
 }
 
 export function saveState(state: MySQLState) {
-  core.saveState(BASEDIR, state.baseDir)
-  core.saveState(PID, state.pid)
-  core.saveState(PID_FILE, state.pidFile)
-  core.saveState(TOOLPATH, state.toolPath)
-  core.saveState(ROOT_PASSWORD, state.rootPassword)
+  core.saveState(BASEDIR, state.baseDir);
+  core.saveState(PID, state.pid);
+  core.saveState(PID_FILE, state.pidFile);
+  core.saveState(TOOLPATH, state.toolPath);
+  core.saveState(ROOT_PASSWORD, state.rootPassword);
 }
 
 export function getState(): MySQLState | null {
-  const baseDir = core.getState(BASEDIR)
+  const baseDir = core.getState(BASEDIR);
   if (!baseDir) {
-    return null
+    return null;
   }
-  const pid = parseInt(core.getState(PID))
-  const pidFile = core.getState(PID_FILE)
-  const toolPath = core.getState(TOOLPATH)
-  const rootPassword = core.getState(ROOT_PASSWORD)
+  const pid = parseInt(core.getState(PID));
+  const pidFile = core.getState(PID_FILE);
+  const toolPath = core.getState(TOOLPATH);
+  const rootPassword = core.getState(ROOT_PASSWORD);
   return {
     pid,
     pidFile,
     baseDir,
     toolPath,
-    rootPassword
-  }
+    rootPassword,
+  };
 }
 
 export async function startMySQL(
@@ -57,83 +57,70 @@ export async function startMySQL(
   cnf: string,
   rootPassword: string
 ): Promise<MySQLState> {
-  const baseDir = await mkdtemp()
-  const config = mycnf.parse(`[mysqld]\n${cnf}`)
-  config['mysqld'] ||= {}
-  const pidFile =
-    config['mysqld']['pid-file'] || path.join(baseDir, 'tmp', 'mysqld.pid')
-  config['mysqld']['lc-messages-dir'] ||= path.join(mysql.toolPath, 'share')
-  config['mysqld']['socket'] ||= path.join(baseDir, 'tmp', 'mysql.sock')
-  config['mysqld']['datadir'] ||= path.join(baseDir, 'var')
-  config['mysqld']['pid-file'] = pidFile
-  config['mysqld']['tmpdir'] ||= path.join(baseDir, 'tmp')
-  config['mysqld']['ssl_ca'] ||= path.join(baseDir, 'var', 'ca.pem')
-  config['mysqld']['ssl_cert'] ||= path.join(baseDir, 'var', 'server-cert.pem')
-  config['mysqld']['ssl_key'] ||= path.join(baseDir, 'var', 'server-key.pem')
+  const baseDir = await mkdtemp();
+  const config = mycnf.parse(`[mysqld]\n${cnf}`);
+  config["mysqld"] ||= {};
+  const pidFile = config["mysqld"]["pid-file"] || path.join(baseDir, "tmp", "mysqld.pid");
+  config["mysqld"]["lc-messages-dir"] ||= path.join(mysql.toolPath, "share");
+  config["mysqld"]["socket"] ||= path.join(baseDir, "tmp", "mysql.sock");
+  config["mysqld"]["datadir"] ||= path.join(baseDir, "var");
+  config["mysqld"]["pid-file"] = pidFile;
+  config["mysqld"]["tmpdir"] ||= path.join(baseDir, "tmp");
+  config["mysqld"]["ssl_ca"] ||= path.join(baseDir, "var", "ca.pem");
+  config["mysqld"]["ssl_cert"] ||= path.join(baseDir, "var", "server-cert.pem");
+  config["mysqld"]["ssl_key"] ||= path.join(baseDir, "var", "server-key.pem");
 
-  await core.group('setup MySQL Database', async () => {
-    core.info(`creating the directory structure on ${baseDir}`)
+  await core.group("setup MySQL Database", async () => {
+    core.info(`creating the directory structure on ${baseDir}`);
 
     // (re)create directory structure
-    await io.mkdirP(path.join(baseDir, 'etc'))
-    await io.mkdirP(path.join(baseDir, 'var'))
-    await io.mkdirP(path.join(baseDir, 'tmp'))
+    await io.mkdirP(path.join(baseDir, "etc"));
+    await io.mkdirP(path.join(baseDir, "var"));
+    await io.mkdirP(path.join(baseDir, "tmp"));
 
     // configure my.cnf
-    core.info(`writing my.cnf`)
-    core.debug(`my.cnf path is ${path.join(baseDir, 'etc', 'my.cnf')}`)
-    core.debug(mycnf.stringify(config))
-    fs.writeFileSync(
-      path.join(baseDir, 'etc', 'my.cnf'),
-      mycnf.stringify(config)
-    )
+    core.info(`writing my.cnf`);
+    core.debug(`my.cnf path is ${path.join(baseDir, "etc", "my.cnf")}`);
+    core.debug(mycnf.stringify(config));
+    fs.writeFileSync(path.join(baseDir, "etc", "my.cnf"), mycnf.stringify(config));
 
-    const help = await verboseHelp(mysql)
-    const useMysqldInitialize = help.match(/--initialize-insecure/)
-    if (
-      fs.existsSync(path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'))
-    ) {
+    const help = await verboseHelp(mysql);
+    const useMysqldInitialize = help.match(/--initialize-insecure/);
+    if (fs.existsSync(path.join(mysql.toolPath, "bin", "mariadb-install-db.exe"))) {
       // MariaDB on Windows has mariadb-install-db.exe utility
       // that is the Windows equivalent of mysql_install_db.exe
       // https://mariadb.com/kb/en/mysql_install_dbexe/
-      await execute(
-        path.join(mysql.toolPath, 'bin', 'mariadb-install-db.exe'),
-        [`--datadir=${baseDir}${sep}var`]
-      )
-    } else if (
-      fs.existsSync(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'))
-    ) {
+      await execute(path.join(mysql.toolPath, "bin", "mariadb-install-db.exe"), [
+        `--datadir=${baseDir}${sep}var`,
+      ]);
+    } else if (fs.existsSync(path.join(mysql.toolPath, "bin", "mysql_install_db.exe"))) {
       // mysql_install_db.exe is old name of mariadb-install-db.exe
       // https://mariadb.com/kb/en/mariadb-install-db/
-      await execute(path.join(mysql.toolPath, 'bin', 'mysql_install_db.exe'), [
-        `--datadir=${baseDir}${sep}var`
-      ])
+      await execute(path.join(mysql.toolPath, "bin", "mysql_install_db.exe"), [
+        `--datadir=${baseDir}${sep}var`,
+      ]);
     } else if (useMysqldInitialize) {
       // `mysql_install_db` command is obsoleted MySQL 5.7.6 or later and
       // `mysqld --initialize-insecure` should be used.
-      await execute(path.join(mysql.toolPath, 'bin', `mysqld${binExt}`), [
+      await execute(path.join(mysql.toolPath, "bin", `mysqld${binExt}`), [
         `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-        `--initialize-insecure`
-      ])
+        `--initialize-insecure`,
+      ]);
     } else {
-      core.debug(`mysqld doesn't have the --initialize-insecure option`)
-      let command = path.join(mysql.toolPath, 'scripts', 'mysql_install_db')
-      let args: string[] = []
-      if (
-        fs.existsSync(
-          path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl')
-        )
-      ) {
+      core.debug(`mysqld doesn't have the --initialize-insecure option`);
+      let command = path.join(mysql.toolPath, "scripts", "mysql_install_db");
+      let args: string[] = [];
+      if (fs.existsSync(path.join(mysql.toolPath, "scripts", "mysql_install_db.pl"))) {
         // MySQL on Windows need to execute perl
-        command = 'perl'
-        args = [path.join(mysql.toolPath, 'scripts', 'mysql_install_db.pl')]
+        command = "perl";
+        args = [path.join(mysql.toolPath, "scripts", "mysql_install_db.pl")];
       }
-      const help = await installDbHelp(command, args)
+      const help = await installDbHelp(command, args);
       const installArgs = [
         ...args,
         `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-        `--basedir=${mysql.toolPath}`
-      ]
+        `--basedir=${mysql.toolPath}`,
+      ];
 
       if (help.match(/--auth-root-authentication-method/)) {
         // in MariaDB until 10.3, mysql_install_db has --auth-root-authentication-method option.
@@ -141,282 +128,261 @@ export async function startMySQL(
         // With "socket" option, mysqld accepts only unix socket, and rejects TCP protocol.
         // ref. https://mariadb.com/kb/en/authentication-from-mariadb-104/
         // We set "normal" to revert to the previous authentication method.
-        installArgs.push('--auth-root-authentication-method=normal')
+        installArgs.push("--auth-root-authentication-method=normal");
       }
-      await execute(command, installArgs)
+      await execute(command, installArgs);
     }
 
     // configure ssl
-    await setupTls(mysql, baseDir)
-  })
+    await setupTls(mysql, baseDir);
+  });
 
-  let pid: number = 0
-  await core.group('start MySQL database', async () => {
-    core.info('start MySQL database')
-    const out = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
-    const err = fs.openSync(path.join(baseDir, 'tmp', 'mysqld.log'), 'a')
+  let pid: number = 0;
+  await core.group("start MySQL database", async () => {
+    core.info("start MySQL database");
+    const out = fs.openSync(path.join(baseDir, "tmp", "mysqld.log"), "a");
+    const err = fs.openSync(path.join(baseDir, "tmp", "mysqld.log"), "a");
     const subprocess = child_process.spawn(
-      path.join(mysql.toolPath, 'bin', `mysqld${binExt}`),
-      [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, '--user=root'],
+      path.join(mysql.toolPath, "bin", `mysqld${binExt}`),
+      [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, "--user=root"],
       {
         detached: true,
-        stdio: ['ignore', out, err]
+        stdio: ["ignore", out, err],
       }
-    )
-    pid = subprocess.pid || 0
+    );
+    pid = subprocess.pid || 0;
 
-    core.info('wait for MySQL ready')
+    core.info("wait for MySQL ready");
     for (;;) {
       try {
-        fs.statSync(pidFile)
-        break
+        fs.statSync(pidFile);
+        break;
       } catch {
-        await sleep(0.1)
+        await sleep(0.1);
       }
       if (subprocess.exitCode !== null) {
-        throw new Error('failed to launch MySQL')
+        throw new Error("failed to launch MySQL");
       }
     }
-    subprocess.unref()
-    core.info('MySQL Server started')
-  })
+    subprocess.unref();
+    core.info("MySQL Server started");
+  });
 
   if (rootPassword) {
-    await core.group('configure root password', async () => {
-      await execute(path.join(mysql.toolPath, 'bin', `mysqladmin${binExt}`), [
+    await core.group("configure root password", async () => {
+      await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
         `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
         `--user=root`,
         `--host=127.0.0.1`,
         `password`,
-        rootPassword
-      ])
-    })
+        rootPassword,
+      ]);
+    });
   }
 
-  core.setOutput('base-dir', baseDir)
+  core.setOutput("base-dir", baseDir);
 
   return {
     pid,
     pidFile,
     baseDir,
     toolPath: mysql.toolPath,
-    rootPassword
-  }
+    rootPassword,
+  };
 }
 
-export async function createUser(
-  state: MySQLState,
-  user: string,
-  password: string
-): Promise<void> {
-  const mysql = path.join(state.toolPath, 'bin', `mysql${binExt}`)
-  const env: {[key: string]: string} = {}
+export async function createUser(state: MySQLState, user: string, password: string): Promise<void> {
+  const mysql = path.join(state.toolPath, "bin", `mysql${binExt}`);
+  const env: { [key: string]: string } = {};
   const args = [
     `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
     `--user=root`,
-    `--host=127.0.0.1`
-  ]
+    `--host=127.0.0.1`,
+  ];
   if (state.rootPassword) {
-    env['MYSQL_PWD'] = state.rootPassword
+    env["MYSQL_PWD"] = state.rootPassword;
   }
   if (core.isDebug()) {
-    env['MYSQL_DEBUG'] = '1'
+    env["MYSQL_DEBUG"] = "1";
   }
-  for (let host of ['localhost', '127.0.0.1', '::1']) {
+  for (let host of ["localhost", "127.0.0.1", "::1"]) {
     await execute(
       mysql,
-      [
-        ...args,
-        '-e',
-        `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`
-      ],
+      [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
       {
-        env: env
+        env: env,
       }
-    )
+    );
     await execute(
       mysql,
-      [
-        ...args,
-        '-e',
-        `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`
-      ],
+      [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
       {
-        env: env
+        env: env,
       }
-    )
+    );
   }
 }
 
 // execute "mysqld --verbose --help" and returns its result.
 async function verboseHelp(mysql: installer.MySQL): Promise<string> {
-  let myOutput = ''
+  let myOutput = "";
   const options = {
     silent: true,
     listeners: {
       stdout: (data: Buffer) => {
-        myOutput += data.toString()
+        myOutput += data.toString();
       },
       stderr: (data: Buffer) => {
-        myOutput += data.toString()
-      }
-    }
-  }
+        myOutput += data.toString();
+      },
+    },
+  };
   try {
     await execute(
-      path.join(mysql.toolPath, 'bin', `mysqld${binExt}`),
-      ['--no-defaults', '--verbose', '--help'],
+      path.join(mysql.toolPath, "bin", `mysqld${binExt}`),
+      ["--no-defaults", "--verbose", "--help"],
       options
-    )
+    );
   } catch (e) {
-    core.error('fail to get mysqld options')
-    core.error(myOutput)
-    return ''
+    core.error("fail to get mysqld options");
+    core.error(myOutput);
+    return "";
   }
-  return myOutput
+  return myOutput;
 }
 
 // TypeScript port of mysql_ssl_rsa_setup which is available from MySQL 5.7.6.
 // It is for better compatibility.
 // based on https://dev.mysql.com/doc/refman/8.0/en/creating-ssl-files-using-openssl.html
-async function setupTls(
-  mysql: installer.MySQL,
-  baseDir: string
-): Promise<void> {
-  const datadir = `${baseDir}${sep}var`
-  const openssl = `${mysql.toolPath}${sep}bin${sep}openssl${binExt}`
-  const options: exec.ExecOptions = {}
-  process.env['LD_LIBRARY_PATH'] = `${mysql.toolPath}${sep}lib`
-  process.env['DYLD_LIBRARY_PATH'] = `${mysql.toolPath}${sep}lib`
+async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> {
+  const datadir = `${baseDir}${sep}var`;
+  const openssl = `${mysql.toolPath}${sep}bin${sep}openssl${binExt}`;
+  const options: exec.ExecOptions = {};
+  process.env["LD_LIBRARY_PATH"] = `${mysql.toolPath}${sep}lib`;
+  process.env["DYLD_LIBRARY_PATH"] = `${mysql.toolPath}${sep}lib`;
 
   // Generate CA Key and Certificate
   await exec.exec(
     openssl,
     [
-      'req',
-      '-newkey',
-      'rsa:2048',
-      '-days',
-      '3650',
-      '-nodes',
-      '-keyout',
+      "req",
+      "-newkey",
+      "rsa:2048",
+      "-days",
+      "3650",
+      "-nodes",
+      "-keyout",
       `${datadir}${sep}ca-key.pem`,
-      '-subj',
-      '/CN=Actions_Setup_MySQL_Auto_Generated_CA_Certificate',
-      '-out',
-      `${datadir}${sep}ca-req.pem`
+      "-subj",
+      "/CN=Actions_Setup_MySQL_Auto_Generated_CA_Certificate",
+      "-out",
+      `${datadir}${sep}ca-req.pem`,
     ],
     options
-  )
+  );
   await exec.exec(
     openssl,
     [
-      'x509',
-      '-sha256',
-      '-req',
-      '-in',
+      "x509",
+      "-sha256",
+      "-req",
+      "-in",
       `${datadir}${sep}ca-req.pem`,
-      '-days',
-      '3650',
-      '-set_serial',
-      '01',
-      '-signkey',
+      "-days",
+      "3650",
+      "-set_serial",
+      "01",
+      "-signkey",
       `${datadir}${sep}ca-key.pem`,
-      '-out',
-      `${datadir}${sep}ca.pem`
+      "-out",
+      `${datadir}${sep}ca.pem`,
     ],
     options
-  )
+  );
 
   // Generate Server Key and Certificate
   await exec.exec(openssl, [
-    'req',
-    '-newkey',
-    'rsa:2048',
-    '-days',
-    '3650',
-    '-nodes',
-    '-keyout',
+    "req",
+    "-newkey",
+    "rsa:2048",
+    "-days",
+    "3650",
+    "-nodes",
+    "-keyout",
     `${datadir}${sep}server-key.pem`,
-    '-subj',
-    '/CN=Actions_Setup_MySQL_Auto_Generated_Certificate',
-    '-out',
-    `${datadir}${sep}server-req.pem`
-  ])
+    "-subj",
+    "/CN=Actions_Setup_MySQL_Auto_Generated_Certificate",
+    "-out",
+    `${datadir}${sep}server-req.pem`,
+  ]);
   await exec.exec(
     openssl,
-    [
-      'rsa',
-      '-in',
-      `${datadir}${sep}server-key.pem`,
-      '-out',
-      `${datadir}${sep}server-key.pem`
-    ],
+    ["rsa", "-in", `${datadir}${sep}server-key.pem`, "-out", `${datadir}${sep}server-key.pem`],
     options
-  )
+  );
   await exec.exec(
     openssl,
     [
-      'x509',
-      '-sha256',
-      '-req',
-      '-in',
+      "x509",
+      "-sha256",
+      "-req",
+      "-in",
       `${datadir}${sep}server-req.pem`,
-      '-days',
-      '3650',
-      '-CA',
+      "-days",
+      "3650",
+      "-CA",
       `${datadir}${sep}ca.pem`,
-      '-CAkey',
+      "-CAkey",
       `${datadir}${sep}ca-key.pem`,
-      '-set_serial',
-      '01',
-      '-out',
-      `${datadir}${sep}server-cert.pem`
+      "-set_serial",
+      "01",
+      "-out",
+      `${datadir}${sep}server-cert.pem`,
     ],
     options
-  )
+  );
 }
 
 // execute "mysql_install_db --help" and return its result
 async function installDbHelp(command: string, args: string[]): Promise<string> {
-  let myOutput = ''
+  let myOutput = "";
   const options = {
     silent: true,
     listeners: {
       stdout: (data: Buffer) => {
-        myOutput += data.toString()
+        myOutput += data.toString();
       },
       stderr: (data: Buffer) => {
-        myOutput += data.toString()
-      }
-    }
-  }
+        myOutput += data.toString();
+      },
+    },
+  };
   try {
-    await exec.exec(command, [...args, '--help'], options)
+    await exec.exec(command, [...args, "--help"], options);
   } catch (e) {
     // suppress the exception.
     // "mysql_install_db --help" returns exit code 1.
   }
-  return myOutput
+  return myOutput;
 }
 
 function mkdtemp(): Promise<string> {
-  const tmp = os.tmpdir()
+  const tmp = os.tmpdir();
   return new Promise(function (resolve, reject) {
     fs.mkdtemp(`${tmp}${sep}actions-setup-mysql-`, (err, dir) => {
       if (err) {
-        reject(err)
-        return
+        reject(err);
+        return;
       }
-      resolve(dir)
-    })
-  })
+      resolve(dir);
+    });
+  });
 }
 
 function sleep(waitSec: number) {
   return new Promise<void>(function (resolve) {
-    setTimeout(() => resolve(), waitSec * 1000)
-  })
+    setTimeout(() => resolve(), waitSec * 1000);
+  });
 }
 
 function execute(
@@ -425,9 +391,9 @@ function execute(
   options?: exec.ExecOptions
 ): Promise<number> {
   if (args) {
-    core.debug(`execute: ${commandLine} ${args.join(' ')}`)
+    core.debug(`execute: ${commandLine} ${args.join(" ")}`);
   } else {
-    core.debug(`execute: ${commandLine}`)
+    core.debug(`execute: ${commandLine}`);
   }
-  return exec.exec(commandLine, args, options)
+  return exec.exec(commandLine, args, options);
 }
