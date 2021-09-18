@@ -1,5 +1,5 @@
 Param($MARIADB_VERSION)
-$OPENSSL_VERSION = "1_1_1l"
+$OPENSSL_VERSION = "3.0.0"
 $ROOT = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RUNNER_TEMP = $env:RUNNER_TEMP
 if ($null -eq $RUNNER_TEMP) {
@@ -41,7 +41,7 @@ Write-Host "::endgroup::"
 Write-Host "::group::fetch OpenSSL source"
 Set-Location "$RUNNER_TEMP"
 Write-Host "Downloading zip archive..."
-Invoke-WebRequest "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.zip" -OutFile "openssl.zip"
+Invoke-WebRequest "https://github.com/openssl/openssl/archive/openssl-$OPENSSL_VERSION.zip" -OutFile "openssl.zip"
 Write-Host "Unzipping..."
 Expand-Archive -Path "openssl.zip" -DestinationPath .
 Remove-Item -Path "openssl.zip"
@@ -50,12 +50,12 @@ Write-Host "::endgroup::"
 
 Write-Host "::group::build OpenSSL"
 Set-Location "$RUNNER_TEMP"
-Set-Location "openssl-OpenSSL_$OPENSSL_VERSION"
+Set-Location "openssl-openssl-$OPENSSL_VERSION"
 C:\strawberry\perl\bin\perl.exe Configure --prefix="$PREFIX" VC-WIN64A
 nmake
 nmake install_sw install_ssldirs
 Set-Location "$RUNNER_TEMP"
-Remove-Item -Path "openssl-OpenSSL_$OPENSSL_VERSION" -Recurse -Force
+Remove-Item -Path "openssl-openssl-$OPENSSL_VERSION" -Recurse -Force
 
 # remove debug information
 Get-ChildItem "$PREFIX" -Include *.pdb -Recurse | Remove-Item

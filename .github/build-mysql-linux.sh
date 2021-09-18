@@ -3,11 +3,11 @@
 set -e
 
 MYSQL_VERSION=$1
-OPENSSL_VERSION=1_1_1l
+OPENSSL_VERSION=3.0.0
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
-PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/x64
+PREFIX=$RUNNER_TOOL_CACHE/mariadb/$MARIADB_VERSION/x64
 
 # detect the number of CPU Core
 JOBS=$(nproc)
@@ -22,7 +22,7 @@ echo "::group::download OpenSSL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl --retry 3 -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
+    curl --retry 3 -sSL "https://github.com/openssl/openssl/archive/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
 )
 echo "::endgroup::"
 
@@ -37,7 +37,7 @@ echo "::endgroup::"
 echo "::group::build OpenSSL"
 (
     set -eux
-    cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
+    cd "$RUNNER_TEMP/openssl-openssl-$OPENSSL_VERSION"
     ./Configure --prefix="$PREFIX" linux-x86_64
     make "-j$JOBS"
     make install_sw install_ssldirs
