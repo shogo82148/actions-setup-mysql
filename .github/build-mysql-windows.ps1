@@ -9,7 +9,7 @@ $RUNNER_TOOL_CACHE = $env:RUNNER_TOOL_CACHE
 if ($null -eq $RUNNER_TOOL_CACHE) {
     $RUNNER_TOOL_CACHE = Join-Path $RUNNER_TEMP "dist"
 }
-$PREFIX = Join-Path $RUNNER_TOOL_CACHE "mariadb" $MARIADB_VERSION "x64"
+$PREFIX = Join-Path $RUNNER_TOOL_CACHE "mysql" $MARIADB_VERSION "x64"
 
 $ACTION_VERSION = Get-Content (Join-Path $ROOT ".." "package.json") | jq -r ".version"
 

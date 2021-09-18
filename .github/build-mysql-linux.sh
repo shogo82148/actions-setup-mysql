@@ -7,7 +7,7 @@ OPENSSL_VERSION=3.0.0
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
-PREFIX=$RUNNER_TOOL_CACHE/mariadb/$MARIADB_VERSION/x64
+PREFIX=$RUNNER_TOOL_CACHE/mysql/$MARIADB_VERSION/x64
 
 # detect the number of CPU Core
 JOBS=$(nproc)
