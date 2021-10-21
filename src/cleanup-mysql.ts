@@ -1,20 +1,20 @@
-import * as core from '@actions/core'
-import * as cleanup from './cleanup'
-import * as starter from './starter'
+import * as core from "@actions/core";
+import * as cleanup from "./cleanup";
+import * as starter from "./starter";
 
 async function run(): Promise<void> {
   try {
-    const state = starter.getState()
+    const state = starter.getState();
     if (state) {
-      await cleanup.shutdownMySQL(state)
+      await cleanup.shutdownMySQL(state);
     }
   } catch (error) {
     if (error instanceof Error) {
-      core.warning(`failed to clean up: ${error.message}`)
+      core.warning(`failed to clean up: ${error.message}`);
     } else {
-      core.warning(`failed to clean up: ${error}`)
+      core.warning(`failed to clean up: ${error}`);
     }
   }
 }
 
-run()
+run();

@@ -7,3 +7,7 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    ignore:
+      # update too often, ignore patch releases
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-patch"]
