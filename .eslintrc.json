@@ -4,8 +4,7 @@
     "@typescript-eslint"
   ],
   "extends": [
-    // XXX: fails with Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: Package subpath './lib/util/glob-util' is not defined by "exports" in /Users/shogo.ichinose/src/github.com/shogo82148/actions-setup-mysql/node_modules/eslint/package.json
-    // "plugin:github/recommended"
+    "plugin:github/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {

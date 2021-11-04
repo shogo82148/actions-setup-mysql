@@ -1,12 +1,12 @@
-import * as fs from "fs";
-import * as os from "os";
-import * as path from "path";
 import * as child_process from "child_process";
 import * as core from "@actions/core";
-import * as io from "@actions/io";
 import * as exec from "@actions/exec";
+import * as fs from "fs";
 import * as installer from "./installer";
+import * as io from "@actions/io";
 import * as mycnf from "./mycnf";
+import * as os from "os";
+import * as path from "path";
 
 const sep = path.sep;
 const BASEDIR = "BASEDIR";
@@ -115,14 +115,14 @@ export async function startMySQL(
         command = "perl";
         args = [path.join(mysql.toolPath, "scripts", "mysql_install_db.pl")];
       }
-      const help = await installDbHelp(command, args);
+      const installHelp = await installDbHelp(command, args);
       const installArgs = [
         ...args,
         `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
         `--basedir=${mysql.toolPath}`,
       ];
 
-      if (help.match(/--auth-root-authentication-method/)) {
+      if (installHelp.match(/--auth-root-authentication-method/)) {
         // in MariaDB until 10.3, mysql_install_db has --auth-root-authentication-method option.
         // and until 10.4, its default value changes from "normal" to "socket".
         // With "socket" option, mysqld accepts only unix socket, and rejects TCP protocol.
@@ -205,19 +205,19 @@ export async function createUser(state: MySQLState, user: string, password: stri
   if (core.isDebug()) {
     env["MYSQL_DEBUG"] = "1";
   }
-  for (let host of ["localhost", "127.0.0.1", "::1"]) {
+  for (const host of ["localhost", "127.0.0.1", "::1"]) {
     await execute(
       mysql,
       [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
       {
-        env: env,
+        env,
       }
     );
     await execute(
       mysql,
       [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
       {
-        env: env,
+        env,
       }
     );
   }

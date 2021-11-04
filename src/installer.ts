@@ -1,9 +1,9 @@
 import * as core from "@actions/core";
-import * as tc from "@actions/tool-cache";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
+import * as tc from "@actions/tool-cache";
 
 const osPlat = os.platform();
 const osArch = os.arch();
@@ -35,10 +35,10 @@ async function determineVersion(distribution: string, version: string): Promise<
     version = version.substring("mariadb-".length);
   }
   const availableVersions = await getAvailableVersions(distribution);
-  for (let v of availableVersions) {
+  for (const v of availableVersions) {
     if (semver.satisfies(v, version)) {
       return {
-        distribution: distribution,
+        distribution,
         version: v,
         toolPath: "",
       };
@@ -57,7 +57,7 @@ export async function getMySQL(distribution: string, version: string): Promise<M
   if (!toolPath) {
     // download, extract, cache
     toolPath = await acquireMySQL(selected.distribution, selected.version);
-    core.debug("MySQL tool is cached under " + toolPath);
+    core.debug(`MySQL tool is cached under ${toolPath}`);
   }
 
   //
@@ -69,7 +69,7 @@ export async function getMySQL(distribution: string, version: string): Promise<M
   return {
     distribution: selected.distribution,
     version: selected.version,
-    toolPath: toolPath,
+    toolPath,
   };
 }
 
@@ -90,7 +90,7 @@ async function acquireMySQL(distribution: string, version: string): Promise<stri
       core.info(`${error}`);
     }
 
-    throw `Failed to download version ${version}: ${error}`;
+    throw new Error(`Failed to download version ${version}: ${error}`);
   }
 
   //
@@ -117,7 +117,7 @@ interface PackageVersion {
 }
 
 async function getDownloadUrl(filename: string): Promise<string> {
-  return new Promise<PackageVersion>((resolve, reject) => {
+  const promise = new Promise<PackageVersion>((resolve, reject) => {
     fs.readFile(path.join(__dirname, "..", "package.json"), (err, data) => {
       if (err) {
         reject(err);
@@ -125,8 +125,9 @@ async function getDownloadUrl(filename: string): Promise<string> {
       const info: PackageVersion = JSON.parse(data.toString());
       resolve(info);
     });
-  }).then((info) => {
-    const actionsVersion = info.version;
-    return `https://setupmysql.blob.core.windows.net/actions-setup-mysql/v${actionsVersion}/${filename}`;
   });
+
+  const info = await promise;
+  const actionsVersion = info.version;
+  return `https://setupmysql.blob.core.windows.net/actions-setup-mysql/v${actionsVersion}/${filename}`;
 }

@@ -1,5 +1,5 @@
-import * as core from "@actions/core";
 import * as cleanup from "./cleanup";
+import * as core from "@actions/core";
 import * as starter from "./starter";
 
 async function run(): Promise<void> {
