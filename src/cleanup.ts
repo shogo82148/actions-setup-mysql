@@ -1,16 +1,16 @@
-import * as fs from "fs";
-import * as path from "path";
-import * as os from "os";
-import * as starter from "./starter";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
+import * as fs from "fs";
 import * as io from "@actions/io";
+import * as os from "os";
+import * as path from "path";
+import * as starter from "./starter";
 
 // extension of executable files
 const binExt = os.platform() === "win32" ? ".exe" : "";
 const sep = path.sep;
 
-export async function shutdownMySQL(state: starter.MySQLState) {
+export async function shutdownMySQL(state: starter.MySQLState): Promise<void> {
   await core.group("shutdown MySQL Server", async () => {
     const env: { [key: string]: string } = {};
     const args = [
@@ -28,7 +28,7 @@ export async function shutdownMySQL(state: starter.MySQLState) {
       path.join(state.toolPath, "bin", `mysqladmin${binExt}`),
       [...args, `shutdown`],
       {
-        env: env,
+        env,
       }
     );
 
@@ -47,7 +47,7 @@ export async function shutdownMySQL(state: starter.MySQLState) {
   });
 }
 
-function sleep(waitSec: number) {
+async function sleep(waitSec: number): Promise<void> {
   return new Promise<void>(function (resolve) {
     setTimeout(() => resolve(), waitSec * 1000);
   });
