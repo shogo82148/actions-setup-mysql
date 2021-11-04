@@ -13,7 +13,7 @@ export function parse(cnf: string): MyCnf {
 export function stringify(cnf: MyCnf): string {
   const lines: string[] = [];
   const keys = Object.keys(cnf);
-  keys.sort();
+  keys.sort(undefined);
   for (const key of keys) {
     lines.push(`[${key}]`);
     const obj = cnf[key];
@@ -36,11 +36,11 @@ export function stringify(cnf: MyCnf): string {
 
 const EOF = "EOF";
 
-const isWhitespace = (ch: string) => {
+const isWhitespace = (ch: string): boolean => {
   return ch === "\t" || ch === "\n" || ch === "\v" || ch === "\f" || ch === "\r" || ch === " ";
 };
 
-const isWhitespaceWithoutEOL = (ch: string) => {
+const isWhitespaceWithoutEOL = (ch: string): boolean => {
   return ch === "\t" || ch === "\v" || ch === "\f" || ch === " ";
 };
 
@@ -62,23 +62,23 @@ class Parser {
     return this.data[this.idx];
   }
 
-  next() {
+  next(): void {
     this.idx++;
   }
 
-  skipWhitespace() {
+  skipWhitespace(): void {
     while (isWhitespace(this.peek())) {
       this.next();
     }
   }
 
-  skipWhitespaceWithoutEOL() {
+  skipWhitespaceWithoutEOL(): void {
     while (isWhitespaceWithoutEOL(this.peek())) {
       this.next();
     }
   }
 
-  skipToEOL() {
+  skipToEOL(): void {
     this.skipWhitespaceWithoutEOL();
     if (this.peek() === "#") {
       // skip comment
@@ -110,7 +110,7 @@ class Parser {
   }
 
   // `[group]`
-  parseGroup() {
+  parseGroup(): void {
     if (this.peek() !== "[") {
       throw new Error(`unexpected section start: "${this.peek()}"`);
     }
@@ -256,7 +256,7 @@ class Parser {
     return buf.join("");
   }
 
-  parseOption() {
+  parseOption(): void {
     const name = this.parseOptionName();
     const value = this.parseOptionValue();
     this.skipToEOL();

@@ -26,7 +26,7 @@ export interface MySQLState {
   rootPassword: string;
 }
 
-export function saveState(state: MySQLState) {
+export function saveState(state: MySQLState): void {
   core.saveState(BASEDIR, state.baseDir);
   core.saveState(PID, state.pid);
   core.saveState(PID_FILE, state.pidFile);
@@ -379,7 +379,7 @@ async function mkdtemp(): Promise<string> {
   });
 }
 
-async function sleep(waitSec: number) {
+async function sleep(waitSec: number): Promise<void> {
   return new Promise<void>(function (resolve) {
     setTimeout(() => resolve(), waitSec * 1000);
   });

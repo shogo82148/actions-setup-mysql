@@ -10,7 +10,7 @@ import * as io from "@actions/io";
 const binExt = os.platform() === "win32" ? ".exe" : "";
 const sep = path.sep;
 
-export async function shutdownMySQL(state: starter.MySQLState) {
+export async function shutdownMySQL(state: starter.MySQLState): Promise<void> {
   await core.group("shutdown MySQL Server", async () => {
     const env: { [key: string]: string } = {};
     const args = [
@@ -47,7 +47,7 @@ export async function shutdownMySQL(state: starter.MySQLState) {
   });
 }
 
-async function sleep(waitSec: number) {
+async function sleep(waitSec: number): Promise<void> {
   return new Promise<void>(function (resolve) {
     setTimeout(() => resolve(), waitSec * 1000);
   });
