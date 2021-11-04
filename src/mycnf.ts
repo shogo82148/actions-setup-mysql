@@ -47,7 +47,7 @@ const isWhitespaceWithoutEOL = (ch: string) => {
 class Parser {
   data: string[];
   idx: number;
-  group: string = "";
+  group = "";
   result: MyCnf = {};
 
   constructor(cnf: string) {

@@ -47,7 +47,7 @@ export async function shutdownMySQL(state: starter.MySQLState) {
   });
 }
 
-function sleep(waitSec: number) {
+async function sleep(waitSec: number) {
   return new Promise<void>(function (resolve) {
     setTimeout(() => resolve(), waitSec * 1000);
   });

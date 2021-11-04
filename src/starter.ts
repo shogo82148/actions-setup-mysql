@@ -137,7 +137,7 @@ export async function startMySQL(
     await setupTls(mysql, baseDir);
   });
 
-  let pid: number = 0;
+  let pid = 0;
   await core.group("start MySQL database", async () => {
     core.info("start MySQL database");
     const out = fs.openSync(path.join(baseDir, "tmp", "mysqld.log"), "a");
@@ -366,7 +366,7 @@ async function installDbHelp(command: string, args: string[]): Promise<string> {
   return myOutput;
 }
 
-function mkdtemp(): Promise<string> {
+async function mkdtemp(): Promise<string> {
   const tmp = os.tmpdir();
   return new Promise(function (resolve, reject) {
     fs.mkdtemp(`${tmp}${sep}actions-setup-mysql-`, (err, dir) => {
@@ -379,13 +379,13 @@ function mkdtemp(): Promise<string> {
   });
 }
 
-function sleep(waitSec: number) {
+async function sleep(waitSec: number) {
   return new Promise<void>(function (resolve) {
     setTimeout(() => resolve(), waitSec * 1000);
   });
 }
 
-function execute(
+async function execute(
   commandLine: string,
   args?: string[],
   options?: exec.ExecOptions
