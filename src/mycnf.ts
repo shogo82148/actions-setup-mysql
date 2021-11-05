@@ -12,12 +12,13 @@ export function parse(cnf: string): MyCnf {
 
 export function stringify(cnf: MyCnf): string {
   const lines: string[] = [];
-  const keys = Object.keys(cnf);
-  keys.sort();
-  for (const key of keys) {
-    lines.push(`[${key}]`);
-    const obj = cnf[key];
+  const groupKeys = Object.keys(cnf);
+  groupKeys.sort(undefined);
+  for (const groupKey of groupKeys) {
+    lines.push(`[${groupKey}]`);
+    const obj = cnf[groupKey];
     const keys = Object.keys(obj);
+    keys.sort(undefined);
     for (const key of keys) {
       let value = obj[key];
       value = value.replace(/\\/g, "\\\\");
@@ -36,18 +37,18 @@ export function stringify(cnf: MyCnf): string {
 
 const EOF = "EOF";
 
-const isWhitespace = (ch: string) => {
+const isWhitespace = (ch: string): boolean => {
   return ch === "\t" || ch === "\n" || ch === "\v" || ch === "\f" || ch === "\r" || ch === " ";
 };
 
-const isWhitespaceWithoutEOL = (ch: string) => {
+const isWhitespaceWithoutEOL = (ch: string): boolean => {
   return ch === "\t" || ch === "\v" || ch === "\f" || ch === " ";
 };
 
 class Parser {
   data: string[];
   idx: number;
-  group: string = "";
+  group = "";
   result: MyCnf = {};
 
   constructor(cnf: string) {
@@ -62,27 +63,27 @@ class Parser {
     return this.data[this.idx];
   }
 
-  next() {
+  next(): void {
     this.idx++;
   }
 
-  skipWhitespace() {
+  skipWhitespace(): void {
     while (isWhitespace(this.peek())) {
       this.next();
     }
   }
 
-  skipWhitespaceWithoutEOL() {
+  skipWhitespaceWithoutEOL(): void {
     while (isWhitespaceWithoutEOL(this.peek())) {
       this.next();
     }
   }
 
-  skipToEOL() {
+  skipToEOL(): void {
     this.skipWhitespaceWithoutEOL();
     if (this.peek() === "#") {
       // skip comment
-      while (true) {
+      for (;;) {
         const ch = this.peek();
         if (ch === EOF) {
           return;
@@ -94,7 +95,7 @@ class Parser {
       }
     } else if (this.peek() === "\r" || this.peek() === "\n" || this.peek() === EOF) {
       // EOL
-      while (true) {
+      for (;;) {
         const ch = this.peek();
         if (ch === EOF) {
           return;
@@ -110,7 +111,7 @@ class Parser {
   }
 
   // `[group]`
-  parseGroup() {
+  parseGroup(): void {
     if (this.peek() !== "[") {
       throw new Error(`unexpected section start: "${this.peek()}"`);
     }
@@ -119,7 +120,7 @@ class Parser {
     // parse group
     let group = "";
     const buf: string[] = [];
-    while (true) {
+    for (;;) {
       const ch = this.peek();
       if (ch === "]") {
         // end of group
@@ -142,7 +143,7 @@ class Parser {
 
   parseOptionName(): string {
     const buf: string[] = [];
-    while (true) {
+    for (;;) {
       const ch = this.peek();
       if (ch === "=" || ch === "\r" || ch === "\n" || ch === EOF) {
         break;
@@ -161,8 +162,7 @@ class Parser {
     const ch = this.peek();
     if (ch === "\\") {
       this.next(); // skip '\\'
-      const ch = this.peek();
-      switch (ch) {
+      switch (this.peek()) {
         case "n":
           this.next();
           return "\n";
@@ -209,7 +209,7 @@ class Parser {
       case '"':
         this.next(); // skip first '"'
         // read until correspond '"'
-        while (true) {
+        for (;;) {
           const ch = this.peek();
           if (ch === '"') {
             this.next();
@@ -225,7 +225,7 @@ class Parser {
       case "'":
         this.next(); // skip first "'"
         // read until correspond "'"
-        while (true) {
+        for (;;) {
           const ch = this.peek();
           if (ch === "'") {
             this.next();
@@ -240,7 +240,7 @@ class Parser {
         break;
       default:
         // read the value until EOL
-        while (true) {
+        for (;;) {
           const ch = this.peek();
           if (ch === "\r" || ch === "\n" || ch === EOF) {
             break;
@@ -256,7 +256,7 @@ class Parser {
     return buf.join("");
   }
 
-  parseOption() {
+  parseOption(): void {
     const name = this.parseOptionName();
     const value = this.parseOptionValue();
     this.skipToEOL();
@@ -265,16 +265,15 @@ class Parser {
   }
 
   parse(): MyCnf {
-    while (true) {
+    for (;;) {
       this.skipWhitespace();
-      const ch = this.peek();
-      switch (ch) {
+      switch (this.peek()) {
         case EOF:
           return this.result;
         case "#":
         case ";":
           // comment, skip this line
-          while (true) {
+          for (;;) {
             const ch = this.peek();
             if (ch === EOF) {
               break;

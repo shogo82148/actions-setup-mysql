@@ -2,7 +2,7 @@
 
 This action sets by MySQL database for use in actions by:
 
-- optionally downloading and caching a version of MySQL
+- download a version of MySQL or MariaDB
 - start mysqld
 
 ## Motivation
