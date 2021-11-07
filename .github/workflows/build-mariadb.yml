@@ -44,8 +44,8 @@ jobs:
       - run: .github/build-mariadb-linux.sh "$MARIADB_VERSION"
       - uses: actions/upload-artifact@v2
         with:
-          name: mariadb-${{ matrix.mariadb }}-linux-x64.tar.xz
-          path: ${{ runner.temp }}/mariadb.tar.xz
+          name: mariadb-${{ matrix.mariadb }}-linux-x64.tar.zstd
+          path: ${{ runner.temp }}/mariadb.tar.zstd
 
   build-darwin:
     runs-on: macos-10.15
@@ -61,8 +61,8 @@ jobs:
       - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
       - uses: actions/upload-artifact@v2
         with:
-          name: mariadb-${{ matrix.mariadb }}-darwin-x64.tar.xz
-          path: ${{ runner.temp }}/mariadb.tar.xz
+          name: mariadb-${{ matrix.mariadb }}-darwin-x64.tar.zstd
+          path: ${{ runner.temp }}/mariadb.tar.zstd
 
   build-windows:
     runs-on: windows-2019
@@ -78,8 +78,8 @@ jobs:
       - run: .github\build-mariadb-windows.ps1 $env:MARIADB_VERSION
       - uses: actions/upload-artifact@v2
         with:
-          name: mariadb-${{ matrix.mariadb }}-win32-x64.zip
-          path: "C:\\Temp\\mariadb.zip"
+          name: mariadb-${{ matrix.mariadb }}-win32-x64.tar.zstd
+          path: "C:\\Temp\\mariadb.tar.zstd"
 
   upload:
     needs:
