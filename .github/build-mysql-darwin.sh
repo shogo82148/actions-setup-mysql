@@ -77,7 +77,7 @@ echo "::group::build MySQL"
         -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
         -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" \
-        -DWITH_ROCKSDB_LZ4=0 \
+        -DWITH_ROCKSDB_LZ4=OFF \
         -DWITH_SSL="$PREFIX"
     make "-j$JOBS"
 )
