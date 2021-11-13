@@ -94,22 +94,19 @@ async function acquireMySQL(distribution: string, version: string): Promise<stri
   }
 
   //
-  // Extract XZ compressed tar
+  // Extract Zstandard compressed tar
   //
-  const extPath = downloadUrl.endsWith(".zip")
-    ? await tc.extractZip(downloadPath)
-    : downloadUrl.endsWith(".tar.xz")
-    ? await tc.extractTar(downloadPath, "", "xJ")
-    : downloadUrl.endsWith(".tar.bz2")
-    ? await tc.extractTar(downloadPath, "", "xj")
-    : await tc.extractTar(downloadPath);
+  const extPath = await tc.extractTar(downloadPath, "", [
+    "--use-compress-program",
+    "zstd -d --long=30",
+    "-x",
+  ]);
 
   return await tc.cacheDir(extPath, distribution, version);
 }
 
 function getFileName(distribution: string, version: string): string {
-  const ext = osPlat === "win32" ? "zip" : "tar.xz";
-  return `${distribution}-${version}-${osPlat}-${osArch}.${ext}`;
+  return `${distribution}-${version}-${osPlat}-${osArch}.tar.zstd`;
 }
 
 interface PackageVersion {
