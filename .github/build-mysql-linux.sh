@@ -101,7 +101,6 @@ echo "::group::archive"
     rm -rf ./mysql-test
     rm -rf ./sql-bench
 
-    export XZ_OPT=-9
-    tar Jcf "$RUNNER_TEMP/mysql.tar.xz" .
+    tar --use-compress-program 'zstd -T0 --long=30 --ultra -22' -cf "$RUNNER_TEMP/mysql.tar.zstd" .
 )
 echo "::endgroup::"
