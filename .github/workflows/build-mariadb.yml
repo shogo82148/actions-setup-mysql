@@ -42,10 +42,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mariadb-linux.sh "$MARIADB_VERSION"
-      - uses: actions/upload-artifact@v2
-        with:
-          name: mariadb-${{ matrix.mariadb }}-linux-x64.tar.zstd
-          path: ${{ runner.temp }}/mariadb.tar.zstd
+      - name: upload
+        shell: bash
+        run: |
+          ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
+          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-linux-x64.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-linux-x64.tar.zstd"
+        env:
+          MARIADB_VERSION: ${{ matrix.mariadb }}
+          GITHUB_TOKEN: ${{ github.token }}
 
   build-darwin:
     runs-on: macos-10.15
@@ -59,10 +64,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
-      - uses: actions/upload-artifact@v2
-        with:
-          name: mariadb-${{ matrix.mariadb }}-darwin-x64.tar.zstd
-          path: ${{ runner.temp }}/mariadb.tar.zstd
+      - name: upload
+        shell: bash
+        run: |
+          ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
+          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-darwin-x64.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-darwin-x64.tar.zstd"
+        env:
+          MARIADB_VERSION: ${{ matrix.mariadb }}
+          GITHUB_TOKEN: ${{ github.token }}
 
   build-windows:
     runs-on: windows-2019
@@ -76,29 +86,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github\build-mariadb-windows.ps1 $env:MARIADB_VERSION
-      - uses: actions/upload-artifact@v2
-        with:
-          name: mariadb-${{ matrix.mariadb }}-win32-x64.zip
-          path: "C:\\Temp\\mariadb.zip"
-
-  upload:
-    needs:
-      - build-linux
-      - build-darwin
-      - build-windows
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          path: artifacts
-      - name: upload to azure
+      - name: upload
+        shell: bash
         run: |
-          "$GITHUB_WORKSPACE/.github/upload-to-azure.sh"
+          ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
+          TEMP_DIR=$(cygpath "C:\\Temp")
+          mv "$TEMP_DIR/mariadb.zip" "$TEMP_DIR/mariadb-$MARIADB_VERSION-win32-x64.zip"
+          gh release upload --clobber "$ACTIONS_VERSION" "$TEMP_DIR/mariadb-$MARIADB_VERSION-win32-x64.zip"
         env:
-          AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
-          AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
-          AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
-        working-directory: artifacts
+          MARIADB_VERSION: ${{ matrix.mariadb }}
+          GITHUB_TOKEN: ${{ github.token }}
