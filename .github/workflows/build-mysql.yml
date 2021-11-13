@@ -47,8 +47,8 @@ jobs:
       - run: .github/build-mysql-linux.sh "$MYSQL_VERSION"
       - uses: actions/upload-artifact@v2
         with:
-          name: mysql-${{ matrix.mysql }}-linux-x64.tar.xz
-          path: ${{ runner.temp }}/mysql.tar.xz
+          name: mysql-${{ matrix.mysql }}-linux-x64.tar.zstd
+          path: ${{ runner.temp }}/mysql.tar.zstd
 
   build-darwin:
     runs-on: macos-10.15
@@ -64,8 +64,8 @@ jobs:
       - run: .github/build-mysql-darwin.sh "$MYSQL_VERSION"
       - uses: actions/upload-artifact@v2
         with:
-          name: mysql-${{ matrix.mysql }}-darwin-x64.tar.xz
-          path: ${{ runner.temp }}/mysql.tar.xz
+          name: mysql-${{ matrix.mysql }}-darwin-x64.tar.zstd
+          path: ${{ runner.temp }}/mysql.tar.zstd
 
   build-windows:
     runs-on: windows-2019
