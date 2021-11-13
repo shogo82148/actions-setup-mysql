@@ -46,7 +46,7 @@ jobs:
         shell: bash
         run: |
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
-          mv "$RUNNER_TEMP/mariadb.tar.xz" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-linux-x64.tar.zstd"
+          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-linux-x64.tar.zstd"
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-linux-x64.tar.zstd"
         env:
           MARIADB_VERSION: ${{ matrix.mariadb }}
@@ -68,7 +68,7 @@ jobs:
         shell: bash
         run: |
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
-          mv "$RUNNER_TEMP/mariadb.tar.xz" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-darwin-x64.tar.zstd"
+          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-darwin-x64.tar.zstd"
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-darwin-x64.tar.zstd"
         env:
           MARIADB_VERSION: ${{ matrix.mariadb }}
