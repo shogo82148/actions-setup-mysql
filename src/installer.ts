@@ -96,11 +96,9 @@ async function acquireMySQL(distribution: string, version: string): Promise<stri
   //
   // Extract Zstandard compressed tar
   //
-  const extPath = await tc.extractTar(downloadPath, "", [
-    "--use-compress-program",
-    "zstd -d --long=30",
-    "-x",
-  ]);
+  const extPath = downloadUrl.endsWith(".zip")
+    ? await tc.extractZip(downloadPath)
+    : await tc.extractTar(downloadPath, "", ["--use-compress-program", "zstd -d --long=30", "-x"]);
 
   return await tc.cacheDir(extPath, distribution, version);
 }

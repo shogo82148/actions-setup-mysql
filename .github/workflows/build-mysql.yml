@@ -81,8 +81,8 @@ jobs:
       - run: .github\build-mysql-windows.ps1 $env:MYSQL_VERSION
       - uses: actions/upload-artifact@v2
         with:
-          name: mysql-${{ matrix.mysql }}-win32-x64.tar.zstd
-          path: "C:\\Temp\\mysql.tar.zstd"
+          name: mysql-${{ matrix.mysql }}-win32-x64.zip
+          path: "C:\\Temp\\mysql.zip"
 
   upload:
     needs:

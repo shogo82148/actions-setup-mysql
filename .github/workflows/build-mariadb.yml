@@ -78,8 +78,8 @@ jobs:
       - run: .github\build-mariadb-windows.ps1 $env:MARIADB_VERSION
       - uses: actions/upload-artifact@v2
         with:
-          name: mariadb-${{ matrix.mariadb }}-win32-x64.tar.zstd
-          path: "C:\\Temp\\mariadb.tar.zstd"
+          name: mariadb-${{ matrix.mariadb }}-win32-x64.zip
+          path: "C:\\Temp\\mariadb.zip"
 
   upload:
     needs:

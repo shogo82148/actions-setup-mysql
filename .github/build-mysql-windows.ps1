@@ -143,6 +143,5 @@ Get-ChildItem "." -Include *.pdb -Recurse | Remove-Item
 # copy libraries
 Copy-Item -Path "$PREFIX\*" -Recurse -Destination "." -Force
 
-tar "--use-compress-program" "zstd -T0 --long=30 --ultra -22" "-cf" "$RUNNER_TEMP\mysql.tar.zstd" .
-
+Compress-Archive -Path * -DestinationPath "$RUNNER_TEMP\mysql.zip" -CompressionLevel Optimal
 Write-Host "::endgroup::"
