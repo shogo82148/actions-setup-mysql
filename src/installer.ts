@@ -104,7 +104,8 @@ async function acquireMySQL(distribution: string, version: string): Promise<stri
 }
 
 function getFileName(distribution: string, version: string): string {
-  return `${distribution}-${version}-${osPlat}-${osArch}.tar.zstd`;
+  const ext = osPlat === "win32" ? "zip" : "tar.zstd";
+  return `${distribution}-${version}-${osPlat}-${osArch}.${ext}`;
 }
 
 interface PackageVersion {
