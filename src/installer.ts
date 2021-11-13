@@ -125,5 +125,5 @@ async function getDownloadUrl(filename: string): Promise<string> {
 
   const info = await promise;
   const actionsVersion = info.version;
-  return `https://setupmysql.blob.core.windows.net/actions-setup-mysql/v${actionsVersion}/${filename}`;
+  return `https://github.com/shogo82148/actions-setup-mysql/releases/download/v${actionsVersion}/${filename}`;
 }
