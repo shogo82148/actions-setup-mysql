@@ -45,10 +45,15 @@ jobs:
           sudo apt-get install gcc-8 g++-8
       - uses: actions/checkout@v2
       - run: .github/build-mysql-linux.sh "$MYSQL_VERSION"
-      - uses: actions/upload-artifact@v2
-        with:
-          name: mysql-${{ matrix.mysql }}-linux-x64.tar.xz
-          path: ${{ runner.temp }}/mysql.tar.xz
+      - name: upload
+        shell: bash
+        run: |
+          ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
+          mv "$RUNNER_TEMP/mysql.tar.zstd" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-linux-x64.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-linux-x64.tar.zstd"
+        env:
+          MYSQL_VERSION: ${{ matrix.mysql }}
+          GITHUB_TOKEN: ${{ github.token }}
 
   build-darwin:
     runs-on: macos-10.15
@@ -62,10 +67,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github/build-mysql-darwin.sh "$MYSQL_VERSION"
-      - uses: actions/upload-artifact@v2
-        with:
-          name: mysql-${{ matrix.mysql }}-darwin-x64.tar.xz
-          path: ${{ runner.temp }}/mysql.tar.xz
+      - name: upload
+        shell: bash
+        run: |
+          ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
+          mv "$RUNNER_TEMP/mysql.tar.zstd" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-x64.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-x64.tar.zstd"
+        env:
+          MYSQL_VERSION: ${{ matrix.mysql }}
+          GITHUB_TOKEN: ${{ github.token }}
 
   build-windows:
     runs-on: windows-2019
@@ -79,29 +89,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: .github\build-mysql-windows.ps1 $env:MYSQL_VERSION
-      - uses: actions/upload-artifact@v2
-        with:
-          name: mysql-${{ matrix.mysql }}-win32-x64.zip
-          path: "C:\\Temp\\mysql.zip"
-
-  upload:
-    needs:
-      - build-linux
-      - build-darwin
-      - build-windows
-    if: always()
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          path: artifacts
-      - name: upload to azure
+      - name: upload
+        shell: bash
         run: |
-          "$GITHUB_WORKSPACE/.github/upload-to-azure.sh"
+          ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
+          TEMP_DIR=$(cygpath "C:\\Temp")
+          mv "$TEMP_DIR/mysql.zip" "$TEMP_DIR/mysql-$MYSQL_VERSION-win32-x64.zip"
+          gh release upload --clobber "$ACTIONS_VERSION" "$TEMP_DIR/mysql-$MYSQL_VERSION-win32-x64.zip"
         env:
-          AZCOPY_SPA_APPLICATION_ID: ${{ secrets.AZCOPY_SPA_APPLICATION_ID }}
-          AZCOPY_SPA_CLIENT_SECRET: ${{ secrets.AZCOPY_SPA_CLIENT_SECRET }}
-          AZCOPY_TENANT_ID: ${{ secrets.AZCOPY_TENANT_ID }}
-        working-directory: artifacts
+          MYSQL_VERSION: ${{ matrix.mysql }}
+          GITHUB_TOKEN: ${{ github.token }}

@@ -83,8 +83,9 @@ echo "::group::build MariaDB"
     cmake "../mariadb-$MARIADB_VERSION" \
         -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
         -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
-        -DCMAKE_INSTALL_PREFIX="$PREFIX" \
         -DWITH_ROCKSDB_LZ4=OFF -DWITH_ROCKSDB_BZip2=OFF -DWITH_ROCKSDB_Snappy=OFF -DWITH_ROCKSDB_ZSTD=OFF \
+        -DWITH_UNIT_TESTS=OFF \
+        -DCMAKE_INSTALL_PREFIX="$PREFIX" \
         -DWITH_SSL="$PREFIX" -DPLUGIN_TOKUDB=NO
     make "-j$JOBS"
 )
@@ -109,7 +110,6 @@ echo "::group::archive"
     rm -rf ./mysql-test
     rm -rf ./sql-bench
 
-    export XZ_OPT=-9
-    tar Jcf "$RUNNER_TEMP/mariadb.tar.xz" .
+    tar --use-compress-program 'zstd -T0 --long=30 --ultra -22' -cf "$RUNNER_TEMP/mariadb.tar.zstd" .
 )
 echo "::endgroup::"

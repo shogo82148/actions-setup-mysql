@@ -94,21 +94,17 @@ async function acquireMySQL(distribution: string, version: string): Promise<stri
   }
 
   //
-  // Extract XZ compressed tar
+  // Extract Zstandard compressed tar
   //
   const extPath = downloadUrl.endsWith(".zip")
     ? await tc.extractZip(downloadPath)
-    : downloadUrl.endsWith(".tar.xz")
-    ? await tc.extractTar(downloadPath, "", "xJ")
-    : downloadUrl.endsWith(".tar.bz2")
-    ? await tc.extractTar(downloadPath, "", "xj")
-    : await tc.extractTar(downloadPath);
+    : await tc.extractTar(downloadPath, "", ["--use-compress-program", "zstd -d --long=30", "-x"]);
 
   return await tc.cacheDir(extPath, distribution, version);
 }
 
 function getFileName(distribution: string, version: string): string {
-  const ext = osPlat === "win32" ? "zip" : "tar.xz";
+  const ext = osPlat === "win32" ? "zip" : "tar.zstd";
   return `${distribution}-${version}-${osPlat}-${osArch}.${ext}`;
 }
 
@@ -129,5 +125,5 @@ async function getDownloadUrl(filename: string): Promise<string> {
 
   const info = await promise;
   const actionsVersion = info.version;
-  return `https://setupmysql.blob.core.windows.net/actions-setup-mysql/v${actionsVersion}/${filename}`;
+  return `https://github.com/shogo82148/actions-setup-mysql/releases/download/v${actionsVersion}/${filename}`;
 }

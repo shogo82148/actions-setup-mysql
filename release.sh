@@ -23,21 +23,25 @@ MINOR=$(echo "$VERSION" | cut -d. -f2)
 PATCH=$(echo "$VERSION" | cut -d. -f3)
 WORKING=$CURRENT/.working
 
+: release the action
+if ! RELEASE=$(gh release view "v$MAJOR.$MINOR.$PATCH" --json url,targetCommitish); then
+    : it looks that "v$MAJOR.$MINOR.$PATCH" is not tagged.
+    : run ./prepare.sh "v$MAJOR.$MINOR.$PATCH" at first.
+    : see the comments of ./release.sh for more details.
+    exit 1
+fi
+
 : clone
 ORIGIN=$(git remote get-url origin)
 rm -rf "$WORKING"
 git clone "$ORIGIN" "$WORKING"
 cd "$WORKING"
 
-: release the action
-git checkout "v$MAJOR.$MINOR.$PATCH" || (
-    : it looks that "v$MAJOR.$MINOR.$PATCH" is not tagged.
-    : run ./prepare.sh "v$MAJOR.$MINOR.$PATCH" at first.
-    : see the comments of ./release.sh for more details.
-    exit 1
-)
-git tag -fa "v$MAJOR" -m "release v$MAJOR.$MINOR.$PATCH"
+git checkout "$(echo "$RELEASE" | jq -r .targetCommitish)"
+git tag -sfa "v$MAJOR" -m "release v$MAJOR.$MINOR.$PATCH"
 git push -f origin "v$MAJOR"
 
 cd "$CURRENT"
 rm -rf "$WORKING"
+
+open "$(echo "$RELEASE" | jq -r .url)"
