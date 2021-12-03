@@ -80,3 +80,29 @@ jobs:
         env:
           MYSQL_VERSION: ${{ matrix.mysql }}
           BASE_DIR: ${{ steps.action.outputs.base-dir }}
+
+  # https://github.com/shogo82148/actions-setup-mysql/issues/421
+  test-issue421:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set Node.js 12.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - name: use the action
+        id: action
+        uses: ./
+        with:
+          mysql-version: '8'
+          my-cnf: |
+            port=5729
+            authentication_policy=mysql_native_password
+            sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
