@@ -16,7 +16,6 @@ export async function shutdownMySQL(state: starter.MySQLState): Promise<void> {
     const args = [
       `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
       `--user=root`,
-      `--host=127.0.0.1`,
     ];
     if (state.rootPassword) {
       env["MYSQL_PWD"] = state.rootPassword;

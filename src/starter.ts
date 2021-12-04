@@ -57,6 +57,7 @@ export async function startMySQL(
   cnf: string,
   rootPassword: string
 ): Promise<MySQLState> {
+  // configure mysqld
   const baseDir = await mkdtemp();
   const config = mycnf.parse(`[mysqld]\n${cnf}`);
   config["mysqld"] ||= {};
@@ -65,10 +66,16 @@ export async function startMySQL(
   config["mysqld"]["socket"] ||= path.join(baseDir, "tmp", "mysql.sock");
   config["mysqld"]["datadir"] ||= path.join(baseDir, "var");
   config["mysqld"]["pid-file"] = pidFile;
+  config["mysqld"]["port"] ||= "3306";
   config["mysqld"]["tmpdir"] ||= path.join(baseDir, "tmp");
   config["mysqld"]["ssl_ca"] ||= path.join(baseDir, "var", "ca.pem");
   config["mysqld"]["ssl_cert"] ||= path.join(baseDir, "var", "server-cert.pem");
   config["mysqld"]["ssl_key"] ||= path.join(baseDir, "var", "server-key.pem");
+
+  // configure mysql client
+  config["client"] ||= {};
+  config["client"]["port"] = config["mysqld"]["port"];
+  config["client"]["host"] = "127.0.0.1";
 
   await core.group("setup MySQL Database", async () => {
     core.info(`creating the directory structure on ${baseDir}`);
@@ -173,7 +180,6 @@ export async function startMySQL(
       await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
         `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
         `--user=root`,
-        `--host=127.0.0.1`,
         `password`,
         rootPassword,
       ]);
@@ -197,7 +203,6 @@ export async function createUser(state: MySQLState, user: string, password: stri
   const args = [
     `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
     `--user=root`,
-    `--host=127.0.0.1`,
   ];
   if (state.rootPassword) {
     env["MYSQL_PWD"] = state.rootPassword;
