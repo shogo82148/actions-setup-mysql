@@ -17,7 +17,7 @@
 set -uex
 
 CURRENT=$(cd "$(dirname "$0")" && pwd)
-VERSION=$1
+VERSION=${1#v}
 MAJOR=$(echo "$VERSION" | cut -d. -f1)
 MINOR=$(echo "$VERSION" | cut -d. -f2)
 PATCH=$(echo "$VERSION" | cut -d. -f3)
