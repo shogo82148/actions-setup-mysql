@@ -20,10 +20,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set Node.js 12.x
+      - name: Set Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: 12.x
+          node-version: 16.x
           cache: npm
 
       - run: npm ci
@@ -54,10 +54,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set Node.js 12.x
+      - name: Set Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: 12.x
+          node-version: 16.x
           cache: npm
       - name: Set up perl
         uses: shogo82148/actions-setup-perl@v1
@@ -89,10 +89,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Set Node.js 12.x
+      - name: Set Node.js 16.x
         uses: actions/setup-node@v2
         with:
-          node-version: 12.x
+          node-version: 16.x
           cache: npm
 
       - run: npm ci
