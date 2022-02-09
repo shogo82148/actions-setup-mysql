@@ -50,6 +50,7 @@ jobs:
           - "mariadb-10.5"
           - "mariadb-10.4"
           - "mariadb-10.3"
+          - "mariadb-10.2"
     timeout-minutes: 5
     runs-on: ${{ matrix.os }}
     steps:
