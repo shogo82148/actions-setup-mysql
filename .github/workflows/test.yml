@@ -44,6 +44,8 @@ jobs:
           - "8.0"
           - "5.7"
           - "5.6"
+          - "mariadb-10.8"
+          - "mariadb-10.7"
           - "mariadb-10.6"
           - "mariadb-10.5"
           - "mariadb-10.4"
