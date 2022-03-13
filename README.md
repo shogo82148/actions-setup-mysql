@@ -15,7 +15,7 @@ This action sets by MySQL database for use in actions by:
 
 ```yaml
 steps:
-- uses: actions/checkout@v2
+- uses: actions/checkout@v3
 - uses: shogo82148/actions-setup-mysql@v1
   with:
     mysql-version: '8.0'
