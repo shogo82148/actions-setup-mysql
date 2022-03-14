@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: set-matrix
         name: list available MariaDB versions
         run: |
@@ -40,7 +40,7 @@ jobs:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: .github/build-mariadb-linux.sh "$MARIADB_VERSION"
       - name: upload
         shell: bash
@@ -62,7 +62,7 @@ jobs:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
       - name: upload
         shell: bash
@@ -84,7 +84,7 @@ jobs:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: .github\build-mariadb-windows.ps1 $env:MARIADB_VERSION
       - name: upload
         shell: bash
