@@ -3,7 +3,7 @@
 set -e
 
 MYSQL_VERSION=$1
-OPENSSL_VERSION=1_1_1m
+OPENSSL_VERSION=1_1_1n
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
