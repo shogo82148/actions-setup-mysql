@@ -14,14 +14,14 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Node.js 16.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 16.x
           cache: npm
@@ -51,14 +51,14 @@ jobs:
           - "mariadb-10.4"
           - "mariadb-10.3"
           - "mariadb-10.2"
-    timeout-minutes: 5
+    timeout-minutes: 15
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Node.js 16.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 16.x
           cache: npm
@@ -86,14 +86,14 @@ jobs:
 
   # https://github.com/shogo82148/actions-setup-mysql/issues/421
   test-issue421:
-    timeout-minutes: 5
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set Node.js 16.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 16.x
           cache: npm

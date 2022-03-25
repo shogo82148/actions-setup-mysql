@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - id: set-matrix
         name: list available MySQL versions
         run: |
@@ -43,7 +43,7 @@ jobs:
       - name: install gcc
         run: |
           sudo apt-get install gcc-8 g++-8
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: .github/build-mysql-linux.sh "$MYSQL_VERSION"
       - name: upload
         shell: bash
@@ -65,7 +65,7 @@ jobs:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: .github/build-mysql-darwin.sh "$MYSQL_VERSION"
       - name: upload
         shell: bash
@@ -87,7 +87,7 @@ jobs:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: .github\build-mysql-windows.ps1 $env:MYSQL_VERSION
       - name: upload
         shell: bash
