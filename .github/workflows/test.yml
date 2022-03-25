@@ -14,7 +14,7 @@ jobs:
         os:
           - ubuntu-latest
           - macos-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -51,7 +51,7 @@ jobs:
           - "mariadb-10.4"
           - "mariadb-10.3"
           - "mariadb-10.2"
-    timeout-minutes: 5
+    timeout-minutes: 15
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -86,7 +86,7 @@ jobs:
 
   # https://github.com/shogo82148/actions-setup-mysql/issues/421
   test-issue421:
-    timeout-minutes: 5
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
