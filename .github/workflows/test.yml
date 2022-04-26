@@ -36,6 +36,7 @@ jobs:
         os:
           - ubuntu-20.04
           - ubuntu-18.04
+          - macos-12
           - macos-11
           - macos-10.15
           - windows-2022
