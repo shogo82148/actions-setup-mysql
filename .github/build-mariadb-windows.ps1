@@ -1,5 +1,5 @@
 Param($MARIADB_VERSION)
-$OPENSSL_VERSION = "1_1_1n"
+$OPENSSL_VERSION = "1_1_1o"
 $ROOT = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RUNNER_TEMP = $env:RUNNER_TEMP
 if ($null -eq $RUNNER_TEMP) {
