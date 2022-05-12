@@ -20,15 +20,12 @@ jobs:
       - id: set-matrix
         name: list available MariaDB versions
         run: |
-          if [ -n "$MARIADB_VERSIONS" ]; then
-            echo "::set-output name=matrix-linux::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: . , os: ["ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04"]}')"
-            echo "::set-output name=matrix-darwin::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
-            echo "::set-output name=matrix-windows::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
-          else
-            echo "::set-output name=matrix-linux::$(< versions/mariadb.json jq -c '{mariadb: . , os: ["ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04"]}')"
-            echo "::set-output name=matrix-darwin::$(< versions/mariadb.json jq -c '{mariadb: .}')"
-            echo "::set-output name=matrix-windows::$(< versions/mariadb.json jq -c '{mariadb: .}')"
+          if [[ -z "$MARIADB_VERSIONS" ]]; then
+            export MARIADB_VERSIONS=$(< versions/mariadb.json)
           fi
+          echo "::set-output name=matrix-linux::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: . , os: ["ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04"]}')"
+          echo "::set-output name=matrix-darwin::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
+          echo "::set-output name=matrix-windows::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
         env:
           MARIADB_VERSIONS: ${{ github.event.inputs.mariadb-versions }}
     outputs:
