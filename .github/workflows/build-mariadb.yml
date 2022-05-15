@@ -20,24 +20,28 @@ jobs:
       - id: set-matrix
         name: list available MariaDB versions
         run: |
-          if [ -n "$MARIADB_VERSIONS" ]; then
-            echo "::set-output name=matrix::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
-          else
-            echo "::set-output name=matrix::$(< versions/mariadb.json jq -c '{mariadb: .}')"
+          if [[ -z "$MARIADB_VERSIONS" ]]; then
+            export MARIADB_VERSIONS=$(< versions/mariadb.json)
           fi
+          echo "::set-output name=matrix-linux::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: . , os: ["ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04"]}')"
+          echo "::set-output name=matrix-darwin::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
+          echo "::set-output name=matrix-windows::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
         env:
           MARIADB_VERSIONS: ${{ github.event.inputs.mariadb-versions }}
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix-linux: ${{ steps.set-matrix.outputs.matrix-linux }}
+      matrix-darwin: ${{ steps.set-matrix.outputs.matrix-darwin }}
+      matrix-windows: ${{ steps.set-matrix.outputs.matrix-windows }}
 
   build-linux:
-    runs-on: ubuntu-18.04
+    runs-on: ${{ matrix.os }}
     needs: list
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.list.outputs.matrix)}}
+      matrix: ${{fromJson(needs.list.outputs.matrix-linux)}}
     env:
       MARIADB_VERSION: ${{ matrix.mariadb }}
+      BUILD_OS: ${{ matrix.os }}
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v3
@@ -46,10 +50,9 @@ jobs:
         shell: bash
         run: |
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
-          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-linux-x64.tar.zstd"
-          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-linux-x64.tar.zstd"
+          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-$BUILD_OS-x64.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-$BUILD_OS-x64.tar.zstd"
         env:
-          MARIADB_VERSION: ${{ matrix.mariadb }}
           GITHUB_TOKEN: ${{ github.token }}
 
   build-darwin:
@@ -57,7 +60,7 @@ jobs:
     needs: list
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.list.outputs.matrix)}}
+      matrix: ${{fromJson(needs.list.outputs.matrix-darwin)}}
     env:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
@@ -79,7 +82,7 @@ jobs:
     needs: list
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.list.outputs.matrix)}}
+      matrix: ${{fromJson(needs.list.outputs.matrix-windows)}}
     env:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
