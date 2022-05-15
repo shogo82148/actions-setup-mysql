@@ -20,39 +20,39 @@ jobs:
       - id: set-matrix
         name: list available MySQL versions
         run: |
-          if [ -n "$MYSQL_VERSIONS" ]; then
-            echo "::set-output name=matrix::$(printenv MYSQL_VERSIONS | jq -c '{mysql: .}')"
-          else
-            echo "::set-output name=matrix::$(< versions/mysql.json jq -c '{mysql: .}')"
+          if [[ -z "$MYSQL_VERSIONS" ]]; then
+            export MYSQL_VERSIONS=$(< versions/mysql.json)
           fi
+          echo "::set-output name=matrix-linux::$(printenv MYSQL_VERSIONS | jq -c '{mysql: . , os: ["ubuntu-18.04", "ubuntu-20.04", "ubuntu-22.04"]}')"
+          echo "::set-output name=matrix-darwin::$(printenv MYSQL_VERSIONS | jq -c '{mysql: .}')"
+          echo "::set-output name=matrix-windows::$(printenv MYSQL_VERSIONS | jq -c '{mysql: .}')"
         env:
           MYSQL_VERSIONS: ${{ github.event.inputs.mysql-versions }}
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix-linux: ${{ steps.set-matrix.outputs.matrix-linux }}
+      matrix-darwin: ${{ steps.set-matrix.outputs.matrix-darwin }}
+      matrix-windows: ${{ steps.set-matrix.outputs.matrix-windows }}
 
   build-linux:
-    runs-on: ubuntu-18.04
+    runs-on: ${{ matrix.os }}
     needs: list
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.list.outputs.matrix)}}
+      matrix: ${{fromJson(needs.list.outputs.matrix-linux)}}
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
+      BUILD_OS: ${{ matrix.os }}
     timeout-minutes: 180
     steps:
-      - name: install gcc
-        run: |
-          sudo apt-get install gcc-8 g++-8
       - uses: actions/checkout@v3
       - run: .github/build-mysql-linux.sh "$MYSQL_VERSION"
       - name: upload
         shell: bash
         run: |
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
-          mv "$RUNNER_TEMP/mysql.tar.zstd" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-linux-x64.tar.zstd"
-          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-linux-x64.tar.zstd"
+          mv "$RUNNER_TEMP/mysql.tar.zstd" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-$BUILD_OS-x64.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-$BUILD_OS-x64.tar.zstd"
         env:
-          MYSQL_VERSION: ${{ matrix.mysql }}
           GITHUB_TOKEN: ${{ github.token }}
 
   build-darwin:
@@ -60,7 +60,7 @@ jobs:
     needs: list
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.list.outputs.matrix)}}
+      matrix: ${{fromJson(needs.list.outputs.matrix-darwin)}}
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
@@ -74,7 +74,6 @@ jobs:
           mv "$RUNNER_TEMP/mysql.tar.zstd" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-x64.tar.zstd"
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-x64.tar.zstd"
         env:
-          MYSQL_VERSION: ${{ matrix.mysql }}
           GITHUB_TOKEN: ${{ github.token }}
 
   build-windows:
@@ -82,7 +81,7 @@ jobs:
     needs: list
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.list.outputs.matrix)}}
+      matrix: ${{fromJson(needs.list.outputs.matrix-windows)}}
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
@@ -97,5 +96,4 @@ jobs:
           mv "$TEMP_DIR/mysql.zip" "$TEMP_DIR/mysql-$MYSQL_VERSION-win32-x64.zip"
           gh release upload --clobber "$ACTIONS_VERSION" "$TEMP_DIR/mysql-$MYSQL_VERSION-win32-x64.zip"
         env:
-          MYSQL_VERSION: ${{ matrix.mysql }}
           GITHUB_TOKEN: ${{ github.token }}
