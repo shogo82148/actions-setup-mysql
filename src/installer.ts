@@ -7,6 +7,7 @@ import * as tc from "@actions/tool-cache";
 
 const osPlat = os.platform();
 const osArch = os.arch();
+const virtualEnv = getVirtualEnvironmentName();
 
 export interface MySQL {
   distribution: string;
@@ -104,8 +105,15 @@ async function acquireMySQL(distribution: string, version: string): Promise<stri
 }
 
 function getFileName(distribution: string, version: string): string {
-  const ext = osPlat === "win32" ? "zip" : "tar.zstd";
-  return `${distribution}-${version}-${osPlat}-${osArch}.${ext}`;
+  switch (osPlat) {
+    case "win32":
+      return `${distribution}-${version}-${osPlat}-${osArch}.zip`;
+    case "darwin":
+      return `${distribution}-${version}-${osPlat}-${osArch}.tar.zstd`;
+    case "linux":
+      return `${distribution}-${version}-${virtualEnv}-${osArch}.tar.zstd`;
+  }
+  throw new Error(`unknown platform: ${osPlat}`);
 }
 
 interface PackageVersion {
@@ -126,4 +134,33 @@ async function getDownloadUrl(filename: string): Promise<string> {
   const info = await promise;
   const actionsVersion = info.version;
   return `https://github.com/shogo82148/actions-setup-mysql/releases/download/v${actionsVersion}/${filename}`;
+}
+
+function getImageOS(): string {
+  const imageOS = process.env["ImageOS"];
+  if (!imageOS) {
+    throw new Error("The environment variable ImageOS must be set");
+  }
+  return imageOS;
+}
+
+function getVirtualEnvironmentName(): string {
+  const imageOS = getImageOS();
+
+  let match = imageOS.match(/^ubuntu(\d+)/); // e.g. ubuntu18
+  if (match) {
+    return `ubuntu-${match[1]}.04`;
+  }
+
+  match = imageOS.match(/^macos(\d{2})(\d+)?/); // e.g. macos1015, macos11
+  if (match) {
+    return `macos-${match[1]}.${match[2] || "0"}`;
+  }
+
+  match = imageOS.match(/^win(\d+)/); // e.g. win19
+  if (match) {
+    return `windows-20${match[1]}`;
+  }
+
+  throw new Error(`Unknown ImageOS ${imageOS}`);
 }
