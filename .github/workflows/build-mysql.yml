@@ -44,10 +44,6 @@ jobs:
       BUILD_OS: ${{ matrix.os }}
     timeout-minutes: 180
     steps:
-      - name: install gcc
-        run: |
-          sudo apt-get install gcc-9 g++-9 || true
-          gcc --version
       - uses: actions/checkout@v3
       - run: .github/build-mysql-linux.sh "$MYSQL_VERSION"
       - name: upload

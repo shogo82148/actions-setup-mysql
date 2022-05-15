@@ -9,6 +9,29 @@ ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
 PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/x64
 
+# use latest version of gcc installed
+if command -v gcc-11 > /dev/null 2>&1; then
+    echo "gcc-11 is available"
+    export CC=gcc-11
+elif command -v gcc-10 > /dev/null 2>&1; then
+    echo "gcc-10 is available"
+    export CC=gcc-10
+elif command -v gcc-9 > /dev/null 2>&1; then
+    echo "gcc-9 is available"
+    export CC=gcc-9
+fi
+
+if command -v g++-11 > /dev/null 2>&1; then
+    echo "g++-11 is available"
+    export CXX=g++-11
+elif command -v g++-10 > /dev/null 2>&1; then
+    echo "g++-10 is available"
+    export CXX=g++-10
+elif command -v g++-9 > /dev/null 2>&1; then
+    echo "g++-9 is available"
+    export CXX=g++-9
+fi
+
 # detect the number of CPU Core
 JOBS=$(nproc)
 
