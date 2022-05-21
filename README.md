@@ -35,6 +35,7 @@ Available Versions are:
     - `5.7`
     - `5.6`
 - MariaDB
+    - `10.9`
     - `10.8`
     - `10.7`
     - `10.6`
