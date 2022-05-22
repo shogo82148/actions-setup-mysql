@@ -35,6 +35,7 @@ Available Versions are:
     - `5.7`
     - `5.6`
 - MariaDB
+    - `10.9`
     - `10.8`
     - `10.7`
     - `10.6`
@@ -102,3 +103,33 @@ The name of the new user.
 ### `password`
 
 The password for the new user.
+
+## Outputs
+
+### `base-dir`
+
+The directory under which the mysql database is being created.
+
+It contains:
+
+- `etc/my.cnf`
+- `tmp/mysqld.log`
+- `tmp/mysqld.pid`
+- `tmp/mysql.sock`
+- `var`: The default path of `datadir`
+- `var/ca.pem`: The root certificate of the certification authority for SSL/TLS
+- `var/server-cert.pem`: The server certificate for SSL/TLS
+- `var/server-key.pem`: The server key for SSL/TLS
+
+For example, you can use the root certificate for connecting via SSL/TLS.
+
+```yaml
+- id: setup-mysql
+  uses: shogo82148/actions-setup-mysql@v1
+  with:
+    mysql-version: '8.0'
+- run: mysql -uroot -h127.0.0.1 \
+  --ssl --ssl-mode=--ssl-mode=REQUIRED \
+  --ssl-ca=${{ steps.setup-mysql.outputs.base-dir }}/var/ca.pem \
+  -e 'SELECT version()'
+```
