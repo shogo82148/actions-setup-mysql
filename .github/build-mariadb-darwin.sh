@@ -3,7 +3,7 @@
 set -e
 
 MARIADB_VERSION=$1
-OPENSSL_VERSION=1_1_1o
+OPENSSL_VERSION=1_1_1p
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
