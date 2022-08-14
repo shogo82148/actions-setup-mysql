@@ -7,7 +7,7 @@ OPENSSL_VERSION=1_1_1q
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
-PREFIX=$RUNNER_TOOL_CACHE/mariadb/$MARIADB_VERSION/x64
+PREFIX=$RUNNER_TOOL_CACHE/mariadb/$MARIADB_VERSION/$(uname -m)
 
 # use latest version of gcc installed
 if command -v gcc-11 > /dev/null 2>&1; then
@@ -94,7 +94,7 @@ index 926f3884b138..a8ab64b2714b 100644
  #include <openssl/pem.h>
 PATCH
 
-    ./Configure --prefix="$PREFIX" linux-x86_64
+    ./Configure --prefix="$PREFIX" "linux-$(uname -m)"
     make "-j$JOBS"
     make install_sw install_ssldirs
 )

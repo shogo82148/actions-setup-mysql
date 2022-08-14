@@ -1,0 +1,86 @@
+diff --git a/MYSQL_VERSION b/MYSQL_VERSION
+new file mode 100644
+index 00000000000..f0020f26f0f
+--- /dev/null
++++ b/MYSQL_VERSION
+@@ -0,0 +1,4 @@
++MYSQL_VERSION_MAJOR=5
++MYSQL_VERSION_MINOR=6
++MYSQL_VERSION_PATCH=51
++MYSQL_VERSION_EXTRA=
+diff --git a/VERSION b/VERSION
+deleted file mode 100644
+index f0020f26f0f..00000000000
+--- a/VERSION
++++ /dev/null
+@@ -1,4 +0,0 @@
+-MYSQL_VERSION_MAJOR=5
+-MYSQL_VERSION_MINOR=6
+-MYSQL_VERSION_PATCH=51
+-MYSQL_VERSION_EXTRA=
+diff --git a/cmake/mysql_version.cmake b/cmake/mysql_version.cmake
+index 34ed6f4db22..f07950bc1b9 100644
+--- a/cmake/mysql_version.cmake
++++ b/cmake/mysql_version.cmake
+@@ -31,15 +31,15 @@ SET(DOT_FRM_VERSION "6")
+ 
+ # Generate "something" to trigger cmake rerun when VERSION changes
+ CONFIGURE_FILE(
+-  ${CMAKE_SOURCE_DIR}/VERSION
+-  ${CMAKE_BINARY_DIR}/VERSION.dep
++  ${CMAKE_SOURCE_DIR}/MYSQL_VERSION
++  ${CMAKE_BINARY_DIR}/MYSQL_VERSION.dep
+ )
+ 
+ # Read value for a variable from VERSION.
+ 
+ MACRO(MYSQL_GET_CONFIG_VALUE keyword var)
+  IF(NOT ${var})
+-   FILE (STRINGS ${CMAKE_SOURCE_DIR}/VERSION str REGEX "^[ ]*${keyword}=")
++   FILE (STRINGS ${CMAKE_SOURCE_DIR}/MYSQL_VERSION str REGEX "^[ ]*${keyword}=")
+    IF(str)
+      STRING(REPLACE "${keyword}=" "" str ${str})
+      STRING(REGEX REPLACE  "[ ].*" ""  str "${str}")
+@@ -58,7 +58,7 @@ MACRO(GET_MYSQL_VERSION)
+   MYSQL_GET_CONFIG_VALUE("MYSQL_VERSION_EXTRA" EXTRA_VERSION)
+ 
+   IF(NOT MAJOR_VERSION OR NOT MINOR_VERSION OR NOT PATCH_VERSION)
+-    MESSAGE(FATAL_ERROR "VERSION file cannot be parsed.")
++    MESSAGE(FATAL_ERROR "MYSQL_VERSION file cannot be parsed.")
+   ENDIF()
+ 
+   SET(VERSION "${MAJOR_VERSION}.${MINOR_VERSION}.${PATCH_VERSION}${EXTRA_VERSION}")
+diff --git a/cmake/os/Darwin.cmake b/cmake/os/Darwin.cmake
+index d7d20f4e2db..221d5abb9ab 100644
+--- a/cmake/os/Darwin.cmake
++++ b/cmake/os/Darwin.cmake
+@@ -22,7 +22,15 @@
+ 
+ # This file includes OSX specific options and quirks, related to system checks
+ 
++IF(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64")
++  SET(APPLE_ARM 1)
++ENDIF()
++
+ # This is used for the version_compile_machine variable.
+ IF(CMAKE_SIZEOF_VOID_P MATCHES 8)
+-  SET(MYSQL_MACHINE_TYPE "x86_64")
++  IF(APPLE_ARM)
++    SET(MYSQL_MACHINE_TYPE "arm64")
++  ELSE()
++    SET(MYSQL_MACHINE_TYPE "x86_64")
++  ENDIF()
+ ENDIF()
+diff --git a/include/my_global.h b/include/my_global.h
+index f5ac0a8a2da..45b558dab66 100644
+--- a/include/my_global.h
++++ b/include/my_global.h
+@@ -175,7 +175,7 @@
+ #  if defined(__i386__) || defined(__ppc__)
+ #    define SIZEOF_CHARP 4
+ #    define SIZEOF_LONG 4
+-#  elif defined(__x86_64__) || defined(__ppc64__)
++#  elif defined(__x86_64__) || defined(__ppc64__) || defined(__arm64__)
+ #    define SIZEOF_CHARP 8
+ #    define SIZEOF_LONG 8
+ #  else
