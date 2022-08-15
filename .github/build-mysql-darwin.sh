@@ -7,7 +7,20 @@ OPENSSL_VERSION=1_1_1q
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
-PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/$(uname -m)
+
+case "$(uname -m)" in
+    "x86_64")
+        MYSQL_ARCH="x86"
+        ;;
+    "arm64")
+        MYSQL_ARCH="arm64"
+        ;;
+    *)
+        echo "unsupported architecture: $(uname -m)"
+        exit 1
+        ;;
+esac
+PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/$MYSQL_ARCH
 
 # detect the number of CPU Core
 JOBS=$(sysctl -n hw.logicalcpu_max)
