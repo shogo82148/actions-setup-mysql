@@ -10,17 +10,17 @@ ROOT=$(cd "$(dirname "$0")" && pwd)
 
 case "$(uname -m)" in
     "x86_64")
-        MYSQL_ARCH="x86"
+        MARIADB_ARCH="x64"
         ;;
     "arm64")
-        MYSQL_ARCH="arm64"
+        MARIADB_ARCH="arm64"
         ;;
     *)
         echo "unsupported architecture: $(uname -m)"
         exit 1
         ;;
 esac
-PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/$MYSQL_ARCH
+PREFIX=$RUNNER_TOOL_CACHE/mysql/$MARIADB_VERSION/$MARIADB_ARCH
 
 # use latest version of gcc installed
 if command -v gcc-11 > /dev/null 2>&1; then

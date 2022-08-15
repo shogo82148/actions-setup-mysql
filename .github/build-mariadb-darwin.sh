@@ -10,7 +10,7 @@ ROOT=$(cd "$(dirname "$0")" && pwd)
 
 case "$(uname -m)" in
     "x86_64")
-        MARIADB_ARCH="x86"
+        MARIADB_ARCH="x64"
         ;;
     "arm64")
         MARIADB_ARCH="arm64"

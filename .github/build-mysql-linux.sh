@@ -10,7 +10,7 @@ ROOT=$(cd "$(dirname "$0")" && pwd)
 
 case "$(uname -m)" in
     "x86_64")
-        MYSQL_ARCH="x86"
+        MYSQL_ARCH="x64"
         ;;
     "arm64")
         MYSQL_ARCH="arm64"
