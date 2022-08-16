@@ -179,8 +179,8 @@ export async function startMySQL(
   });
 
   if (rootPassword) {
-    await core.group("configure root password", async () => {
-      try {
+    try {
+      await core.group("configure root password", async () => {
         await retry(async () => {
           await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
             `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
@@ -189,13 +189,13 @@ export async function startMySQL(
             rootPassword,
           ]);
         });
-      } catch (error) {
-        core.error(`failed to configure root password: ${error}`);
-        const log = await readFile(logFile, { encoding: "utf8" });
-        core.error(`log of mysqld: ${log}`);
-        throw new Error("failed to configure root password");
-      }
-    });
+      });
+    } catch (error) {
+      core.error(`failed to configure root password: ${error}`);
+      const log = await readFile(logFile, { encoding: "utf8" });
+      core.error(`log of mysqld: ${log}`);
+      throw new Error("failed to configure root password");
+    }
   }
 
   core.setOutput("base-dir", baseDir);
