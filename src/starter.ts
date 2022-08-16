@@ -74,8 +74,8 @@ export async function startMySQL(
   config["mysqld"]["ssl_key"] ||= path.join(baseDir, "var", "server-key.pem");
 
   // https://mariadb.com/kb/en/server-system-variables/#bind_address
-  // accepts all requests via IPv4 and/or IPv6
-  config["mysqld"]["bind-address"] ||= "*";
+  // accepts all requests via IPv4
+  config["mysqld"]["bind-address"] ||= "0.0.0.0";
 
   // configure mysql client
   config["client"] ||= {};
