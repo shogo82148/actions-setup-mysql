@@ -200,10 +200,7 @@ export async function startMySQL(
 export async function createUser(state: MySQLState, user: string, password: string): Promise<void> {
   const mysql = path.join(state.toolPath, "bin", `mysql${binExt}`);
   const env: { [key: string]: string } = {};
-  const args = [
-    `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
-    `--user=root`,
-  ];
+  const args = [`--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`, `--user=root`];
   if (state.rootPassword) {
     env["MYSQL_PWD"] = state.rootPassword;
   }
