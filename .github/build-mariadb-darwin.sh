@@ -7,7 +7,20 @@ OPENSSL_VERSION=1_1_1q
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
-PREFIX=$RUNNER_TOOL_CACHE/mariadb/$MARIADB_VERSION/x64
+
+case "$(uname -m)" in
+    "x86_64")
+        MARIADB_ARCH="x64"
+        ;;
+    "arm64")
+        MARIADB_ARCH="arm64"
+        ;;
+    *)
+        echo "unsupported architecture: $(uname -m)"
+        exit 1
+        ;;
+esac
+PREFIX=$RUNNER_TOOL_CACHE/mariadb/$MARIADB_VERSION/$MARIADB_ARCH
 
 # detect the number of CPU Core
 JOBS=$(sysctl -n hw.logicalcpu_max)
@@ -71,7 +84,7 @@ index 926f3884b138..a8ab64b2714b 100644
  #include <openssl/pem.h>
 PATCH
 
-    ./Configure --prefix="$PREFIX" darwin64-x86_64-cc
+    ./Configure --prefix="$PREFIX" "darwin64-$(uname -m)-cc"
     make "-j$JOBS"
     make install_sw install_ssldirs
 )
