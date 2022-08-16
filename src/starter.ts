@@ -2,6 +2,7 @@ import * as child_process from "child_process";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as fs from "fs";
+import { stat } from "fs/promises";
 import * as installer from "./installer";
 import * as io from "@actions/io";
 import * as mycnf from "./mycnf";
@@ -160,16 +161,11 @@ export async function startMySQL(
     pid = subprocess.pid || 0;
 
     core.info("wait for MySQL ready");
-    for (;;) {
-      try {
-        fs.statSync(pidFile);
-        break;
-      } catch {
-        await sleep(0.1);
-      }
-      if (subprocess.exitCode !== null) {
-        throw new Error("failed to launch MySQL");
-      }
+    await retry(async () => {
+      await stat(pidFile);
+    });
+    if (subprocess.exitCode !== null) {
+      throw new Error("failed to launch MySQL");
     }
     subprocess.unref();
     core.info("MySQL Server started");
@@ -177,12 +173,14 @@ export async function startMySQL(
 
   if (rootPassword) {
     await core.group("configure root password", async () => {
-      await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
-        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-        `--user=root`,
-        `password`,
-        rootPassword,
-      ]);
+      await retry(async () => {
+        await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
+          `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+          `--user=root`,
+          `password`,
+          rootPassword,
+        ]);
+      });
     });
   }
 
@@ -396,4 +394,19 @@ async function execute(
     core.debug(`execute: ${commandLine}`);
   }
   return exec.exec(commandLine, args, options);
+}
+
+async function retry<T>(func: () => Promise<T>): Promise<T> {
+  let waitSec = 1;
+  for (let i = 0; i < 3; i++) {
+    try {
+      return await func();
+    } catch (error) {
+      core.debug(`failed: ${error}`);
+    }
+    core.debug(`retry in ${waitSec} sec...`);
+    await sleep(waitSec);
+    waitSec = Math.min(waitSec * 2, 30);
+  }
+  throw new Error("try harder but give up");
 }
