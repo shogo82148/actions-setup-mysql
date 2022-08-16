@@ -2,7 +2,7 @@ import * as child_process from "child_process";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as fs from "fs";
-import { stat } from "fs/promises";
+import { stat, open, readFile } from "fs/promises";
 import * as installer from "./installer";
 import * as io from "@actions/io";
 import * as mycnf from "./mycnf";
@@ -145,42 +145,56 @@ export async function startMySQL(
     await setupTls(mysql, baseDir);
   });
 
+  // start MySQL database
   let pid = 0;
+  const logFile = path.join(baseDir, "tmp", "mysqld.log");
   await core.group("start MySQL database", async () => {
-    core.info("start MySQL database");
-    const out = fs.openSync(path.join(baseDir, "tmp", "mysqld.log"), "a");
-    const err = fs.openSync(path.join(baseDir, "tmp", "mysqld.log"), "a");
-    const subprocess = child_process.spawn(
-      path.join(mysql.toolPath, "bin", `mysqld${binExt}`),
-      [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, "--user=root"],
-      {
-        detached: true,
-        stdio: ["ignore", out, err],
-      }
-    );
-    pid = subprocess.pid || 0;
+    const out = await open(logFile, "a");
+    const err = await open(logFile, "a");
+    try {
+      core.info("start MySQL database");
+      const subprocess = child_process.spawn(
+        path.join(mysql.toolPath, "bin", `mysqld${binExt}`),
+        [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, "--user=root"],
+        {
+          detached: true,
+          stdio: ["ignore", out.fd, err.fd],
+        }
+      );
+      pid = subprocess.pid || 0;
 
-    core.info("wait for MySQL ready");
-    await retry(async () => {
-      await stat(pidFile);
-    });
-    if (subprocess.exitCode !== null) {
-      throw new Error("failed to launch MySQL");
+      core.info("wait for MySQL ready");
+      await retry(async () => {
+        await stat(pidFile);
+      });
+      if (subprocess.exitCode !== null) {
+        throw new Error("failed to launch MySQL");
+      }
+      subprocess.unref();
+    } finally {
+      await out.close();
+      await err.close();
     }
-    subprocess.unref();
     core.info("MySQL Server started");
   });
 
   if (rootPassword) {
     await core.group("configure root password", async () => {
-      await retry(async () => {
-        await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
-          `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-          `--user=root`,
-          `password`,
-          rootPassword,
-        ]);
-      });
+      try {
+        await retry(async () => {
+          await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
+            `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+            `--user=root`,
+            `password`,
+            rootPassword,
+          ]);
+        });
+      } catch (error) {
+        core.error(`failed to configure root password: ${error}`);
+        const log = await readFile(logFile, { encoding: "utf8" });
+        core.error(`log of mysqld: ${log}`);
+        throw new Error("failed to configure root password");
+      }
     });
   }
 
@@ -397,8 +411,8 @@ async function execute(
 }
 
 async function retry<T>(func: () => Promise<T>): Promise<T> {
-  let waitSec = 1;
-  for (let i = 0; i < 3; i++) {
+  let waitSec = 0.5;
+  for (let i = 0; i < 10; i++) {
     try {
       return await func();
     } catch (error) {
