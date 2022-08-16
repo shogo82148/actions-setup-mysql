@@ -273,8 +273,6 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
       "req",
       "-newkey",
       "rsa:2048",
-      "-days",
-      "3650",
       "-nodes",
       "-keyout",
       `${datadir}${sep}ca-key.pem`,
