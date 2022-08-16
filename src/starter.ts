@@ -73,10 +73,6 @@ export async function startMySQL(
   config["mysqld"]["ssl_cert"] ||= path.join(baseDir, "var", "server-cert.pem");
   config["mysqld"]["ssl_key"] ||= path.join(baseDir, "var", "server-key.pem");
 
-  // https://mariadb.com/kb/en/server-system-variables/#bind_address
-  // accepts all requests via IPv4
-  config["mysqld"]["bind-address"] ||= "127.0.0.1";
-
   // configure mysql client
   config["client"] ||= {};
   config["client"]["port"] = config["mysqld"]["port"];
@@ -159,7 +155,7 @@ export async function startMySQL(
       core.info("start MySQL database");
       const subprocess = child_process.spawn(
         path.join(mysql.toolPath, "bin", `mysqld${binExt}`),
-        [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, "--user=root"],
+        [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, "--user=root", "--bind-address=*"],
         {
           detached: true,
           stdio: ["ignore", out.fd, err.fd],
