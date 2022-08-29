@@ -34,7 +34,7 @@
     "@types/semver": "^7.3.12",
     "@typescript-eslint/eslint-plugin": "^5.35.1",
     "@typescript-eslint/parser": "^5.35.1",
-    "eslint": "^8.22.0",
+    "eslint": "^8.23.0",
     "eslint-plugin-github": "^4.3.7",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jest": "^27.0.1",
