@@ -76,6 +76,7 @@ export async function startMySQL(
   config["client"] ||= {};
   config["client"]["port"] ||= "3306";
   config["client"]["host"] ||= "127.0.0.1";
+  config["client"]["socket"] ||= path.join(baseDir, "tmp", "mysql.sock");
 
   await core.group("setup MySQL Database", async () => {
     core.info(`creating the directory structure on ${baseDir}`);
