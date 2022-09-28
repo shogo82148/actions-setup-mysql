@@ -67,6 +67,7 @@ export async function startMySQL(
   config["mysqld"]["socket"] ||= path.join(baseDir, "tmp", "mysql.sock");
   config["mysqld"]["datadir"] ||= path.join(baseDir, "var");
   config["mysqld"]["pid-file"] = pidFile;
+  config["mysqld"]["port"] ||= "3306";
   config["mysqld"]["tmpdir"] ||= path.join(baseDir, "tmp");
   config["mysqld"]["ssl_ca"] ||= path.join(baseDir, "var", "ca.pem");
   config["mysqld"]["ssl_cert"] ||= path.join(baseDir, "var", "server-cert.pem");
@@ -74,8 +75,8 @@ export async function startMySQL(
 
   // configure mysql client
   config["client"] ||= {};
-  config["client"]["port"] ||= "3306";
-  config["client"]["host"] ||= "127.0.0.1";
+  config["client"]["port"] = config["mysqld"]["port"];
+  config["client"]["host"] = "127.0.0.1";
 
   await core.group("setup MySQL Database", async () => {
     core.info(`creating the directory structure on ${baseDir}`);
@@ -154,7 +155,7 @@ export async function startMySQL(
       core.info("start MySQL database");
       const subprocess = child_process.spawn(
         path.join(mysql.toolPath, "bin", `mysqld${binExt}`),
-        [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, "--user=root"],
+        [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, "--user=root", "--bind-address=*"],
         {
           detached: true,
           stdio: ["ignore", out.fd, err.fd],
