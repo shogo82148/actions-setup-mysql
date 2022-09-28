@@ -2,6 +2,7 @@ import * as child_process from "child_process";
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
 import * as fs from "fs";
+import { stat, open, readFile } from "fs/promises";
 import * as installer from "./installer";
 import * as io from "@actions/io";
 import * as mycnf from "./mycnf";
@@ -144,46 +145,57 @@ export async function startMySQL(
     await setupTls(mysql, baseDir);
   });
 
+  // start MySQL database
   let pid = 0;
+  const logFile = path.join(baseDir, "tmp", "mysqld.log");
   await core.group("start MySQL database", async () => {
-    core.info("start MySQL database");
-    const out = fs.openSync(path.join(baseDir, "tmp", "mysqld.log"), "a");
-    const err = fs.openSync(path.join(baseDir, "tmp", "mysqld.log"), "a");
-    const subprocess = child_process.spawn(
-      path.join(mysql.toolPath, "bin", `mysqld${binExt}`),
-      [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, "--user=root"],
-      {
-        detached: true,
-        stdio: ["ignore", out, err],
-      }
-    );
-    pid = subprocess.pid || 0;
+    const out = await open(logFile, "a");
+    const err = await open(logFile, "a");
+    try {
+      core.info("start MySQL database");
+      const subprocess = child_process.spawn(
+        path.join(mysql.toolPath, "bin", `mysqld${binExt}`),
+        [`--defaults-file=${baseDir}${sep}etc${sep}my.cnf`, "--user=root", "--bind-address=*"],
+        {
+          detached: true,
+          stdio: ["ignore", out.fd, err.fd],
+        }
+      );
+      pid = subprocess.pid || 0;
 
-    core.info("wait for MySQL ready");
-    for (;;) {
-      try {
-        fs.statSync(pidFile);
-        break;
-      } catch {
-        await sleep(0.1);
-      }
+      core.info("wait for MySQL ready");
+      await retry(async () => {
+        await stat(pidFile);
+      });
       if (subprocess.exitCode !== null) {
         throw new Error("failed to launch MySQL");
       }
+      subprocess.unref();
+    } finally {
+      await out.close();
+      await err.close();
     }
-    subprocess.unref();
     core.info("MySQL Server started");
   });
 
   if (rootPassword) {
-    await core.group("configure root password", async () => {
-      await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
-        `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-        `--user=root`,
-        `password`,
-        rootPassword,
-      ]);
-    });
+    try {
+      await core.group("configure root password", async () => {
+        await retry(async () => {
+          await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
+            `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+            `--user=root`,
+            `password`,
+            rootPassword,
+          ]);
+        });
+      });
+    } catch (error) {
+      core.error(`failed to configure root password: ${error}`);
+      const log = await readFile(logFile, { encoding: "utf8" });
+      core.error(`log of mysqld: ${log}`);
+      throw new Error("failed to configure root password");
+    }
   }
 
   core.setOutput("base-dir", baseDir);
@@ -200,10 +212,7 @@ export async function startMySQL(
 export async function createUser(state: MySQLState, user: string, password: string): Promise<void> {
   const mysql = path.join(state.toolPath, "bin", `mysql${binExt}`);
   const env: { [key: string]: string } = {};
-  const args = [
-    `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
-    `--user=root`,
-  ];
+  const args = [`--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`, `--user=root`];
   if (state.rootPassword) {
     env["MYSQL_PWD"] = state.rootPassword;
   }
@@ -273,8 +282,6 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
       "req",
       "-newkey",
       "rsa:2048",
-      "-days",
-      "3650",
       "-nodes",
       "-keyout",
       `${datadir}${sep}ca-key.pem`,
@@ -401,4 +408,19 @@ async function execute(
     core.debug(`execute: ${commandLine}`);
   }
   return exec.exec(commandLine, args, options);
+}
+
+async function retry<T>(func: () => Promise<T>): Promise<T> {
+  let waitSec = 0.5;
+  for (let i = 0; i < 10; i++) {
+    try {
+      return await func();
+    } catch (error) {
+      core.debug(`failed: ${error}`);
+    }
+    core.debug(`retry in ${waitSec} sec...`);
+    await sleep(waitSec);
+    waitSec = Math.min(waitSec * 2, 30);
+  }
+  throw new Error("try harder but give up");
 }
