@@ -13,10 +13,7 @@ const sep = path.sep;
 export async function shutdownMySQL(state: starter.MySQLState): Promise<void> {
   await core.group("shutdown MySQL Server", async () => {
     const env: { [key: string]: string } = {};
-    const args = [
-      `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
-      `--user=root`,
-    ];
+    const args = [`--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`, `--user=root`];
     if (state.rootPassword) {
       env["MYSQL_PWD"] = state.rootPassword;
     }

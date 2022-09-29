@@ -1,0 +1,42 @@
+From 4f715e8fb1757a9c3b432471dbbc36787da6030c Mon Sep 17 00:00:00 2001
+From: Georg Richter <georg@mariadb.com>
+Date: Fri, 2 Sep 2022 09:50:58 +0200
+Subject: [PATCH] Fix for CONC-612:
+
+When connecting via socket (non unix-socket) the connection can't
+be established if the wait function (usleep) returns an error and
+modifies errno. This is the case on MacOSX, where usleep() returns
+-1 and sets errno to ETIMED_OUT. This patch saves errno from connect()
+call and restores it after usleep.
+
+This bug was introduced with PR204 (commit dfe3563192e43a48bef3a861e72d9d122b9b346c)
+
+see https://github.com/mariadb-corporation/mariadb-connector-c/commit/4f715e8fb1757a9c3b432471dbbc36787da6030c
+
+---
+ plugins/pvio/pvio_socket.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/libmariadb/plugins/pvio/pvio_socket.c b/libmariadb/plugins/pvio/pvio_socket.c
+index 42ce3088..0a2e5d43 100644
+--- a/libmariadb/plugins/pvio/pvio_socket.c
++++ b/libmariadb/plugins/pvio/pvio_socket.c
+@@ -643,12 +643,18 @@ static int pvio_socket_internal_connect(MARIADB_PVIO *pvio,
+ 
+ #ifndef _WIN32
+   do {
++    int save_errno;
+     rc= connect(csock->socket, (struct sockaddr*) name, (int)namelen);
+ 
+     if (time(NULL) - start_t > (time_t)timeout/1000)
+       break;
+ 
++    /* CONC-612: Since usleep may fail and will set errno (On MacOSX usleep
++      always sets errno=ETIMEDOUT), we need to save and restore errno */
++    save_errno= errno;
+     usleep(wait_conn);
++    errno= save_errno;
++
+     wait_conn= wait_conn >= 1000000 ? 1000000 : wait_conn * 2;
+ 
+   } while (rc == -1 && (errno == EINTR || errno == EAGAIN));
