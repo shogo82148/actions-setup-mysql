@@ -33,7 +33,7 @@
     "@types/node": "^16.11.35",
     "@types/semver": "^7.3.12",
     "@typescript-eslint/eslint-plugin": "^5.40.1",
-    "@typescript-eslint/parser": "^5.40.0",
+    "@typescript-eslint/parser": "^5.40.1",
     "eslint": "^8.25.0",
     "eslint-plugin-github": "^4.4.0",
     "eslint-plugin-import": "^2.26.0",
