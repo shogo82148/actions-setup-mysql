@@ -23,9 +23,9 @@ jobs:
           if [[ -z "$MARIADB_VERSIONS" ]]; then
             export MARIADB_VERSIONS=$(< versions/mariadb.json)
           fi
-          echo "::set-output name=matrix-linux::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: . , os: ["ubuntu-20.04", "ubuntu-22.04"]}')"
-          echo "::set-output name=matrix-darwin::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
-          echo "::set-output name=matrix-windows::$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
+          echo "matrix-linux=$(printenv MARIADB_VERSIONS | jq -c '{mariadb: . , os: ["ubuntu-20.04", "ubuntu-22.04"]}')" >> $GITHUB_OUTPUT
+          echo "matrix-darwin=$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')" >> $GITHUB_OUTPUT
+          echo "matrix-windows=$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')" >> $GITHUB_OUTPUT
         env:
           MARIADB_VERSIONS: ${{ github.event.inputs.mariadb-versions }}
     outputs:
