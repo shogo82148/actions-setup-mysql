@@ -1,26 +1,5 @@
-From c356714d77150433e096fe8f04a2184495d42efb Mon Sep 17 00:00:00 2001
-From: Kartik Soneji <kartiksoneji@rocketmail.com>
-Date: Tue, 31 Aug 2021 14:04:09 +0200
-Subject: [PATCH] Change Find*.cmake modules to match conventions
-
----
- cmake/FindLIBAIO.cmake               |  4 +--
- cmake/FindLZ4.cmake                  |  6 ++---
- cmake/FindLZO.cmake                  |  9 +++++++
- cmake/FindPMEM.cmake                 |  6 ++---
- cmake/FindSnappy.cmake               |  9 +++++++
- cmake/FindURING.cmake                |  6 ++---
- cmake/FindZSTD.cmake                 |  8 +++---
- storage/maria/CMakeLists.txt         |  1 +
- storage/oqgraph/cmake/FindJudy.cmake | 18 ++++++-------
- storage/rocksdb/build_rocksdb.cmake  | 38 ++++++++++++++--------------
- tpool/CMakeLists.txt                 |  6 ++---
- 11 files changed, 65 insertions(+), 46 deletions(-)
- create mode 100644 cmake/FindLZO.cmake
- create mode 100644 cmake/FindSnappy.cmake
-
 diff --git a/cmake/FindLIBAIO.cmake b/cmake/FindLIBAIO.cmake
-index db49439f318e4..3a4205f7a457b 100644
+index db49439f318..3a4205f7a45 100644
 --- a/cmake/FindLIBAIO.cmake
 +++ b/cmake/FindLIBAIO.cmake
 @@ -1,7 +1,7 @@
@@ -34,7 +13,7 @@ index db49439f318e4..3a4205f7a457b 100644
 -    LIBAIO_LIBRARIES LIBAIO_INCLUDE_DIR)
 +    LIBAIO_LIBRARIES LIBAIO_INCLUDE_DIRS)
 diff --git a/cmake/FindLZ4.cmake b/cmake/FindLZ4.cmake
-index 46c1fdc1b9f9c..48a7790afcdde 100644
+index 46c1fdc1b9f..48a7790afcd 100644
 --- a/cmake/FindLZ4.cmake
 +++ b/cmake/FindLZ4.cmake
 @@ -1,9 +1,9 @@
@@ -52,7 +31,7 @@ index 46c1fdc1b9f9c..48a7790afcdde 100644
 +mark_as_advanced(LZ4_INCLUDE_DIRS LZ4_LIBRARIES)
 diff --git a/cmake/FindLZO.cmake b/cmake/FindLZO.cmake
 new file mode 100644
-index 0000000000000..04391bb4720bc
+index 00000000000..04391bb4720
 --- /dev/null
 +++ b/cmake/FindLZO.cmake
 @@ -0,0 +1,9 @@
@@ -66,7 +45,7 @@ index 0000000000000..04391bb4720bc
 +
 +mark_as_advanced(LZO_INCLUDE_DIRS LZO_LIBRARIES)
 diff --git a/cmake/FindPMEM.cmake b/cmake/FindPMEM.cmake
-index 73e71bc29f499..024436444d2c2 100644
+index 73e71bc29f4..024436444d2 100644
 --- a/cmake/FindPMEM.cmake
 +++ b/cmake/FindPMEM.cmake
 @@ -7,12 +7,12 @@ if(DEFINED PMEM_LIBRARIES)
@@ -87,7 +66,7 @@ index 73e71bc29f499..024436444d2c2 100644
 +mark_as_advanced(PMEM_INCLUDE_DIRS PMEM_LIBRARIES)
 diff --git a/cmake/FindSnappy.cmake b/cmake/FindSnappy.cmake
 new file mode 100644
-index 0000000000000..1e99eb65a5037
+index 00000000000..1e99eb65a50
 --- /dev/null
 +++ b/cmake/FindSnappy.cmake
 @@ -0,0 +1,9 @@
@@ -101,7 +80,7 @@ index 0000000000000..1e99eb65a5037
 +
 +mark_as_advanced(SNAPPY_INCLUDE_DIRS SNAPPY_LIBRARIES)
 diff --git a/cmake/FindURING.cmake b/cmake/FindURING.cmake
-index 6e5e0783b46ae..b8141c9d4808b 100644
+index 6e5e0783b46..b8141c9d480 100644
 --- a/cmake/FindURING.cmake
 +++ b/cmake/FindURING.cmake
 @@ -1,9 +1,9 @@
@@ -118,7 +97,7 @@ index 6e5e0783b46ae..b8141c9d4808b 100644
 -mark_as_advanced(URING_INCLUDE_DIR URING_LIBRARIES)
 +mark_as_advanced(URING_INCLUDE_DIRS URING_LIBRARIES)
 diff --git a/cmake/FindZSTD.cmake b/cmake/FindZSTD.cmake
-index ede59010742a7..d03e96fca159b 100644
+index ede59010742..d03e96fca15 100644
 --- a/cmake/FindZSTD.cmake
 +++ b/cmake/FindZSTD.cmake
 @@ -1,11 +1,11 @@
@@ -146,20 +125,8 @@ index ede59010742a7..d03e96fca159b 100644
    ZSTD_LIBRARIES
 -  ZSTD_INCLUDE_DIR)
 +  ZSTD_INCLUDE_DIRS)
-diff --git a/storage/maria/CMakeLists.txt b/storage/maria/CMakeLists.txt
-index 67540a08b090d..6051b98b0dd7a 100644
---- a/storage/maria/CMakeLists.txt
-+++ b/storage/maria/CMakeLists.txt
-@@ -122,6 +122,7 @@ IF(NOT PLUGIN_S3 STREQUAL NO)
- ENDIF()
- 
- IF (CURL_FOUND)
-+  INCLUDE_DIRECTORIES(${CURL_INCLUDE_DIRS})
-   LINK_DIRECTORIES(${PC_CURL_LIBDIR})
-   MYSQL_ADD_PLUGIN(s3 ha_s3.cc ${S3_SOURCES} COMPONENT s3-engine
-     LINK_LIBRARIES curl z STORAGE_ENGINE NOT_EMBEDDED CONFIG s3.cnf)
 diff --git a/storage/oqgraph/cmake/FindJudy.cmake b/storage/oqgraph/cmake/FindJudy.cmake
-index d9ecfdc4a4fa9..37aed8b631c4a 100644
+index d9ecfdc4a4f..37aed8b631c 100644
 --- a/storage/oqgraph/cmake/FindJudy.cmake
 +++ b/storage/oqgraph/cmake/FindJudy.cmake
 @@ -16,7 +16,7 @@
@@ -216,7 +183,7 @@ index d9ecfdc4a4fa9..37aed8b631c4a 100644
 +MARK_AS_ADVANCED(Judy_INCLUDE_DIRS Judy_LIBRARIES)
  
 diff --git a/storage/rocksdb/build_rocksdb.cmake b/storage/rocksdb/build_rocksdb.cmake
-index fd23b7ba470cf..29b2d83a759d4 100644
+index fd23b7ba470..29b2d83a759 100644
 --- a/storage/rocksdb/build_rocksdb.cmake
 +++ b/storage/rocksdb/build_rocksdb.cmake
 @@ -35,48 +35,48 @@ endif()
@@ -288,7 +255,7 @@ index fd23b7ba470cf..29b2d83a759d4 100644
  add_definitions(-DZLIB)
  list(APPEND THIRDPARTY_LIBS ${ZLIB_LIBRARY})
 diff --git a/tpool/CMakeLists.txt b/tpool/CMakeLists.txt
-index 3a49ea228374c..115e3d5863431 100644
+index 3a49ea22837..115e3d58634 100644
 --- a/tpool/CMakeLists.txt
 +++ b/tpool/CMakeLists.txt
 @@ -15,11 +15,11 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
