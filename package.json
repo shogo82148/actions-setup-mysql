@@ -1,6 +1,6 @@
 {
   "name": "actions-setup-mysql",
-  "version": "1.12.2",
+  "version": "1.13.0",
   "private": true,
   "description": "Setup MySQL GitHub Action",
   "main": "lib/main.js",
