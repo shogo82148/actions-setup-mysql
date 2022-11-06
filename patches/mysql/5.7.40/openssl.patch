@@ -1,0 +1,12 @@
+diff --git a/include/my_openssl.h b/include/my_openssl.h
+index 652930fc597..61041650444 100644
+--- a/include/my_openssl.h
++++ b/include/my_openssl.h
+@@ -24,6 +24,7 @@
+ #define MY_OPENSSL_INCLUDED
+ 
+ #include <openssl/ssl.h>
++#include <openssl/crypto.h> // for OPENSSL_INIT_NO_ATEXIT
+ 
+ #ifdef  __cplusplus
+ extern "C" {
