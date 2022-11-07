@@ -1,0 +1,12 @@
+diff --git a/plugin/auth_gssapi/CMakeLists.txt b/plugin/auth_gssapi/CMakeLists.txt
+index 8c82d335ab2..1bf727ddf2e 100644
+--- a/plugin/auth_gssapi/CMakeLists.txt
++++ b/plugin/auth_gssapi/CMakeLists.txt
+@@ -38,7 +38,6 @@ ELSE()
+    IF(HAVE_KRB5_XFREE)
+      ADD_DEFINITIONS(-DHAVE_KRB5_XFREE=1)
+    ENDIF()
+-   MY_CHECK_AND_SET_COMPILER_FLAG(-Wl,--as-needed)
+
+  ELSE()
+    # Can't build plugin
