@@ -1,3 +1,10 @@
+commit a2bd06ab96e2f33065beabad93617d3be5a897b9
+Author: ICHINOSE Shogo <shogo82148@gmail.com>
+Date:   Tue Nov 8 05:49:59 2022 +0900
+
+    Revert "don't require libraries that aren't needed"
+    
+    This reverts commit 2e10c961eb14d67e73b31854e31d3f3416d25b0b.
 diff --git a/plugin/auth_gssapi/CMakeLists.txt b/plugin/auth_gssapi/CMakeLists.txt
 index 8c82d335ab2..1bf727ddf2e 100644
 --- a/plugin/auth_gssapi/CMakeLists.txt
@@ -10,3 +17,25 @@ index 8c82d335ab2..1bf727ddf2e 100644
 
   ELSE()
     # Can't build plugin
+diff --git a/libmariadb/plugins/auth/CMakeLists.txt b/libmariadb/plugins/auth/CMakeLists.txt
+index 1dbde28..0612f08 100644
+--- a/libmariadb/plugins/auth/CMakeLists.txt
++++ b/libmariadb/plugins/auth/CMakeLists.txt
+@@ -99,7 +99,6 @@ IF(NOT WIN32)
+   INCLUDE(${CC_SOURCE_DIR}/cmake/FindGSSAPI.cmake)
+   IF(GSSAPI_FOUND)
+     SET(GSSAPI_SOURCES ${AUTH_DIR}/auth_gssapi_client.c ${AUTH_DIR}/gssapi_client.c ${AUTH_DIR}/gssapi_errmsg.c)
+-    CHECK_C_COMPILER_FLAG(-Wl,--as-needed have_C__Wl___as_needed)
+   ENDIF()
+ ELSE()
+   SET(GSSAPI_LIBS secur32)
+@@ -116,9 +115,6 @@ IF(GSSAPI_SOURCES)
+   IF(CMAKE_C_COMPILER_ID MATCHES "Clang")
+     SET_SOURCE_FILES_PROPERTIES(${GSSAPI_SOURCES} PROPERTY COMPILE_FLAGS "-Wno-deprecated-declarations")
+   ENDIF()
+-  IF(have_C__Wl___as_needed)
+-    SET_TARGET_PROPERTIES(auth_gssapi_client PROPERTIES LINK_FLAGS "-Wl,--as-needed")
+-  ENDIF()
+ ENDIF()
+ 
+ # old_password plugin
