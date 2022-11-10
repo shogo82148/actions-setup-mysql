@@ -69,7 +69,7 @@ export async function startMySQL(
   config["mysqld"]["pid-file"] = pidFile;
   config["mysqld"]["port"] ||= "3306";
   config["mysqld"]["tmpdir"] ||= path.join(baseDir, "tmp");
- 
+
   // configure mysql client
   config["client"] ||= {};
   config["client"]["port"] = config["mysqld"]["port"];
