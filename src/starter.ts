@@ -272,8 +272,6 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
   const datadir = `${baseDir}${sep}var`;
   const openssl = `${mysql.toolPath}${sep}bin${sep}openssl${binExt}`;
   const options: exec.ExecOptions = {};
-  process.env["LD_LIBRARY_PATH"] = `${mysql.toolPath}${sep}lib`;
-  process.env["DYLD_LIBRARY_PATH"] = `${mysql.toolPath}${sep}lib`;
 
   // Generate CA Key and Certificate
   await exec.exec(
