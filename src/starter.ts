@@ -92,6 +92,9 @@ export async function startMySQL(
     core.debug(mycnf.stringify(config));
     fs.writeFileSync(path.join(baseDir, "etc", "my.cnf"), mycnf.stringify(config));
 
+    // configure ssl
+    await setupTls(mysql, baseDir);
+
     const help = await verboseHelp(mysql);
     const useMysqldInitialize = help.match(/--initialize-insecure/);
     if (fs.existsSync(path.join(mysql.toolPath, "bin", "mariadb-install-db.exe"))) {
@@ -140,9 +143,6 @@ export async function startMySQL(
       }
       await execute(command, installArgs);
     }
-
-    // configure ssl
-    await setupTls(mysql, baseDir);
   });
 
   // start MySQL database
