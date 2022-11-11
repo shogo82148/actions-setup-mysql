@@ -92,6 +92,14 @@ else
 fi
 
 
+echo "::group::download MariaDB source"
+(
+    set -eux
+    cd "$RUNNER_TEMP"
+    curl --retry 3 -sSL "https://downloads.mariadb.com/MariaDB/mariadb-$MARIADB_VERSION/source/mariadb-$MARIADB_VERSION.tar.gz" -o mariadb-src.tar.gz
+)
+echo "::endgroup::"
+
 # system bison is too old (2.x). we need bison 3.x
 echo "::group::install bison"
 brew install bison
