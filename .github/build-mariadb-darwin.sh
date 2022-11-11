@@ -31,7 +31,7 @@ cd "$RUNNER_TEMP"
 
 ACTION_VERSION=$(jq -r '.version' < "$ROOT/../package.json")
 
-if [[ "$MYSQL_VERSION" =~ ^[1-9][0-9][.]([89]|1[0-9]+)[.] ]]; then # MariaDB 10.8 or later
+if [[ "$MARIADB_VERSION" =~ ^[1-9][0-9][.]([89]|1[0-9]+)[.] ]]; then # MariaDB 10.8 or later
     # build OpenSSL v3
     export OPENSSL_VERSION=$OPENSSL_VERSION3
     echo "::group::download OpenSSL source"
@@ -84,7 +84,7 @@ else
         set -eux
         cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
 
-        ./Configure --prefix="$PREFIX" "linux-$(uname -m)"
+        ./Configure --prefix="$PREFIX" "darwin64-$(uname -m)-cc"
         make "-j$JOBS"
         make install_sw install_ssldirs
     )

@@ -86,7 +86,7 @@ else
         set -eux
         cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
 
-        ./Configure --prefix="$PREFIX" "linux-$(uname -m)"
+        ./Configure --prefix="$PREFIX" "darwin64-$(uname -m)-cc"
         make "-j$JOBS"
         make install_sw install_ssldirs
     )
