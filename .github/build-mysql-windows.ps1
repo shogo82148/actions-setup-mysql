@@ -59,7 +59,7 @@ if ( $MYSQL_VERSION -match '^8[.]') # MySQL 8.0 or later
     nmake
     nmake install_sw install_ssldirs
     Set-Location "$RUNNER_TEMP"
-    Remove-Item -Path "openssl-OpenSSL_$OPENSSL_VERSION" -Recurse -Force
+    Remove-Item -Path "openssl-openssl-$OPENSSL_VERSION" -Recurse -Force
 
     # remove debug information
     Get-ChildItem "$PREFIX" -Include *.pdb -Recurse | Remove-Item
