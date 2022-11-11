@@ -59,7 +59,7 @@ if ( $MARIADB_VERSION -match '^[1-9][0-9][.]([89]|1[0-9]+)[.]') # # MariaDB 10.8
     nmake
     nmake install_sw install_ssldirs
     Set-Location "$RUNNER_TEMP"
-    Remove-Item -Path "openssl-OpenSSL_$OPENSSL_VERSION" -Recurse -Force
+    Remove-Item -Path "openssl-openssl-$OPENSSL_VERSION" -Recurse -Force
 
     # remove debug information
     Get-ChildItem "$PREFIX" -Include *.pdb -Recurse | Remove-Item
