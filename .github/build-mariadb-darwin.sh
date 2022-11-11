@@ -21,6 +21,7 @@ case "$(uname -m)" in
         ;;
 esac
 PREFIX=$RUNNER_TOOL_CACHE/mariadb/$MARIADB_VERSION/$MARIADB_ARCH
+export LDFLAGS=-Wl,-rpath,$PREFIX/lib
 
 # detect the number of CPU Core
 JOBS=$(sysctl -n hw.logicalcpu_max)

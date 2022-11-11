@@ -21,6 +21,7 @@ case "$(uname -m)" in
         ;;
 esac
 PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/$MYSQL_ARCH
+export LDFLAGS=-Wl,-rpath,$PREFIX/lib
 
 # use latest version of gcc installed
 if [[ "$MYSQL_VERSION" =~ ^5[.]6[.] ]]; then

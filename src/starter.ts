@@ -69,9 +69,6 @@ export async function startMySQL(
   config["mysqld"]["pid-file"] = pidFile;
   config["mysqld"]["port"] ||= "3306";
   config["mysqld"]["tmpdir"] ||= path.join(baseDir, "tmp");
-  config["mysqld"]["ssl_ca"] ||= path.join(baseDir, "var", "ca.pem");
-  config["mysqld"]["ssl_cert"] ||= path.join(baseDir, "var", "server-cert.pem");
-  config["mysqld"]["ssl_key"] ||= path.join(baseDir, "var", "server-key.pem");
 
   // configure mysql client
   config["client"] ||= {};
@@ -140,8 +137,21 @@ export async function startMySQL(
       }
       await execute(command, installArgs);
     }
+  });
 
-    // configure ssl
+  await core.group("configure TLS/SSL", async () => {
+    // add TLS/SSL setting into my.cnf
+    config["mysqld"]["ssl_ca"] ||= path.join(baseDir, "var", "ca.pem");
+    config["mysqld"]["ssl_cert"] ||= path.join(baseDir, "var", "server-cert.pem");
+    config["mysqld"]["ssl_key"] ||= path.join(baseDir, "var", "server-key.pem");
+
+    // configure my.cnf
+    core.info(`add TLS/SSL setting into my.cnf`);
+    core.debug(`my.cnf path is ${path.join(baseDir, "etc", "my.cnf")}`);
+    core.debug(mycnf.stringify(config));
+    fs.writeFileSync(path.join(baseDir, "etc", "my.cnf"), mycnf.stringify(config));
+
+    // configure TLS
     await setupTls(mysql, baseDir);
   });
 
@@ -272,6 +282,7 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
   const datadir = `${baseDir}${sep}var`;
   const openssl = `${mysql.toolPath}${sep}bin${sep}openssl${binExt}`;
   const options: exec.ExecOptions = {};
+
   process.env["LD_LIBRARY_PATH"] = `${mysql.toolPath}${sep}lib`;
   process.env["DYLD_LIBRARY_PATH"] = `${mysql.toolPath}${sep}lib`;
 

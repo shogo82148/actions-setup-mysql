@@ -21,6 +21,7 @@ case "$(uname -m)" in
         ;;
 esac
 PREFIX=$RUNNER_TOOL_CACHE/mariadb/$MARIADB_VERSION/$MARIADB_ARCH
+export LDFLAGS=-Wl,-rpath,$PREFIX/lib
 
 # use latest version of gcc installed
 if command -v gcc-11 > /dev/null 2>&1; then
