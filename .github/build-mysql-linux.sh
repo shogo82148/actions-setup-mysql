@@ -3,7 +3,8 @@
 set -e
 
 MYSQL_VERSION=$1
-OPENSSL_VERSION=1_1_1s
+OPENSSL_VERSION1_1_1=1_1_1s
+OPENSSL_VERSION3=3.0.7
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
@@ -74,32 +75,66 @@ cd "$RUNNER_TEMP"
 ACTION_VERSION=$(jq -r '.version' < "$ROOT/../package.json")
 
 # system SSL/TLS library is too old. so we use custom build.
-echo "::group::download OpenSSL source"
-(
-    set -eux
-    cd "$RUNNER_TEMP"
-    curl --retry 3 -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
-)
-echo "::endgroup::"
 
-echo "::group::extract OpenSSL source"
-(
-    set -eux
-    cd "$RUNNER_TEMP"
-    tar zxf openssl.tar.gz
-)
-echo "::endgroup::"
+if [[ "$MYSQL_VERSION" =~ ^8[.] ]]; then # MySQL 8.0 or later
+    # build OpenSSL v3
+    export OPENSSL_VERSION=$OPENSSL_VERSION3
+    echo "::group::download OpenSSL source"
+    (
+        set -eux
+        cd "$RUNNER_TEMP"
+        curl --retry 3 -sSL "https://github.com/openssl/openssl/archive/openssl-$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
+    )
+    echo "::endgroup::"
 
-echo "::group::build OpenSSL"
-(
-    set -eux
-    cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
+    echo "::group::extract OpenSSL source"
+    (
+        set -eux
+        cd "$RUNNER_TEMP"
+        tar zxf openssl.tar.gz
+    )
+    echo "::endgroup::"
 
-    ./Configure --prefix="$PREFIX" "linux-$(uname -m)"
-    make "-j$JOBS"
-    make install_sw install_ssldirs
-)
-echo "::endgroup::"
+    echo "::group::build OpenSSL"
+    (
+        set -eux
+        cd "$RUNNER_TEMP/openssl-openssl-$OPENSSL_VERSION"
+
+        ./Configure --prefix="$PREFIX" --openssldir="$PREFIX" --libdir=lib
+        make "-j$JOBS"
+        make install_sw install_ssldirs
+    )
+    echo "::endgroup::"
+else
+    # build OpenSSL v1.1.1
+    export OPENSSL_VERSION=$OPENSSL_VERSION1_1_1
+    echo "::group::download OpenSSL source"
+    (
+        set -eux
+        cd "$RUNNER_TEMP"
+        curl --retry 3 -sSL "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.tar.gz" -o openssl.tar.gz
+    )
+    echo "::endgroup::"
+
+    echo "::group::extract OpenSSL source"
+    (
+        set -eux
+        cd "$RUNNER_TEMP"
+        tar zxf openssl.tar.gz
+    )
+    echo "::endgroup::"
+
+    echo "::group::build OpenSSL"
+    (
+        set -eux
+        cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
+
+        ./Configure --prefix="$PREFIX" "linux-$(uname -m)"
+        make "-j$JOBS"
+        make install_sw install_ssldirs
+    )
+    echo "::endgroup::"
+fi
 
 echo "::group::download MySQL source"
 (
