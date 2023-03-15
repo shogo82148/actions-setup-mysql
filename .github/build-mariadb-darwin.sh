@@ -3,8 +3,8 @@
 set -e
 
 MARIADB_VERSION=$1
-OPENSSL_VERSION1_1_1=1_1_1s
-OPENSSL_VERSION3=3.0.7
+OPENSSL_VERSION1_1_1=1_1_1t
+OPENSSL_VERSION3=3.1.0
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
@@ -32,7 +32,7 @@ cd "$RUNNER_TEMP"
 
 ACTION_VERSION=$(jq -r '.version' < "$ROOT/../package.json")
 
-if [[ "$MARIADB_VERSION" =~ ^[1-9][0-9][.]([89]|1[0-9]+)[.] ]]; then # MariaDB 10.8 or later
+if [[ "$MARIADB_VERSION" =~ (^10[.](8|9|[1-9][0-9])[.])|(^1[1-9][.]) ]]; then # MariaDB 10.8 or later
     # build OpenSSL v3
     export OPENSSL_VERSION=$OPENSSL_VERSION3
     echo "::group::download OpenSSL source"

@@ -1,6 +1,6 @@
 Param($MARIADB_VERSION)
-$OPENSSL_VERSION1_1_1 = "1_1_1s"
-$OPENSSL_VERSION3 = "3.0.7"
+$OPENSSL_VERSION1_1_1 = "1_1_1t"
+$OPENSSL_VERSION3 = "3.1.0"
 $ROOT = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RUNNER_TEMP = $env:RUNNER_TEMP
 if ($null -eq $RUNNER_TEMP) {
@@ -144,13 +144,24 @@ cmake ( Join-Path $RUNNER_TEMP "mariadb-$MARIADB_VERSION" ) `
     -DWITH_SSL="$PREFIX" `
     -DCMAKE_BUILD_TYPE=MinSizeRel
 
-devenv MySQL.sln /build RelWithDebInfo
+if ( $MARIADB_VERSION -match '^11[.]') # # MariaDB 11.0 or later
+{
+    devenv MariaDB.sln /build RelWithDebInfo
+} else {
+    devenv MySQL.sln /build RelWithDebInfo
+}
 Write-Host "::endgroup::"
 
 Write-Host "::group::install"
 Set-Location "$RUNNER_TEMP\build"
-devenv MySQL.sln /build RelWithDebInfo /project initial_database
-devenv MySQL.sln /build RelWithDebInfo /project package
+if ( $MARIADB_VERSION -match '^11[.]') # # MariaDB 11.0 or later
+{
+    devenv MariaDB.sln /build RelWithDebInfo /project initial_database
+    devenv MariaDB.sln /build RelWithDebInfo /project package
+} else {
+    devenv MySQL.sln /build RelWithDebInfo /project initial_database
+    devenv MySQL.sln /build RelWithDebInfo /project package
+}
 Write-Host "::endgroup::"
 
 
