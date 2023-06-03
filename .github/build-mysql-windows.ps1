@@ -1,6 +1,6 @@
 Param($MYSQL_VERSION)
-$OPENSSL_VERSION1_1_1 = "1_1_1t"
-$OPENSSL_VERSION3 = "3.1.0"
+$OPENSSL_VERSION1_1_1 = "1_1_1u"
+$OPENSSL_VERSION3 = "3.1.1"
 $ROOT = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RUNNER_TEMP = $env:RUNNER_TEMP
 if ($null -eq $RUNNER_TEMP) {
