@@ -19,7 +19,7 @@ steps:
 - uses: shogo82148/actions-setup-mysql@v1
   with:
     mysql-version: '8.0'
-- run: mysql -uroot -h127.0.0.1 -e 'SELECT version()'
+- run: mysql -uroot -e 'SELECT version()'
 ```
 
 ## Configuration
@@ -35,6 +35,10 @@ Available Versions are:
     - `5.7`
     - `5.6`
 - MariaDB
+    - `11.1`
+    - `11.0`
+    - `10.11`
+    - `10.10`
     - `10.9`
     - `10.8`
     - `10.7`
@@ -121,15 +125,29 @@ It contains:
 - `var/server-cert.pem`: The server certificate for SSL/TLS
 - `var/server-key.pem`: The server key for SSL/TLS
 
-For example, you can use the root certificate for connecting via SSL/TLS.
+Here is some examples:
 
 ```yaml
 - id: setup-mysql
   uses: shogo82148/actions-setup-mysql@v1
   with:
     mysql-version: '8.0'
-- run: mysql -uroot -h127.0.0.1 \
-  --ssl --ssl-mode=--ssl-mode=REQUIRED \
-  --ssl-ca=${{ steps.setup-mysql.outputs.base-dir }}/var/ca.pem \
-  -e 'SELECT version()'
+
+- name: connect via unix domain socket
+  run: mysql -uroot \
+    --protocol=SOCKET \
+    --socket=${{ steps.setup-mysql.outputs.base-dir }}/tmp/mysql.sock
+    -e 'SELECT version()'
+
+- name: configure the root certificate for connecting via SSL/TLS.
+  run: mysql -uroot \
+    --ssl --ssl-mode=--ssl-mode=REQUIRED \
+    --ssl-ca=${{ steps.setup-mysql.outputs.base-dir }}/var/ca.pem \
+    -e 'SELECT version()'
 ```
+
+## Environment Values
+
+### `MYSQL_HOME`
+
+The path to the directory in which the server-specific my.cnf file resides.
