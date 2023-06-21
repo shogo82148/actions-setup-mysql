@@ -74,6 +74,7 @@ export async function startMySQL(
   config["client"] ||= {};
   config["client"]["port"] = config["mysqld"]["port"];
   config["client"]["host"] = "127.0.0.1";
+  config["client"]["socket"] = config["mysqld"]["socket"];
 
   await core.group("setup MySQL Database", async () => {
     core.info(`creating the directory structure on ${baseDir}`);
@@ -209,6 +210,14 @@ export async function startMySQL(
   }
 
   core.setOutput("base-dir", baseDir);
+
+  // configure environment variables
+  //
+  // ref. https://dev.mysql.com/doc/refman/8.0/en/environment-variables.html
+  // ref. https://mariadb.com/kb/en/mariadb-environment-variables/
+  //
+  // MYSQL_HOME: The path to the directory in which the server-specific my.cnf file resides.
+  core.exportVariable("MYSQL_HOME", `${baseDir}${sep}etc`);
 
   return {
     pid,
