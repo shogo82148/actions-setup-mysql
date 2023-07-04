@@ -16,7 +16,7 @@ updates:
         update-types: ["version-update:semver-patch"]
     groups:
       typescript-eslint:
-        pattern:
+        patterns:
           - "@typescript-eslint/*"
 
   # Maintain dependencies for GitHub Actions
