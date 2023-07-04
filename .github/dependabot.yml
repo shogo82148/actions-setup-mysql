@@ -1,16 +1,23 @@
+# configure Dependabot
+# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
 version: 2
 updates:
   # Enable version updates for npm
-  - package-ecosystem: 'npm'
+  - package-ecosystem: "npm"
     # Look for `package.json` and `lock` files in the `root` directory
-    directory: '/'
+    directory: "/"
     # Check the npm registry for updates every day (weekdays)
     schedule:
-      interval: 'daily'
+      interval: "daily"
     ignore:
       # update too often, ignore patch releases
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-patch"]
+    groups:
+      typescript-eslint:
+        pattern:
+          - "@typescript-eslint/*"
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
