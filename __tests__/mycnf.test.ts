@@ -63,6 +63,22 @@ describe("parsing my.cnf", () => {
         key: ' "value" ',
       },
     });
+
+    // https://github.com/shogo82148/actions-setup-mysql/issues/882
+    expect(
+      mycnf.parse(`[mysqld]
+secure-file-priv = ''
+character-set-server = utf8mb4
+collation-server = utf8mb4_0900_ai_ci
+sql-mode = NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES`)
+    ).toStrictEqual({
+      mysqld: {
+        "secure-file-priv": "",
+        "character-set-server": "utf8mb4",
+        "collation-server": "utf8mb4_0900_ai_ci",
+        "sql-mode": "NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES",
+      },
+    });
   });
 
   it("parses multiple groups", () => {
