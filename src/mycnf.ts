@@ -220,7 +220,7 @@ class Parser {
           }
           buf.push(this.getChar());
         }
-        this.skipToEOL();
+        this.skipWhitespaceWithoutEOL();
         break;
       case "'":
         this.next(); // skip first "'"
@@ -236,7 +236,7 @@ class Parser {
           }
           buf.push(this.getChar());
         }
-        this.skipToEOL();
+        this.skipWhitespaceWithoutEOL();
         break;
       default:
         // read the value until EOL
