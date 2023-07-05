@@ -18,6 +18,10 @@ updates:
       typescript-eslint:
         patterns:
           - "@typescript-eslint/*"
+      jest-monorepo:
+        patterns:
+          - jest
+          - jest-circus
 
   # Maintain dependencies for GitHub Actions
   - package-ecosystem: "github-actions"
