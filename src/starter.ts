@@ -56,7 +56,7 @@ export function getState(): MySQLState | null {
 export async function startMySQL(
   mysql: installer.MySQL,
   cnf: string,
-  rootPassword: string
+  rootPassword: string,
 ): Promise<MySQLState> {
   // configure mysqld
   const baseDir = await mkdtemp();
@@ -170,7 +170,7 @@ export async function startMySQL(
         {
           detached: true,
           stdio: ["ignore", out.fd, err.fd],
-        }
+        },
       );
       pid = subprocess.pid || 0;
 
@@ -244,14 +244,14 @@ export async function createUser(state: MySQLState, user: string, password: stri
       [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
       {
         env,
-      }
+      },
     );
     await execute(
       mysql,
       [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
       {
         env,
-      }
+      },
     );
   }
 }
@@ -274,7 +274,7 @@ async function verboseHelp(mysql: installer.MySQL): Promise<string> {
     await execute(
       path.join(mysql.toolPath, "bin", `mysqld${binExt}`),
       ["--no-defaults", "--verbose", "--help"],
-      options
+      options,
     );
   } catch (e) {
     core.error("fail to get mysqld options");
@@ -310,7 +310,7 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
       "-out",
       `${datadir}${sep}ca-req.pem`,
     ],
-    options
+    options,
   );
   await exec.exec(
     openssl,
@@ -329,7 +329,7 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
       "-out",
       `${datadir}${sep}ca.pem`,
     ],
-    options
+    options,
   );
 
   // Generate Server Key and Certificate
@@ -350,7 +350,7 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
   await exec.exec(
     openssl,
     ["rsa", "-in", `${datadir}${sep}server-key.pem`, "-out", `${datadir}${sep}server-key.pem`],
-    options
+    options,
   );
   await exec.exec(
     openssl,
@@ -371,7 +371,7 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
       "-out",
       `${datadir}${sep}server-cert.pem`,
     ],
-    options
+    options,
   );
 }
 
@@ -420,7 +420,7 @@ async function sleep(waitSec: number): Promise<void> {
 async function execute(
   commandLine: string,
   args?: string[],
-  options?: exec.ExecOptions
+  options?: exec.ExecOptions,
 ): Promise<number> {
   if (args) {
     core.debug(`execute: ${commandLine} ${args.join(" ")}`);
