@@ -94,7 +94,7 @@ if ( $MYSQL_VERSION -match '^8[.]') # MySQL 8.0 or later
 
 # Bison
 Write-Host "::group::Set up Bison"
-$BISON_VERSION = "2.4.1"
+$BISON_VERSION = "3.8.2"
 $BISON_PREFIX = Join-Path "C:" "GnuWin32"
 Set-Location "$RUNNER_TEMP"
 Write-Host "Downloading zip archive of binary..."
