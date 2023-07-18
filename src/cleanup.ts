@@ -25,7 +25,7 @@ export async function shutdownMySQL(state: starter.MySQLState): Promise<void> {
       [...args, `shutdown`],
       {
         env,
-      }
+      },
     );
 
     core.info("wait for MySQL shutdown");

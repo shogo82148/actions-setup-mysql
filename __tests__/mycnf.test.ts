@@ -70,7 +70,7 @@ describe("parsing my.cnf", () => {
 secure-file-priv = ''
 character-set-server = utf8mb4
 collation-server = utf8mb4_0900_ai_ci
-sql-mode = NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES`)
+sql-mode = NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES`),
     ).toStrictEqual({
       mysqld: {
         "secure-file-priv": "",
@@ -103,14 +103,14 @@ sql-mode = NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES`)
   it("parses examples", () => {
     // examples from https://dev.mysql.com/doc/refman/8.0/en/option-files.html
     expect(
-      mycnf.parse('[group]\nbasedir="C:\\Program Files\\MySQL\\MySQL Server 8.0"')
+      mycnf.parse('[group]\nbasedir="C:\\Program Files\\MySQL\\MySQL Server 8.0"'),
     ).toStrictEqual({
       group: {
         basedir: "C:\\Program Files\\MySQL\\MySQL Server 8.0",
       },
     });
     expect(
-      mycnf.parse('[group]\nbasedir="C:\\\\Program Files\\\\MySQL\\\\MySQL Server 8.0"')
+      mycnf.parse('[group]\nbasedir="C:\\\\Program Files\\\\MySQL\\\\MySQL Server 8.0"'),
     ).toStrictEqual({
       group: {
         basedir: "C:\\Program Files\\MySQL\\MySQL Server 8.0",
@@ -121,10 +121,10 @@ sql-mode = NO_ENGINE_SUBSTITUTION,STRICT_TRANS_TABLES`)
         group: {
           basedir: "C:/Program Files/MySQL/MySQL Server 8.0",
         },
-      }
+      },
     );
     expect(
-      mycnf.parse("[group]\nbasedir=C:\\\\Program\\sFiles\\\\MySQL\\\\MySQL\\sServer\\s8.0")
+      mycnf.parse("[group]\nbasedir=C:\\\\Program\\sFiles\\\\MySQL\\\\MySQL\\sServer\\s8.0"),
     ).toStrictEqual({
       group: {
         basedir: "C:\\Program Files\\MySQL\\MySQL Server 8.0",
