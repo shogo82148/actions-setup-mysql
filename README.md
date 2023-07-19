@@ -15,11 +15,11 @@ This action sets by MySQL database for use in actions by:
 
 ```yaml
 steps:
-- uses: actions/checkout@v3
-- uses: shogo82148/actions-setup-mysql@v1
-  with:
-    mysql-version: '8.0'
-- run: mysql -uroot -e 'SELECT version()'
+  - uses: actions/checkout@v3
+  - uses: shogo82148/actions-setup-mysql@v1
+    with:
+      mysql-version: "8.0"
+  - run: mysql -uroot -e 'SELECT version()'
 ```
 
 ## Configuration
@@ -31,22 +31,23 @@ The version of MySQL or MariaDB.
 Available Versions are:
 
 - MySQL
-    - `8.0`
-    - `5.7`
-    - `5.6`
+  - `8.1`
+  - `8.0`
+  - `5.7`
+  - `5.6`
 - MariaDB
-    - `11.1`
-    - `11.0`
-    - `10.11`
-    - `10.10`
-    - `10.9`
-    - `10.8`
-    - `10.7`
-    - `10.6`
-    - `10.5`
-    - `10.4`
-    - `10.3`
-    - `10.2`
+  - `11.1`
+  - `11.0`
+  - `10.11`
+  - `10.10`
+  - `10.9`
+  - `10.8`
+  - `10.7`
+  - `10.6`
+  - `10.5`
+  - `10.4`
+  - `10.3`
+  - `10.2`
 
 ### `distribution`
 
@@ -59,14 +60,14 @@ For example, the following two workflows install MariaDB 10.6.
 ```yaml
 - uses: shogo82148/actions-setup-mysql@v1
   with:
-    distribution: 'mariadb'
-    mysql-version: '10.6'
+    distribution: "mariadb"
+    mysql-version: "10.6"
 ```
 
 ```yaml
 - uses: shogo82148/actions-setup-mysql@v1
   with:
-    mysql-version: 'mariadb-10.6'
+    mysql-version: "mariadb-10.6"
 ```
 
 ### `auto-start`
@@ -87,7 +88,7 @@ Example:
 ```yaml
 - uses: shogo82148/actions-setup-mysql@v1
   with:
-    mysql-version: '8.0'
+    mysql-version: "8.0"
     my-cnf: |
       innodb_log_file_size=256MB
       innodb_buffer_pool_size=512MB
@@ -131,7 +132,7 @@ Here is some examples:
 - id: setup-mysql
   uses: shogo82148/actions-setup-mysql@v1
   with:
-    mysql-version: '8.0'
+    mysql-version: "8.0"
 
 - name: connect via unix domain socket
   run: mysql -uroot \

@@ -69,6 +69,10 @@ jobs:
     timeout-minutes: 180
     steps:
       - uses: actions/checkout@v3
+      - run: |
+          # pre-installed version is too old.
+          # install new one.
+          brew install bison
       - run: .github/build-mysql-darwin.sh "$MYSQL_VERSION"
       - name: upload
         shell: bash
