@@ -98,7 +98,7 @@ if ( $MYSQL_VERSION -match '^8[.]' ) # MySQL 8.0 or later
 {
     choco install winflexbison3
 }
-else if ( $MYSQL_VERSION -match '^5[.]7[.]' ) # MySQL 5.7
+elseif ( $MYSQL_VERSION -match '^5[.]7[.]' ) # MySQL 5.7
 {
     choco install winflexbison
 }
