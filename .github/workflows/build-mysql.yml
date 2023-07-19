@@ -71,7 +71,7 @@ jobs:
       - uses: actions/checkout@v3
       - run: |
           # pre-installed version is too old.
-          $ install new one.
+          # install new one.
           brew install bison
       - run: .github/build-mysql-darwin.sh "$MYSQL_VERSION"
       - name: upload
