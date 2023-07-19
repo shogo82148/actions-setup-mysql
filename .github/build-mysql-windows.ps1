@@ -98,13 +98,9 @@ if ( $MYSQL_VERSION -match '^8[.]' ) # MySQL 8.0 or later
 {
     choco install winflexbison3
 }
-elseif ( $MYSQL_VERSION -match '^5[.]7[.]' ) # MySQL 5.7
-{
-    choco install winflexbison
-}
 else
 {
-    # MySQL 5.6 or earlier
+    # MySQL 5.7 or earlier
     $BISON_VERSION = "2.4.1"
     $BISON_PREFIX = Join-Path "C:" "GnuWin32"
     Set-Location "$RUNNER_TEMP"
