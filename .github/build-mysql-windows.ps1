@@ -94,7 +94,12 @@ if ( $MYSQL_VERSION -match '^8[.]') # MySQL 8.0 or later
 
 # Bison
 Write-Host "::group::Set up Bison"
-choco install winflexbison3
+if ( $MYSQL_VERSION -match '^8[.]') # MySQL 8.0 or later
+{
+    choco install winflexbison3
+} else {
+    choco install winflexbison2
+}
 Write-Host "::endgroup::"
 
 # use C drive to avoid disk full
