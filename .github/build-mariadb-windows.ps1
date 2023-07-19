@@ -95,20 +95,7 @@ if ( $MARIADB_VERSION -match '^[1-9][0-9][.]([89]|1[0-9]+)[.]') # # MariaDB 10.8
 
 # Bison
 Write-Host "::group::Set up Bison"
-$BISON_VERSION = "2.4.1"
-$BISON_PREFIX = Join-Path "C:" "GnuWin32"
-Set-Location "$RUNNER_TEMP"
-Write-Host "Downloading zip archive of binary..."
-Invoke-WebRequest "https://versaweb.dl.sourceforge.net/project/gnuwin32/bison/$BISON_VERSION/bison-$BISON_VERSION-bin.zip" -OutFile "bison-bin.zip"
-Write-Host "Unzipping..."
-Expand-Archive -Path "bison-bin.zip" -DestinationPath "$BISON_PREFIX"
-Write-Host "Downloading zip archive of dependencies..."
-Invoke-WebRequest "https://versaweb.dl.sourceforge.net/project/gnuwin32/bison/$BISON_VERSION/bison-$BISON_VERSION-dep.zip" -OutFile "bison-dep.zip"
-Write-Host "Unzipping..."
-Expand-Archive -Path "bison-dep.zip" -DestinationPath "$BISON_PREFIX"
-Set-Item -Path "env:PATH" "$(Join-Path $BISON_PREFIX "bin");$env:PATH"
-Remove-Item -Path "bison-bin.zip"
-Remove-Item -Path "bison-dep.zip"
+choco install winflexbison3
 Write-Host "::endgroup::"
 
 # use C drive to avoid disk full
