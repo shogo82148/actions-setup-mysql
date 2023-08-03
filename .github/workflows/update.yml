@@ -13,5 +13,7 @@ jobs:
       - name: update
         run: |
           ./.github/update-dependencies.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: commit and create a pull request
         uses: shogo82148/actions-commit-and-create-pr@v1
