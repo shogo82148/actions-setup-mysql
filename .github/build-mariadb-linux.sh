@@ -3,7 +3,7 @@
 set -e
 
 MARIADB_VERSION=$1
-OPENSSL_VERSION1_1_1=1_1_1v
+OPENSSL_VERSION1_1_1=1_1_1w
 OPENSSL_VERSION3=3.1.2
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
