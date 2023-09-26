@@ -24,7 +24,7 @@ outputs:
   base-dir:
     description: "Returns directory under which the mysql database is being created."
 runs:
-  using: "node16"
+  using: "node20"
   main: "lib/setup-mysql.js"
   post: "lib/cleanup-mysql.js"
   post-if: "always()"
