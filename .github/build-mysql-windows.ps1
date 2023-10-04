@@ -14,7 +14,7 @@ $PREFIX = Join-Path $RUNNER_TOOL_CACHE "mysql" $MYSQL_VERSION "x64"
 
 $ACTION_VERSION = Get-Content (Join-Path $ROOT ".." "package.json") | jq -r ".version"
 
-Write-Host "::group::Set up Visual Studio 2019"
+Write-Host "::group::Set up Visual Studio 2022"
 New-Item $RUNNER_TEMP -ItemType Directory -Force
 Set-Location "$RUNNER_TEMP"
 Remove-Item -Path * -Recurse -Force
