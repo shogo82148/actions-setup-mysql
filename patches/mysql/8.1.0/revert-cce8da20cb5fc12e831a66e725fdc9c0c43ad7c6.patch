@@ -1,6 +1,6 @@
-commit ee1e935b8a4606a943285376a08c815efbaeeb31
+commit df5097ed9916b6d523cda27086774a72fd73df9d
 Author: ICHINOSE Shogo <shogo82148@gmail.com>
-Date:   Wed Oct 4 13:23:49 2023 +0900
+Date:   Wed Oct 4 14:43:21 2023 +0900
 
     Revert "Bug#35115810 stmt-execute with new-params-bound = 0 [2/2]"
     
@@ -48,10 +48,10 @@ index 1065e59927e..e536b4cf70e 100644
  
  /**
 diff --git a/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h b/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h
-index feabf47dd56..1d5b6b19566 100644
+index 1f72371c0ef..2af5c42c003 100644
 --- a/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h
 +++ b/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h
-@@ -2381,35 +2381,23 @@ class Codec<borrowable::message::client::StmtExecute<Borrowed>>
+@@ -2381,20 +2381,16 @@ class Codec<borrowable::message::client::StmtExecute<Borrowed>>
      auto new_params_bound_res = accu.template step<bw::FixedInt<1>>();
      if (!accu.result()) return stdx::make_unexpected(accu.result().error());
  
@@ -73,35 +73,28 @@ index feabf47dd56..1d5b6b19566 100644
 +      // old param-defs
 +      return stdx::make_unexpected(make_error_code(codec_errc::invalid_input));
 +    }
- 
-+    std::vector<typename value_type::ParamDef> types;
 +
++    std::vector<typename value_type::ParamDef> types;
+ 
 +    if (new_params_bound == 1) {
        types.reserve(param_count);
  
        for (size_t n{}; n < param_count; ++n) {
-         auto type_res = accu.template step<bw::FixedInt<2>>();
-         if (!accu.result()) return stdx::make_unexpected(accu.result().error());
- 
--        if (supports_query_attributes) {
--          auto name_res = accu.template step<bw::VarString<Borrowed>>();
--          if (!accu.result()) {
--            return stdx::make_unexpected(accu.result().error());
--          }
--          types.emplace_back(type_res->value(), name_res->value());
--        } else {
--          types.emplace_back(type_res->value());
--        }
-+        types.push_back(type_res->value());
+@@ -2411,8 +2407,6 @@ class Codec<borrowable::message::client::StmtExecute<Borrowed>>
+           types.emplace_back(type_res->value(), "");
+         }
        }
-     } else {
-       return stdx::make_unexpected(make_error_code(codec_errc::invalid_input));
+-    } else {
+-      return stdx::make_unexpected(make_error_code(codec_errc::invalid_input));
+     }
+ 
+     if (param_count != types.size()) {
 diff --git a/router/src/routing/src/classic_frame.h b/router/src/routing/src/classic_frame.h
-index 29adcf6c503..c693c5d9bd5 100644
+index ea10a20c197..70302b1d6e5 100644
 --- a/router/src/routing/src/classic_frame.h
 +++ b/router/src/routing/src/classic_frame.h
-@@ -108,57 +108,4 @@ class ClassicFrame {
-   }
+@@ -129,58 +129,4 @@ class ClassicFrame {
+       const classic_protocol::borrowed::message::server::Error &msg);
  };
  
 -/**
@@ -147,7 +140,8 @@ index 29adcf6c503..c693c5d9bd5 100644
 -        params.reserve(it->second.parameters.size());
 -
 -        for (const auto &param : it->second.parameters) {
--          params.emplace_back(param.type_and_flags);
+-          params.emplace_back(param.type_and_flags, std::string_view{},
+-                              param.param_already_sent);
 -        }
 -
 -        return params;
@@ -159,7 +153,7 @@ index 29adcf6c503..c693c5d9bd5 100644
 -
  #endif
 diff --git a/router/src/routing/src/classic_stmt_execute_forwarder.cc b/router/src/routing/src/classic_stmt_execute_forwarder.cc
-index a66066a1e52..8833ea760df 100644
+index 1eed89c8736..6916ea44116 100644
 --- a/router/src/routing/src/classic_stmt_execute_forwarder.cc
 +++ b/router/src/routing/src/classic_stmt_execute_forwarder.cc
 @@ -26,7 +26,6 @@
@@ -170,7 +164,7 @@ index a66066a1e52..8833ea760df 100644
  #include "mysql/harness/stdx/expected.h"
  #include "mysql/harness/tls_error.h"
  #include "mysqld_error.h"  // mysql-server error-codes
-@@ -63,51 +62,7 @@ StmtExecuteForwarder::process() {
+@@ -67,51 +66,7 @@ StmtExecuteForwarder::process() {
  stdx::expected<Processor::Result, std::error_code>
  StmtExecuteForwarder::command() {
    if (auto &tr = tracer()) {
@@ -222,16 +216,17 @@ index a66066a1e52..8833ea760df 100644
 +    tr.trace(Tracer::Event().stage("stmt_execute::command"));
    }
  
-   auto &server_conn = connection()->socket_splicer()->server_conn();
+   connection()->execution_context().diagnostics_area().warnings().clear();
 diff --git a/router/tests/integration/test_routing_direct.cc b/router/tests/integration/test_routing_direct.cc
-index 25a1bfa5a64..b21bec4fa39 100644
+index 7f1d07817cf..fb9ca6943bd 100644
 --- a/router/tests/integration/test_routing_direct.cc
 +++ b/router/tests/integration/test_routing_direct.cc
-@@ -2181,17 +2181,6 @@ TEST_P(ConnectionTest, classic_protocol_prepare_execute) {
+@@ -2184,19 +2184,6 @@ TEST_P(ConnectionTest, classic_protocol_prepare_execute) {
    };
    ASSERT_NO_ERROR(stmt.bind_params(params));
  
--  // execute again to trigger a StmtExecute with new-params-bound = 1.
+-  SCOPED_TRACE(
+-      "// execute again to trigger a StmtExecute with new-params-bound = 1.");
 -  {
 -    auto exec_res = stmt.execute();
 -    ASSERT_NO_ERROR(exec_res);
@@ -241,11 +236,12 @@ index 25a1bfa5a64..b21bec4fa39 100644
 -    }
 -  }
 -
--  // execute again to trigger a StmtExecute with new-params-bound = 0.
+-  SCOPED_TRACE(
+-      "// execute again to trigger a StmtExecute with new-params-bound = 0.");
    {
      auto exec_res = stmt.execute();
      ASSERT_NO_ERROR(exec_res);
-@@ -2205,7 +2194,7 @@ TEST_P(ConnectionTest, classic_protocol_prepare_execute) {
+@@ -2210,7 +2197,7 @@ TEST_P(ConnectionTest, classic_protocol_prepare_execute) {
      auto events_res = changed_event_counters(cli);
      ASSERT_NO_ERROR(events_res);
  
@@ -254,7 +250,7 @@ index 25a1bfa5a64..b21bec4fa39 100644
                                           Pair("statement/com/Prepare", 1)));
    }
  
-@@ -2217,7 +2206,7 @@ TEST_P(ConnectionTest, classic_protocol_prepare_execute) {
+@@ -2222,7 +2209,7 @@ TEST_P(ConnectionTest, classic_protocol_prepare_execute) {
      ASSERT_NO_ERROR(events_res);
  
      EXPECT_THAT(*events_res,
