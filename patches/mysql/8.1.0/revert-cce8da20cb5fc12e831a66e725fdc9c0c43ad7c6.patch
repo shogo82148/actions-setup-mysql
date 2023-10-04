@@ -6,47 +6,6 @@ Date:   Wed Oct 4 14:43:21 2023 +0900
     
     This reverts commit cce8da20cb5fc12e831a66e725fdc9c0c43ad7c6.
 
-diff --git a/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_base.h b/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_base.h
-index 1065e59927e..e536b4cf70e 100644
---- a/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_base.h
-+++ b/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_base.h
-@@ -110,7 +110,6 @@ stdx::expected<size_t, std::error_code> encode(const T &v,
-  *
-  * @param buffer buffer to read from
-  * @param caps protocol capabilities
-- * @tparam T the message class
-  * @returns number of bytes read from 'buffers' and a T on success, or
-  * std::error_code on error
-  */
-@@ -120,28 +119,6 @@ stdx::expected<std::pair<size_t, T>, std::error_code> decode(
-   return Codec<T>::decode(buffer, caps);
- }
- 
--/**
-- * decode a message from a buffer.
-- *
-- * @param buffer buffer to read from
-- * @param caps protocol capabilities
-- * @param args arguments that shall be forwarded to T's decode()
-- * @tparam T the message class
-- * @tparam Args Types of the extra arguments to be forwarded to T's decode()
-- * function.
-- * @returns number of bytes read from 'buffers' and a T on success, or
-- * std::error_code on error
-- */
--template <class T, class... Args>
--stdx::expected<std::pair<size_t, T>, std::error_code> decode(
--    const net::const_buffer &buffer, capabilities::value_type caps,
--    // clang-format off
--    Args &&... args
--    // clang-format on
--) {
--  return Codec<T>::decode(buffer, caps, std::forward<Args>(args)...);
--}
--
- namespace impl {
- 
- /**
 diff --git a/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h b/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h
 index 1f72371c0ef..2af5c42c003 100644
 --- a/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h
