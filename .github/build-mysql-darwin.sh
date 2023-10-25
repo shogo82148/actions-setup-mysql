@@ -99,7 +99,9 @@ echo "::group::download MySQL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl --retry 3 -sSL "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.tar.gz" -o mysql-src.tar.gz
+    MAJOR=$(echo "$MYSQL_VERSION" | cut -d. -f1)
+    MINOR=$(echo "$MYSQL_VERSION" | cut -d. -f2)
+    curl --retry 3 -sSL "https://dev.mysql.com/get/Downloads/MySQL-$MAJOR.$MINOR/mysql-$MYSQL_VERSION.tar.gz" -o mysql-src.tar.gz
 )
 echo "::endgroup::"
 
@@ -112,7 +114,7 @@ echo "::group::extract MySQL source"
     # apply patches
     if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION" ]]
     then
-        cd "mysql-server-mysql-$MYSQL_VERSION"
+        cd "mysql-$MYSQL_VERSION"
         cat "$ROOT/../patches/mysql/$MYSQL_VERSION"/*.patch | patch -s -f -p1
     fi
 )
@@ -124,7 +126,7 @@ echo "::group::build MySQL"
     cd "$RUNNER_TEMP"
     mkdir build
     cd build
-    cmake "../mysql-server-mysql-$MYSQL_VERSION" \
+    cmake "../mysql-$MYSQL_VERSION" \
         -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
         -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
         -DWITH_ROCKSDB_LZ4=OFF -DWITH_ROCKSDB_BZip2=OFF -DWITH_ROCKSDB_Snappy=OFF -DWITH_ROCKSDB_ZSTD=OFF \
