@@ -125,14 +125,12 @@ New-Item "$RUNNER_TEMP" -ItemType Directory -Force
 Write-Host "::group::fetch MySQL source"
 Set-Location "$RUNNER_TEMP"
 Write-Host "Downloading zip archive..."
-$MAJOR = ($MYSQL_VERSION -split '\.')[0]
-$MINOR = ($MYSQL_VERSION -split '\.')[1]
-Invoke-WebRequest "https://cdn.mysql.com/Downloads/MySQL-$MAJOR.$MINOR/mysql-$MYSQL_VERSION.zip" -OutFile "mysql-src.zip"
+Invoke-WebRequest "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.zip" -OutFile "mysql-src.zip"
 Write-Host "Unzipping..."
 Expand-Archive -Path "mysql-src.zip" -DestinationPath "."
 Remove-Item -Path "mysql-src.zip"
 if (Test-Path ( Join-Path $ROOT .. "patches" "mysql" $MYSQL_VERSION )) {
-    Set-Location "mysql-$MYSQL_VERSION"
+    Set-Location "mysql-server-mysql-$MYSQL_VERSION"
     Get-Content ( Join-Path $ROOT .. "patches" "mysql" $MYSQL_VERSION *.patch ) | patch -s -f -p1
 }
 Write-Host "::endgroup::"
@@ -144,7 +142,7 @@ New-Item "boost" -ItemType Directory -Force
 $BOOST = Join-Path $RUNNER_TEMP "boost"
 New-Item "build" -ItemType Directory -Force
 Set-Location build
-cmake ( Join-Path $RUNNER_TEMP "mysql-$MYSQL_VERSION" ) `
+cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
     -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" `
     -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
     -DWITH_ROCKSDB_LZ4=OFF -DWITH_ROCKSDB_BZip2=OFF -DWITH_ROCKSDB_Snappy=OFF -DWITH_ROCKSDB_ZSTD=OFF `
