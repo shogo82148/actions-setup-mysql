@@ -127,7 +127,7 @@ Set-Location "$RUNNER_TEMP"
 Write-Host "Downloading zip archive..."
 $MAJOR = ($MYSQL_VERSION -split '\.')[0]
 $MINOR = ($MYSQL_VERSION -split '\.')[1]
-Invoke-WebRequest "https://dev.mysql.com/get/Downloads/MySQL-$MAJOR.$MINOR/mysql-$MYSQL_VERSION.zip" -OutFile "mysql-src.zip"
+Invoke-WebRequest "https://cdn.mysql.com/Downloads/MySQL-$MAJOR.$MINOR/mysql-$MYSQL_VERSION.zip" -OutFile "mysql-src.zip"
 Write-Host "Unzipping..."
 Expand-Archive -Path "mysql-src.zip" -DestinationPath "."
 Remove-Item -Path "mysql-src.zip"

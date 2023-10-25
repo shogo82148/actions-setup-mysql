@@ -142,7 +142,7 @@ echo "::group::download MySQL source"
     cd "$RUNNER_TEMP"
     MAJOR=$(echo "$MYSQL_VERSION" | cut -d. -f1)
     MINOR=$(echo "$MYSQL_VERSION" | cut -d. -f2)
-    curl --retry 3 -sSL "https://dev.mysql.com/get/Downloads/MySQL-$MAJOR.$MINOR/mysql-$MYSQL_VERSION.tar.gz" -o mysql-src.tar.gz
+    curl --retry 3 -sSL "https://cdn.mysql.com/Downloads/MySQL-$MAJOR.$MINOR/mysql-$MYSQL_VERSION.tar.gz" -o mysql-src.tar.gz
 )
 echo "::endgroup::"
 
