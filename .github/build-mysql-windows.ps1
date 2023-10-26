@@ -1,4 +1,8 @@
 Param($MYSQL_VERSION)
+
+# Start tracing statements.
+Set-PSDebug -Trace 1
+
 $OPENSSL_VERSION1_1_1 = "1_1_1w"
 $OPENSSL_VERSION3 = "3.1.4"
 $ROOT = Split-Path -Parent $MyInvocation.MyCommand.Path
