@@ -8,6 +8,16 @@ index 00000000000..f0020f26f0f
 +MYSQL_VERSION_MINOR=6
 +MYSQL_VERSION_PATCH=51
 +MYSQL_VERSION_EXTRA=
+diff --git a/VERSION b/VERSION
+deleted file mode 100644
+index f0020f26f0f..00000000000
+--- a/VERSION
++++ /dev/null
+@@ -1,4 +0,0 @@
+-MYSQL_VERSION_MAJOR=5
+-MYSQL_VERSION_MINOR=6
+-MYSQL_VERSION_PATCH=51
+-MYSQL_VERSION_EXTRA=
 diff --git a/cmake/mysql_version.cmake b/cmake/mysql_version.cmake
 index 34ed6f4db22..f07950bc1b9 100644
 --- a/cmake/mysql_version.cmake
