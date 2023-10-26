@@ -117,7 +117,7 @@ echo "::group::extract MySQL source"
     fi
     if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION/darwin" ]]
     then
-        cat "$ROOT/../patches/mysql/$MYSQL_VERSION/darin"/*.patch | patch -s -f -p1
+        cat "$ROOT/../patches/mysql/$MYSQL_VERSION/darwin"/*.patch | patch -s -f -p1
     fi
 )
 echo "::endgroup::"
