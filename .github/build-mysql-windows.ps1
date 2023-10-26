@@ -127,6 +127,7 @@ Set-Location "$RUNNER_TEMP"
 Write-Host "Downloading zip archive..."
 Invoke-WebRequest "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.zip" -OutFile "mysql-src.zip"
 Write-Host "Unzipping..."
+choco install patch
 Expand-Archive -Path "mysql-src.zip" -DestinationPath "."
 Remove-Item -Path "mysql-src.zip"
 if (Test-Path ( Join-Path $ROOT .. "patches" "mysql" $MYSQL_VERSION )) {
