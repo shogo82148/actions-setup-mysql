@@ -1,6 +1,6 @@
 Param($MYSQL_VERSION)
 $OPENSSL_VERSION1_1_1 = "1_1_1w"
-$OPENSSL_VERSION3 = "3.1.3"
+$OPENSSL_VERSION3 = "3.1.4"
 $ROOT = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RUNNER_TEMP = $env:RUNNER_TEMP
 if ($null -eq $RUNNER_TEMP) {
@@ -14,7 +14,7 @@ $PREFIX = Join-Path $RUNNER_TOOL_CACHE "mysql" $MYSQL_VERSION "x64"
 
 $ACTION_VERSION = Get-Content (Join-Path $ROOT ".." "package.json") | jq -r ".version"
 
-Write-Host "::group::Set up Visual Studio 2019"
+Write-Host "::group::Set up Visual Studio 2022"
 New-Item $RUNNER_TEMP -ItemType Directory -Force
 Set-Location "$RUNNER_TEMP"
 Remove-Item -Path * -Recurse -Force
@@ -127,11 +127,16 @@ Set-Location "$RUNNER_TEMP"
 Write-Host "Downloading zip archive..."
 Invoke-WebRequest "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.zip" -OutFile "mysql-src.zip"
 Write-Host "Unzipping..."
+choco install patch
 Expand-Archive -Path "mysql-src.zip" -DestinationPath "."
 Remove-Item -Path "mysql-src.zip"
 if (Test-Path ( Join-Path $ROOT .. "patches" "mysql" $MYSQL_VERSION )) {
-    Set-Location "mysql-server-mysql-$MYSQL_VERSION"
+    Set-Location ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" )
     Get-Content ( Join-Path $ROOT .. "patches" "mysql" $MYSQL_VERSION *.patch ) | patch -s -f -p1
+}
+if (Test-Path ( Join-Path $ROOT .. "patches" "mysql" $MYSQL_VERSION "windows")) {
+    Set-Location ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" )
+    Get-Content ( Join-Path $ROOT .. "patches" "mysql" $MYSQL_VERSION "windows" *.patch ) | patch -s -f -p1
 }
 Write-Host "::endgroup::"
 
@@ -151,7 +156,12 @@ cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
     -DWITH_SSL="$PREFIX" `
     -DCMAKE_BUILD_TYPE=Release
 
-devenv MySQL.sln /build Release
+try {
+    devenv MySQL.sln /build Release
+} catch {
+    # try again
+    devenv MySQL.sln /build Release
+}
 Write-Host "::endgroup::"
 
 Write-Host "::group::install"

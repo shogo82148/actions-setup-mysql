@@ -4,7 +4,7 @@ set -e
 
 MYSQL_VERSION=$1
 OPENSSL_VERSION1_1_1=1_1_1w
-OPENSSL_VERSION3=3.1.3
+OPENSSL_VERSION3=3.1.4
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
@@ -110,10 +110,14 @@ echo "::group::extract MySQL source"
     tar zxf mysql-src.tar.gz
 
     # apply patches
+    cd "mysql-server-mysql-$MYSQL_VERSION"
     if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION" ]]
     then
-        cd "mysql-server-mysql-$MYSQL_VERSION"
         cat "$ROOT/../patches/mysql/$MYSQL_VERSION"/*.patch | patch -s -f -p1
+    fi
+    if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION/darwin" ]]
+    then
+        cat "$ROOT/../patches/mysql/$MYSQL_VERSION/darwin"/*.patch | patch -s -f -p1
     fi
 )
 echo "::endgroup::"

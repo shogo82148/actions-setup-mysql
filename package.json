@@ -4,6 +4,9 @@
   "private": true,
   "description": "Setup MySQL GitHub Action",
   "main": "lib/main.js",
+  "engines": {
+    "node": "~20.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "format": "prettier --write **/*.ts",
@@ -29,14 +32,14 @@
     "semver": "^7.5.4"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.4",
+    "@types/jest": "^29.5.6",
     "@types/node": "^20.6.2",
-    "@types/semver": "^7.5.3",
-    "@typescript-eslint/eslint-plugin": "^6.7.4",
-    "@typescript-eslint/parser": "^6.7.4",
-    "eslint": "^8.50.0",
-    "eslint-plugin-import": "^2.28.1",
-    "eslint-plugin-jest": "^27.4.2",
+    "@types/semver": "^7.5.4",
+    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/parser": "^6.9.0",
+    "eslint": "^8.52.0",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jest": "^27.4.3",
     "jest": "^29.7.0",
     "jest-circus": "^29.5.0",
     "js-yaml": "^4.1.0",

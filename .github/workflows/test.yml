@@ -20,10 +20,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set Node.js 16.x
-        uses: actions/setup-node@v3
+      - name: Set Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version-file: package.json
           cache: npm
 
       - run: npm ci
@@ -42,11 +42,15 @@ jobs:
           - windows-2022
           - windows-2019
         mysql:
+          - "8.2"
           - "8.1"
           - "8.0"
           - "5.7"
           - "5.6"
+          - "mariadb-11.2"
+          - "mariadb-11.1"
           - "mariadb-11.0"
+          - "mariadb-10.11"
           - "mariadb-10.10"
           - "mariadb-10.9"
           - "mariadb-10.8"
@@ -62,10 +66,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set Node.js 16.x
-        uses: actions/setup-node@v3
+      - name: Set Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version-file: package.json
           cache: npm
       - name: Set up perl
         uses: shogo82148/actions-setup-perl@v1
@@ -100,10 +104,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set Node.js 16.x
-        uses: actions/setup-node@v3
+      - name: Set Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 16.x
+          node-version-file: package.json
           cache: npm
 
       - run: npm ci
