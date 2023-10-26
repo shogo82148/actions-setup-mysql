@@ -4,6 +4,9 @@
   "private": true,
   "description": "Setup MySQL GitHub Action",
   "main": "lib/main.js",
+  "engines": {
+    "node": "~20.0.0"
+  },
   "scripts": {
     "build": "tsc",
     "format": "prettier --write **/*.ts",
