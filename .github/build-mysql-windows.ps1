@@ -151,7 +151,12 @@ cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
     -DWITH_SSL="$PREFIX" `
     -DCMAKE_BUILD_TYPE=Release
 
-devenv MySQL.sln /build Release
+try {
+    devenv MySQL.sln /build Release
+} catch {
+    # try again
+    devenv MySQL.sln /build Release
+}
 Write-Host "::endgroup::"
 
 Write-Host "::group::install"
