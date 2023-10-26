@@ -1,0 +1,23 @@
+diff --git a/router/src/routing/src/classic_frame.h b/router/src/routing/src/classic_frame.h
+index 553ae3841f8..86ad6cf3ebd 100644
+--- a/router/src/routing/src/classic_frame.h
++++ b/router/src/routing/src/classic_frame.h
+@@ -177,6 +177,10 @@ ClassicFrame::recv_msg<
+     classic_protocol::borrowed::message::client::StmtExecute>(
+     Channel *src_channel, ClassicProtocolState *src_protocol,
+     classic_protocol::capabilities::value_type caps) {
++#ifdef _WIN32
++  return stdx::make_unexpected(
++      make_error_code(classic_protocol::codec_errc::statement_id_not_found));
++#else
+   using msg_type = classic_protocol::borrowed::message::client::StmtExecute;
+ 
+   auto read_res = ClassicFrame::recv_frame_sequence(src_channel, src_protocol);
+@@ -216,6 +220,7 @@ ClassicFrame::recv_msg<
+   if (!decode_res) return stdx::make_unexpected(decode_res.error());
+ 
+   return decode_res->second;
++#endif
+ }
+ 
+ #endif

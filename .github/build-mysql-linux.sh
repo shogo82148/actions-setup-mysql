@@ -151,10 +151,15 @@ echo "::group::extract MySQL source"
     tar zxf mysql-src.tar.gz
 
     # apply patches
+    cd "mysql-server-mysql-$MYSQL_VERSION"
     if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION" ]]
     then
-        cd "mysql-server-mysql-$MYSQL_VERSION"
         cat "$ROOT/../patches/mysql/$MYSQL_VERSION"/*.patch | patch -s -f -p1
+    fi
+    if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION/linux" ]]
+    then
+        cd "mysql-server-mysql-$MYSQL_VERSION/linux"
+        cat "$ROOT/../patches/mysql/$MYSQL_VERSION/linux"/*.patch | patch -s -f -p1
     fi
 )
 echo "::endgroup::"
