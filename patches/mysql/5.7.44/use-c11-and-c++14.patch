@@ -1,15 +1,29 @@
 diff --git a/cmake/os/Windows.cmake b/cmake/os/Windows.cmake
-index dbef87c409f..666de3cdbe5 100644
+index dbef87c409f..219b8637b98 100644
 --- a/cmake/os/Windows.cmake
 +++ b/cmake/os/Windows.cmake
-@@ -146,6 +146,10 @@ IF(MSVC)
-   #TODO: update the code and remove the disabled warnings
-   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /wd4800 /wd4805 /wd4996")
-   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4800 /wd4805 /wd4996 /we4099")
+@@ -125,7 +125,23 @@ IF(MSVC)
+     ENDIF()
+     SET("${flag}" "${${flag}} /EHsc")
+   ENDFOREACH()
+-  
 +
-+  # use C11 and C++14 standard
-+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /std:c11")
-+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++14")
- ENDIF()
- 
- # Always link with socket library
++  # use C11
++  FOREACH(flag 
++      CMAKE_C_FLAGS_MINSIZEREL
++      CMAKE_C_FLAGS_RELEASE    CMAKE_C_FLAGS_RELWITHDEBINFO 
++      CMAKE_C_FLAGS_DEBUG      CMAKE_C_FLAGS_DEBUG_INIT)
++    SET("${flag}" "${${flag}} /std:c11")
++  ENDFOREACH()
++
++  # use C++14
++  FOREACH(flag 
++      CMAKE_CXX_FLAGS_MINSIZEREL
++      CMAKE_CXX_FLAGS_RELEASE  CMAKE_CXX_FLAGS_RELWITHDEBINFO
++      CMAKE_CXX_FLAGS_DEBUG    CMAKE_CXX_FLAGS_DEBUG_INIT)
++    SET("${flag}" "${${flag}} /std:c++14")
++  ENDFOREACH()
++
+   FOREACH(type EXE SHARED MODULE)
+     FOREACH(config DEBUG RELWITHDEBINFO RELEASE MINSIZEREL)
+       SET(flag "CMAKE_${type}_LINKER_FLAGS_${config}")
