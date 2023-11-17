@@ -81,7 +81,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
   build-windows:
-    runs-on: windows-2022
+    runs-on: windows-2019
     needs: list
     strategy:
       fail-fast: false
