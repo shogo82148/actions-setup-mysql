@@ -1,0 +1,19 @@
+diff --git a/cmake/os/Windows.cmake b/cmake/os/Windows.cmake
+index dbef87c409f..01dba9cbf18 100644
+--- a/cmake/os/Windows.cmake
++++ b/cmake/os/Windows.cmake
+@@ -74,6 +74,14 @@ ENDIF()
+ OPTION(WIN_DEBUG_NO_INLINE "Disable inlining for debug builds on Windows" OFF)
+ 
+ IF(MSVC)
++  # use C++14 and disable C++17 features
++  FOREACH(flag 
++      CMAKE_CXX_FLAGS_MINSIZEREL
++      CMAKE_CXX_FLAGS_RELEASE  CMAKE_CXX_FLAGS_RELWITHDEBINFO
++      CMAKE_CXX_FLAGS_DEBUG    CMAKE_CXX_FLAGS_DEBUG_INIT)
++    SET("${flag}" "${${flag}} /std:c++14")
++  ENDFOREACH()
++
+   OPTION(LINK_STATIC_RUNTIME_LIBRARIES "Link with /MT" OFF)
+   # Enable debug info also in Release build,
+   # and create PDB to be able to analyze crashes.
