@@ -21,7 +21,7 @@ Remove-Item -Path * -Recurse -Force
 
 # https://help.appveyor.com/discussions/questions/18777-how-to-use-vcvars64bat-from-powershell
 # https://stackoverflow.com/questions/2124753/how-can-i-use-powershell-with-the-visual-studio-command-prompt
-cmd.exe /c "call `"C:\Program Files\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat`" x64 && set > %temp%\vcvars.txt"
+cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat`" x64 && set > %temp%\vcvars.txt"
 Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
     if ($_ -match "^(.*?)=(.*)$") {
         Set-Item -Path "env:$($matches[1])" $matches[2]
