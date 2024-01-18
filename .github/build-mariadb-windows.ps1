@@ -14,14 +14,14 @@ $PREFIX = Join-Path $RUNNER_TOOL_CACHE "mariadb" $MARIADB_VERSION "x64"
 
 $ACTION_VERSION = Get-Content (Join-Path $ROOT ".." "package.json") | jq -r ".version"
 
-Write-Host "::group::Set up Visual Studio 2019"
+Write-Host "::group::Set up Visual Studio 2022"
 New-Item $RUNNER_TEMP -ItemType Directory -Force
 Set-Location "$RUNNER_TEMP"
 Remove-Item -Path * -Recurse -Force
 
 # https://help.appveyor.com/discussions/questions/18777-how-to-use-vcvars64bat-from-powershell
 # https://stackoverflow.com/questions/2124753/how-can-i-use-powershell-with-the-visual-studio-command-prompt
-cmd.exe /c "call `"C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat`" x64 && set > %temp%\vcvars.txt"
+cmd.exe /c "call `"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvarsall.bat`" x64 && set > %temp%\vcvars.txt"
 Get-Content "$env:temp\vcvars.txt" | Foreach-Object {
     if ($_ -match "^(.*?)=(.*)$") {
         Set-Item -Path "env:$($matches[1])" $matches[2]

@@ -24,6 +24,12 @@ esac
 PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/$MYSQL_ARCH
 export LDFLAGS=-Wl,-rpath,$PREFIX/lib
 
+# use the latest version of clang installed
+CC=$(brew --prefix llvm@15)/bin/clang
+export CC
+CXX=$(brew --prefix llvm@15)/bin/clang++
+export CXX
+
 # detect the number of CPU Core
 JOBS=$(sysctl -n hw.logicalcpu_max)
 
