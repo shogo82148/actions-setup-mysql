@@ -98,7 +98,7 @@ jobs:
           # pre-installed version is too old.
           # install new one.
           brew install bison
-      - run: .github/build-mysql-darwin.sh "$MYSQL_VERSION"
+      - run: .github/build-mysql-darwin-macos14.sh "$MYSQL_VERSION"
       - name: upload
         shell: bash
         run: |
