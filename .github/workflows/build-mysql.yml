@@ -58,7 +58,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-  build-darwin:
+  build-darwin-x64:
     runs-on: macos-11
     needs: list
     strategy:
@@ -80,6 +80,31 @@ jobs:
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
           mv "$RUNNER_TEMP/mysql.tar.zstd" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-x64.tar.zstd"
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-x64.tar.zstd"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  build-darwin-arm64:
+    runs-on: macos-14
+    needs: list
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.list.outputs.matrix-darwin)}}
+    env:
+      MYSQL_VERSION: ${{ matrix.mysql }}
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          # pre-installed version is too old.
+          # install new one.
+          brew install bison
+      - run: .github/build-mysql-darwin-macos14.sh "$MYSQL_VERSION"
+      - name: upload
+        shell: bash
+        run: |
+          ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
+          mv "$RUNNER_TEMP/mysql.tar.zstd" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-arm64.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-arm64.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
