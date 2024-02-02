@@ -58,7 +58,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
-  build-darwin:
+  build-darwin-x64:
     runs-on: macos-11
     needs: list
     strategy:
@@ -76,6 +76,28 @@ jobs:
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
           mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-darwin-x64.tar.zstd"
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-darwin-x64.tar.zstd"
+        env:
+          MARIADB_VERSION: ${{ matrix.mariadb }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+  build-darwin-arm64:
+    runs-on: macos-14
+    needs: list
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.list.outputs.matrix-darwin)}}
+    env:
+      MARIADB_VERSION: ${{ matrix.mariadb }}
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
+      - name: upload
+        shell: bash
+        run: |
+          ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
+          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-darwin-arm64.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-darwin-arm64.tar.zstd"
         env:
           MARIADB_VERSION: ${{ matrix.mariadb }}
           GITHUB_TOKEN: ${{ github.token }}

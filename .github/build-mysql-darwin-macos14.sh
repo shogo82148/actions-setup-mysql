@@ -2,27 +2,26 @@
 
 set -e
 
-MARIADB_VERSION=$1
+MYSQL_VERSION=$1
 OPENSSL_VERSION1_1_1=1_1_1w
 OPENSSL_VERSION3=3.2.1
-PCRE2_VERSION=10.42
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
 
 case "$(uname -m)" in
     "x86_64")
-        MARIADB_ARCH="x64"
+        MYSQL_ARCH="x64"
         ;;
     "arm64")
-        MARIADB_ARCH="arm64"
+        MYSQL_ARCH="arm64"
         ;;
     *)
         echo "unsupported architecture: $(uname -m)"
         exit 1
         ;;
 esac
-PREFIX=$RUNNER_TOOL_CACHE/mariadb/$MARIADB_VERSION/$MARIADB_ARCH
+PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/$MYSQL_ARCH
 export LDFLAGS=-Wl,-rpath,$PREFIX/lib
 
 # detect the number of CPU Core
@@ -33,7 +32,9 @@ cd "$RUNNER_TEMP"
 
 ACTION_VERSION=$(jq -r '.version' < "$ROOT/../package.json")
 
-if [[ "$MARIADB_VERSION" =~ (^10[.](8|9|[1-9][0-9])[.])|(^1[1-9][.]) ]]; then # MariaDB 10.8 or later
+# system SSL/TLS library is too old. so we use custom build.
+
+if [[ "$MYSQL_VERSION" =~ ^8[.] ]]; then # MySQL 8.0 or later
     # build OpenSSL v3
     export OPENSSL_VERSION=$OPENSSL_VERSION3
     echo "::group::download OpenSSL source"
@@ -94,75 +95,46 @@ else
 fi
 
 
-echo "::group::download PCRE2 source"
+echo "::group::download MySQL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl --retry 3 -sSL "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-$PCRE2_VERSION/pcre2-$PCRE2_VERSION.tar.bz2" -o pcre2.tar.bz2
+    curl --retry 3 -sSL "https://github.com/mysql/mysql-server/archive/mysql-$MYSQL_VERSION.tar.gz" -o mysql-src.tar.gz
 )
 echo "::endgroup::"
 
-echo "::group::extract PCRE2 source"
+echo "::group::extract MySQL source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    tar jxf pcre2.tar.bz2
-)
-echo "::endgroup::"
-
-echo "::group::build PCRE2"
-(
-    set -eux
-    cd "$RUNNER_TEMP/pcre2-$PCRE2_VERSION"
-
-    ./configure --prefix="$PREFIX"
-    make "-j$JOBS"
-    make install
-)
-
-echo "::group::download MariaDB source"
-(
-    set -eux
-    cd "$RUNNER_TEMP"
-    curl --retry 3 -sSL "https://downloads.mariadb.com/MariaDB/mariadb-$MARIADB_VERSION/source/mariadb-$MARIADB_VERSION.tar.gz" -o mariadb-src.tar.gz
-)
-echo "::endgroup::"
-
-# system bison is too old (2.x). we need bison 3.x
-echo "::group::install bison"
-brew install bison
-PATH=$(brew --prefix bison)/bin:$PATH
-export PATH
-echo "::endgroup::"
-
-echo "::group::extract MariaDB source"
-(
-    set -eux
-    cd "$RUNNER_TEMP"
-    tar zxf mariadb-src.tar.gz
+    tar zxf mysql-src.tar.gz
 
     # apply patches
-    if [[ -d "$ROOT/../patches/mariadb/$MARIADB_VERSION" ]]
+    cd "mysql-server-mysql-$MYSQL_VERSION"
+    if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION" ]]
     then
-        cd "mariadb-$MARIADB_VERSION"
-        cat "$ROOT/../patches/mariadb/$MARIADB_VERSION"/*.patch | patch -s -f -p1
+        cat "$ROOT/../patches/mysql/$MYSQL_VERSION"/*.patch | patch -s -f -p1
+    fi
+    if [[ -d "$ROOT/../patches/mysql/$MYSQL_VERSION/darwin" ]]
+    then
+        cat "$ROOT/../patches/mysql/$MYSQL_VERSION/darwin"/*.patch | patch -s -f -p1
     fi
 )
 echo "::endgroup::"
 
-echo "::group::build MariaDB"
+echo "::group::build MySQL"
 (
     set -eux
     cd "$RUNNER_TEMP"
     mkdir build
     cd build
-    cmake "../mariadb-$MARIADB_VERSION" \
+    cmake "../mysql-server-mysql-$MYSQL_VERSION" \
         -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
         -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
         -DWITH_ROCKSDB_LZ4=OFF -DWITH_ROCKSDB_BZip2=OFF -DWITH_ROCKSDB_Snappy=OFF -DWITH_ROCKSDB_ZSTD=OFF \
         -DWITH_UNIT_TESTS=OFF \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" \
-        -DWITH_SSL="$PREFIX" -DPLUGIN_TOKUDB=NO
+        -DWITH_SSL="$PREFIX"
     make "-j$JOBS"
 )
 echo "::endgroup::"
@@ -186,6 +158,6 @@ echo "::group::archive"
     rm -rf ./mysql-test
     rm -rf ./sql-bench
 
-    tar --use-compress-program 'zstd -T0 --long=30 --ultra -22' -cf "$RUNNER_TEMP/mariadb.tar.zstd" .
+    tar --use-compress-program 'zstd -T0 --long=30 --ultra -22' -cf "$RUNNER_TEMP/mysql.tar.zstd" .
 )
 echo "::endgroup::"
