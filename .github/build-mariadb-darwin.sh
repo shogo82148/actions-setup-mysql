@@ -5,7 +5,6 @@ set -e
 MARIADB_VERSION=$1
 OPENSSL_VERSION1_1_1=1_1_1w
 OPENSSL_VERSION3=3.2.1
-PCRE2_VERSION=10.42
 ROOT=$(cd "$(dirname "$0")" && pwd)
 : "${RUNNER_TEMP:=$ROOT/working}"
 : "${RUNNER_TOOL_CACHE:=$RUNNER_TEMP/dist}"
@@ -93,33 +92,6 @@ else
     echo "::endgroup::"
 fi
 
-
-echo "::group::download PCRE2 source"
-(
-    set -eux
-    cd "$RUNNER_TEMP"
-    curl --retry 3 -sSL "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-$PCRE2_VERSION/pcre2-$PCRE2_VERSION.tar.bz2" -o pcre2.tar.bz2
-)
-echo "::endgroup::"
-
-echo "::group::extract PCRE2 source"
-(
-    set -eux
-    cd "$RUNNER_TEMP"
-    tar jxf pcre2.tar.bz2
-)
-echo "::endgroup::"
-
-echo "::group::build PCRE2"
-(
-    set -eux
-    cd "$RUNNER_TEMP/pcre2-$PCRE2_VERSION"
-
-    ./configure --prefix="$PREFIX"
-    make "-j$JOBS"
-    make install
-)
-
 echo "::group::download MariaDB source"
 (
     set -eux
@@ -162,7 +134,8 @@ echo "::group::build MariaDB"
         -DWITH_ROCKSDB_LZ4=OFF -DWITH_ROCKSDB_BZip2=OFF -DWITH_ROCKSDB_Snappy=OFF -DWITH_ROCKSDB_ZSTD=OFF \
         -DWITH_UNIT_TESTS=OFF \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" \
-        -DWITH_SSL="$PREFIX" -DPLUGIN_TOKUDB=NO
+        -DWITH_SSL="$PREFIX" -DPLUGIN_TOKUDB=NO \
+        -DWITH_PCRE=bundled
     make "-j$JOBS"
 )
 echo "::endgroup::"
