@@ -1,6 +1,6 @@
 # actions-setup-mysql
 
-This action sets by MySQL database for use in actions by:
+This action sets up a MySQL database for use in actions by:
 
 - download a version of MySQL or MariaDB
 - start mysqld
@@ -8,7 +8,7 @@ This action sets by MySQL database for use in actions by:
 ## Motivation
 
 - GitHub-Hosted Runners have MySQL Server, but only Linux.
-- GitHub Actions supports Docker services, and there is the official [MySQL image](https://hub.docker.com/_/mysql). but it works on only Linux.
+- GitHub Actions supports Docker services, and there is the official [MySQL image](https://hub.docker.com/_/mysql). But it works on only Linux.
 - Some utils for MySQL (such as [MySQL::Partition](https://metacpan.org/pod/MySQL::Partition), [App::Prove::Plugin::MySQLPool](https://metacpan.org/pod/App::Prove::Plugin::MySQLPool), [Test::mysqld](https://metacpan.org/pod/Test::mysqld)) requires MySQL installed on the local host.
 
 ## Usage
@@ -81,7 +81,7 @@ The default value is `true`.
 ### `my-cnf`
 
 `my.cnf` settings for mysqld.
-It is same syntax with `my.cnf`.
+It uses the same syntax as `my.cnf`.
 
 Example:
 
@@ -126,7 +126,7 @@ It contains:
 - `var/server-cert.pem`: The server certificate for SSL/TLS
 - `var/server-key.pem`: The server key for SSL/TLS
 
-Here is some examples:
+Here are some examples:
 
 ```yaml
 - id: setup-mysql
