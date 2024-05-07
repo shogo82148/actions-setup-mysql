@@ -1,0 +1,265 @@
+commit ee1e935b8a4606a943285376a08c815efbaeeb31
+Author: ICHINOSE Shogo <shogo82148@gmail.com>
+Date:   Wed Oct 4 13:23:49 2023 +0900
+
+    Revert "Bug#35115810 stmt-execute with new-params-bound = 0 [2/2]"
+    
+    This reverts commit cce8da20cb5fc12e831a66e725fdc9c0c43ad7c6.
+
+diff --git a/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_base.h b/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_base.h
+index 1065e59927e..e536b4cf70e 100644
+--- a/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_base.h
++++ b/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_base.h
+@@ -110,7 +110,6 @@ stdx::expected<size_t, std::error_code> encode(const T &v,
+  *
+  * @param buffer buffer to read from
+  * @param caps protocol capabilities
+- * @tparam T the message class
+  * @returns number of bytes read from 'buffers' and a T on success, or
+  * std::error_code on error
+  */
+@@ -120,28 +119,6 @@ stdx::expected<std::pair<size_t, T>, std::error_code> decode(
+   return Codec<T>::decode(buffer, caps);
+ }
+ 
+-/**
+- * decode a message from a buffer.
+- *
+- * @param buffer buffer to read from
+- * @param caps protocol capabilities
+- * @param args arguments that shall be forwarded to T's decode()
+- * @tparam T the message class
+- * @tparam Args Types of the extra arguments to be forwarded to T's decode()
+- * function.
+- * @returns number of bytes read from 'buffers' and a T on success, or
+- * std::error_code on error
+- */
+-template <class T, class... Args>
+-stdx::expected<std::pair<size_t, T>, std::error_code> decode(
+-    const net::const_buffer &buffer, capabilities::value_type caps,
+-    // clang-format off
+-    Args &&... args
+-    // clang-format on
+-) {
+-  return Codec<T>::decode(buffer, caps, std::forward<Args>(args)...);
+-}
+-
+ namespace impl {
+ 
+ /**
+diff --git a/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h b/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h
+index feabf47dd56..1d5b6b19566 100644
+--- a/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h
++++ b/router/src/mysql_protocol/include/mysqlrouter/classic_protocol_codec_message.h
+@@ -2381,35 +2381,23 @@ class Codec<borrowable::message::client::StmtExecute<Borrowed>>
+     auto new_params_bound_res = accu.template step<bw::FixedInt<1>>();
+     if (!accu.result()) return stdx::make_unexpected(accu.result().error());
+ 
+-    std::vector<typename value_type::ParamDef> types;
+-
+     auto new_params_bound = new_params_bound_res->value();
+-    if (new_params_bound == 0) {
+-      // no new params, use the last known params.
+-      types = *metadata_res;
+-    } else if (new_params_bound == 1) {
+-      // check that there is at least enough data for the types (a FixedInt<2>)
+-      // before reserving memory.
+-      if (param_count >= buffer.size() / 2) {
+-        return stdx::make_unexpected(
+-            make_error_code(codec_errc::invalid_input));
+-      }
++    if (new_params_bound != 1) {
++      // new-params-bound is required as long as the decoder doesn't know the
++      // old param-defs
++      return stdx::make_unexpected(make_error_code(codec_errc::invalid_input));
++    }
+ 
++    std::vector<typename value_type::ParamDef> types;
++
++    if (new_params_bound == 1) {
+       types.reserve(param_count);
+ 
+       for (size_t n{}; n < param_count; ++n) {
+         auto type_res = accu.template step<bw::FixedInt<2>>();
+         if (!accu.result()) return stdx::make_unexpected(accu.result().error());
+ 
+-        if (supports_query_attributes) {
+-          auto name_res = accu.template step<bw::VarString<Borrowed>>();
+-          if (!accu.result()) {
+-            return stdx::make_unexpected(accu.result().error());
+-          }
+-          types.emplace_back(type_res->value(), name_res->value());
+-        } else {
+-          types.emplace_back(type_res->value());
+-        }
++        types.push_back(type_res->value());
+       }
+     } else {
+       return stdx::make_unexpected(make_error_code(codec_errc::invalid_input));
+diff --git a/router/src/routing/src/classic_frame.h b/router/src/routing/src/classic_frame.h
+index 29adcf6c503..c693c5d9bd5 100644
+--- a/router/src/routing/src/classic_frame.h
++++ b/router/src/routing/src/classic_frame.h
+@@ -108,57 +108,4 @@ class ClassicFrame {
+   }
+ };
+ 
+-/**
+- * receive a StmtExecute message from a channel.
+- *
+- * specialization of recv_msg<> as StmtExecute needs a the data from the
+- * StmtPrepareOk.
+- */
+-template <>
+-inline stdx::expected<classic_protocol::borrowed::message::client::StmtExecute,
+-                      std::error_code>
+-ClassicFrame::recv_msg<
+-    classic_protocol::borrowed::message::client::StmtExecute>(
+-    Channel *src_channel, ClassicProtocolState *src_protocol,
+-    classic_protocol::capabilities::value_type caps) {
+-  using msg_type = classic_protocol::borrowed::message::client::StmtExecute;
+-
+-  auto read_res = ClassicFrame::recv_frame_sequence(src_channel, src_protocol);
+-  if (!read_res) return stdx::make_unexpected(read_res.error());
+-
+-  const auto &recv_buf = src_channel->recv_plain_view();
+-
+-  auto frame_decode_res = classic_protocol::decode<
+-      classic_protocol::frame::Frame<classic_protocol::borrowed::wire::String>>(
+-      net::buffer(recv_buf), caps);
+-  if (!frame_decode_res) {
+-    return stdx::make_unexpected(frame_decode_res.error());
+-  }
+-
+-  src_protocol->seq_id(frame_decode_res->second.seq_id());
+-
+-  auto decode_res = classic_protocol::decode<msg_type>(
+-      net::buffer(frame_decode_res->second.payload().value()), caps,
+-      [src_protocol](auto stmt_id)
+-          -> stdx::expected<std::vector<msg_type::ParamDef>, std::error_code> {
+-        const auto it = src_protocol->prepared_statements().find(stmt_id);
+-        if (it == src_protocol->prepared_statements().end()) {
+-          return stdx::make_unexpected(make_error_code(
+-              classic_protocol::codec_errc::statement_id_not_found));
+-        }
+-
+-        std::vector<msg_type::ParamDef> params;
+-        params.reserve(it->second.parameters.size());
+-
+-        for (const auto &param : it->second.parameters) {
+-          params.emplace_back(param.type_and_flags);
+-        }
+-
+-        return params;
+-      });
+-  if (!decode_res) return stdx::make_unexpected(decode_res.error());
+-
+-  return decode_res->second;
+-}
+-
+ #endif
+diff --git a/router/src/routing/src/classic_stmt_execute_forwarder.cc b/router/src/routing/src/classic_stmt_execute_forwarder.cc
+index a66066a1e52..8833ea760df 100644
+--- a/router/src/routing/src/classic_stmt_execute_forwarder.cc
++++ b/router/src/routing/src/classic_stmt_execute_forwarder.cc
+@@ -26,7 +26,6 @@
+ 
+ #include "classic_connection_base.h"
+ #include "classic_frame.h"
+-#include "hexify.h"
+ #include "mysql/harness/stdx/expected.h"
+ #include "mysql/harness/tls_error.h"
+ #include "mysqld_error.h"  // mysql-server error-codes
+@@ -63,51 +62,7 @@ StmtExecuteForwarder::process() {
+ stdx::expected<Processor::Result, std::error_code>
+ StmtExecuteForwarder::command() {
+   if (auto &tr = tracer()) {
+-    auto *socket_splicer = connection()->socket_splicer();
+-    auto *src_channel = socket_splicer->client_channel();
+-    auto *src_protocol = connection()->client_protocol();
+-
+-    auto msg_res = ClassicFrame::recv_msg<
+-        classic_protocol::borrowed::message::client::StmtExecute>(src_channel,
+-                                                                  src_protocol);
+-    if (!msg_res) {
+-      auto ec = msg_res.error();
+-
+-      // parse errors are invalid input.
+-      if (ec.category() ==
+-          make_error_code(classic_protocol::codec_errc::invalid_input)
+-              .category()) {
+-        auto send_res =
+-            ClassicFrame::send_msg<classic_protocol::message::server::Error>(
+-                src_channel, src_protocol,
+-                {ER_MALFORMED_PACKET, "Malformed packet", "HY000"});
+-        if (!send_res) return send_client_failed(send_res.error());
+-
+-        const auto &recv_buf = src_channel->recv_plain_view();
+-
+-        tr.trace(Tracer::Event().stage("stmt_execute::command:\n" +
+-                                       mysql_harness::hexify(recv_buf)));
+-
+-        discard_current_msg(src_channel, src_protocol);
+-
+-        stage(Stage::Done);
+-        return Result::SendToClient;
+-      }
+-
+-      return recv_client_failed(msg_res.error());
+-    }
+-
+-    const auto &recv_buf = src_channel->recv_plain_view();
+-
+-    tr.trace(Tracer::Event().stage(
+-        "stmt_execute::command:\nstmt-id: " +              //
+-        std::to_string(msg_res->statement_id()) + "\n" +   //
+-        "flags: " + msg_res->flags().to_string() + "\n" +  //
+-        "new-params-bound: " + std::to_string(msg_res->new_params_bound()) +
+-        "\n" +  //
+-        "types::size(): " + std::to_string(msg_res->types().size()) + "\n" +
+-        "values::size(): " + std::to_string(msg_res->values().size()) + "\n" +
+-        mysql_harness::hexify(recv_buf)));
++    tr.trace(Tracer::Event().stage("stmt_execute::command"));
+   }
+ 
+   auto &server_conn = connection()->socket_splicer()->server_conn();
+diff --git a/router/tests/integration/test_routing_direct.cc b/router/tests/integration/test_routing_direct.cc
+index 25a1bfa5a64..b21bec4fa39 100644
+--- a/router/tests/integration/test_routing_direct.cc
++++ b/router/tests/integration/test_routing_direct.cc
+@@ -2181,17 +2181,6 @@ TEST_P(ConnectionTest, classic_protocol_prepare_execute) {
+   };
+   ASSERT_NO_ERROR(stmt.bind_params(params));
+ 
+-  // execute again to trigger a StmtExecute with new-params-bound = 1.
+-  {
+-    auto exec_res = stmt.execute();
+-    ASSERT_NO_ERROR(exec_res);
+-
+-    for ([[maybe_unused]] auto res : *exec_res) {
+-      // drain the resultsets.
+-    }
+-  }
+-
+-  // execute again to trigger a StmtExecute with new-params-bound = 0.
+   {
+     auto exec_res = stmt.execute();
+     ASSERT_NO_ERROR(exec_res);
+@@ -2205,7 +2194,7 @@ TEST_P(ConnectionTest, classic_protocol_prepare_execute) {
+     auto events_res = changed_event_counters(cli);
+     ASSERT_NO_ERROR(events_res);
+ 
+-    EXPECT_THAT(*events_res, ElementsAre(Pair("statement/com/Execute", 2),
++    EXPECT_THAT(*events_res, ElementsAre(Pair("statement/com/Execute", 1),
+                                          Pair("statement/com/Prepare", 1)));
+   }
+ 
+@@ -2217,7 +2206,7 @@ TEST_P(ConnectionTest, classic_protocol_prepare_execute) {
+     ASSERT_NO_ERROR(events_res);
+ 
+     EXPECT_THAT(*events_res,
+-                ElementsAre(Pair("statement/com/Execute", 2),
++                ElementsAre(Pair("statement/com/Execute", 1),
+                             Pair("statement/com/Prepare", 1),
+                             // explicit
+                             Pair("statement/com/Reset Connection", 1),
