@@ -1,0 +1,12 @@
+diff --git a/extra/libcno/CMakeLists.txt b/extra/libcno/CMakeLists.txt
+index 2cc3a795f59..ef50b2ab5a6 100644
+--- a/extra/libcno/CMakeLists.txt
++++ b/extra/libcno/CMakeLists.txt
+@@ -29,7 +29,6 @@ DISABLE_MISSING_PROFILE_WARNING()
+ MYSQL_ADD_EXECUTABLE(
+   cno_huffman_generator
+   cno_huffman_generator.cc
+-  SKIP_INSTALL
+   EXCLUDE_FROM_ALL
+   )
+ ADD_CUSTOM_COMMAND(
