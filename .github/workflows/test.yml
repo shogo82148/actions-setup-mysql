@@ -43,6 +43,7 @@ jobs:
           - windows-2022
           - windows-2019
         mysql:
+          - "8.4"
           - "8.3"
           - "8.2"
           - "8.1"
@@ -118,7 +119,7 @@ jobs:
         id: action
         uses: ./
         with:
-          mysql-version: "8"
+          mysql-version: "8.3"
           root-password: very-very-secret
           user: my
           password: secret
