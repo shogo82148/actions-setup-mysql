@@ -1,3 +1,18 @@
+    cno/hpack-data.h should be automatically generated during the build process, but it is not generated correctly on Windows.
+    
+        2024-05-07T12:43:46.6430959Z 101>------ Skipped Build: Project: cno_huffman_generator, Configuration: Release x64 ------
+        2024-05-07T12:43:46.6435277Z 101>Project not selected to build for this solution configuration 
+        2024-05-07T12:43:46.6548553Z 102>------ Build started: Project: do_cno_huffman_generator, Configuration: Release x64 ------
+        2024-05-07T12:43:46.6583024Z 103>------ Build started: Project: ndbtrace, Configuration: Release x64 ------
+        2024-05-07T12:43:46.7956464Z 103>Building Custom Rule C:/Temp/mysql-server-mysql-8.4.0/storage/ndb/src/common/debugger/CMakeLists.txt
+        2024-05-07T12:43:46.7957770Z 102>LIBCNO generating huffman codes for HTTP2 encodings.
+        2024-05-07T12:43:46.7963711Z 102>'..\..\runtime_output_directory\Release\cno_huffman_generator.exe' is not recognized as an internal or external command,
+        2024-05-07T12:43:46.7964948Z 102>operable program or batch file.
+        2024-05-07T12:43:47.2741873Z 102>C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppCommon.targets(254,5): error MSB8066: Custom build for 'C:\Temp\build\CMakeFiles\4f8a0ba57c743aeaa87cf9203b55864f\hpack-data.h.rule;C:\Temp\build\CMakeFiles\5d60612c807dd9aa072c1cc5328a81ac\do_cno_huffman_generator.rule;C:\Temp\mysql-server-mysql-8.4.0\extra\libcno\CMakeLists.txt' exited with code 9009.
+        2024-05-07T12:43:47.2745507Z 102>Done building project "do_cno_huffman_generator.vcxproj" -- FAILED.
+    
+    As a workaround, we will commit a pre-generated version beforehand.
+
 diff --git a/extra/libcno/CMakeLists.txt b/extra/libcno/CMakeLists.txt
 index 2cc3a795f59..04581361080 100644
 --- a/extra/libcno/CMakeLists.txt
