@@ -25,7 +25,7 @@ jobs:
             export MYSQL_VERSIONS
           fi
           {
-            echo "matrix-linux=$(printenv MYSQL_VERSIONS | jq -c '{mysql: . , os: ["ubuntu-20.04", "ubuntu-22.04"]}')"
+            echo "matrix-linux=$(printenv MYSQL_VERSIONS | jq -c '{mysql: . , os: ["ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04"]}')"
             echo "matrix-darwin=$(printenv MYSQL_VERSIONS | jq -c '{mysql: .}')"
             echo "matrix-windows=$(printenv MYSQL_VERSIONS | jq -c '{mysql: .}')"
           } >> "$GITHUB_OUTPUT"
