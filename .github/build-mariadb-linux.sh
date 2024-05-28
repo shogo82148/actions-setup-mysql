@@ -45,7 +45,7 @@ elif command -v gcc-9 > /dev/null 2>&1; then
     export CC=gcc-9
 fi
 
-if command -v g++14 > /dev/null 2>&1; then
+if command -v g++-14 > /dev/null 2>&1; then
     echo "g++-14 is available"
     export CXX=g++-14
 elif command -v g++-13 > /dev/null 2>&1; then
