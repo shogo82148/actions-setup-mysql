@@ -156,6 +156,7 @@ echo "::group::archive"
 
     # remove extra files
     rm -rf ./man
+    rm -rf ./mariadb-test
     rm -rf ./mysql-test
     rm -rf ./sql-bench
 
