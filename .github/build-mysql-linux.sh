@@ -27,7 +27,7 @@ export LDFLAGS=-Wl,-rpath,$PREFIX/lib
 # use latest version of gcc installed
 if [[ "$MYSQL_VERSION" =~ ^5[.]6[.] ]]; then
     # I don't know why, but MySQL 5.6.x is not compiled by gcc-11
-    sudo apt install gcc-10 g++-10
+    sudo apt-get install gcc-10 g++-10
     export CC=gcc-10
     export CXX=g++-10
 else
