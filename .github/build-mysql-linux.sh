@@ -27,21 +27,9 @@ export LDFLAGS=-Wl,-rpath,$PREFIX/lib
 # use latest version of gcc installed
 if [[ "$MYSQL_VERSION" =~ ^5[.]6[.] ]]; then
     # I don't know why, but MySQL 5.6.x is not compiled by gcc-11
-    if command -v gcc-10 > /dev/null 2>&1; then
-        echo "gcc-10 is available"
-        export CC=gcc-10
-    elif command -v gcc-9 > /dev/null 2>&1; then
-        echo "gcc-9 is available"
-        export CC=gcc-9
-    fi
-
-    if command -v g++-10 > /dev/null 2>&1; then
-        echo "g++-10 is available"
-        export CXX=g++-10
-    elif command -v g++-9 > /dev/null 2>&1; then
-        echo "g++-9 is available"
-        export CXX=g++-9
-    fi
+    sudo apt install gcc-10 g++-10
+    export CC=gcc-10
+    export CXX=g++-10
 else
     if command -v gcc-11 > /dev/null 2>&1; then
         echo "gcc-11 is available"
