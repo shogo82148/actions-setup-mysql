@@ -1,0 +1,26 @@
+commit cf4a16b5557be5fb3568c1de0d6cc0a18291afc9
+Author: Sergei Golubchik <serg@mariadb.org>
+Date:   Thu May 4 16:05:08 2023 +0200
+
+    MDEV-31057 rocksdb does not compile with gcc-13
+    
+    RocksDB (in a submodule) has to include <cstdint> to use uint64_t
+    but it doesn't. Until the submodule is upgraded, let's replace
+    problematic types with something that's available
+
+diff --git a/storage/rocksdb/CMakeLists.txt b/storage/rocksdb/CMakeLists.txt
+index 15fc4dc735a..71259703e5a 100644
+--- a/storage/rocksdb/CMakeLists.txt
++++ b/storage/rocksdb/CMakeLists.txt
+@@ -30,6 +30,11 @@ IF(WITH_VALGRIND)
+   ADD_DEFINITIONS(-DROCKSDB_VALGRIND_RUN=1)
+ ENDIF()
+ 
++ADD_DEFINITIONS(-Duint64_t=u_int64_t)
++ADD_DEFINITIONS(-Duint32_t=u_int32_t)
++ADD_DEFINITIONS(-Duint16_t=u_int16_t)
++ADD_DEFINITIONS(-Duint8_t=u_int8_t)
++
+ # We've had our builders hang during the build process. This prevents MariaRocks
+ # to be built on 32 bit intel OS kernels.
+ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "i[36]86")
