@@ -135,7 +135,7 @@ echo "::group::build MariaDB"
         -DWITH_UNIT_TESTS=OFF \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" \
         -DWITH_SSL="$PREFIX" -DPLUGIN_TOKUDB=NO \
-        -DWITH_PCRE=bundled
+        -DWITH_PCRE=bundled -DWITH_ZLIB=bundled
     make "-j$JOBS"
 )
 echo "::endgroup::"
