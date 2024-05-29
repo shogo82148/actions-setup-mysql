@@ -160,6 +160,9 @@ Expand-Archive -Path ".\build\mariadb-$MARIADB_VERSION-winx64.zip" -DestinationP
 Set-Location "mariadb-$MARIADB_VERSION-winx64"
 
 # remove extra files
+if (Test-Path mariadb-test) {
+    Remove-Item -Path mariadb-test -Recurse -Force
+}
 if (Test-Path mysql-test) {
     Remove-Item -Path mysql-test -Recurse -Force
 }
