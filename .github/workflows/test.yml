@@ -40,7 +40,6 @@ jobs:
           - macos-14
           - macos-13
           - macos-12
-          - macos-11
           - windows-2022
           - windows-2019
         mysql:
@@ -51,6 +50,7 @@ jobs:
           - "8.0"
           - "5.7"
           - "5.6"
+          - "mariadb-11.5"
           - "mariadb-11.4"
           - "mariadb-11.3"
           - "mariadb-11.2"
