@@ -11,6 +11,11 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
 jobs:
   list:
     runs-on: ubuntu-latest
@@ -48,10 +53,6 @@ jobs:
       MYSQL_VERSION: ${{ matrix.mysql }}
       BUILD_OS: ${{ matrix.os }}
     timeout-minutes: 180
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
     steps:
       - uses: actions/checkout@v4
       - run: .github/build-mysql-linux.sh "$MYSQL_VERSION"
@@ -76,10 +77,6 @@ jobs:
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -108,10 +105,6 @@ jobs:
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -140,10 +133,6 @@ jobs:
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
     steps:
       - uses: actions/checkout@v4
       - run: .github\build-mysql-windows.ps1 $env:MYSQL_VERSION

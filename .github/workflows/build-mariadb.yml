@@ -10,6 +10,10 @@ on:
         description: MariaDB versions to build (JSON Array)
         required: false
         default: ""
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   list:
@@ -48,10 +52,6 @@ jobs:
       MARIADB_VERSION: ${{ matrix.mariadb }}
       BUILD_OS: ${{ matrix.os }}
     timeout-minutes: 180
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
     steps:
       - uses: actions/checkout@v4
       - run: .github/build-mariadb-linux.sh "$MARIADB_VERSION"
@@ -76,10 +76,6 @@ jobs:
     env:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
     steps:
       - uses: actions/checkout@v4
       - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
@@ -105,10 +101,6 @@ jobs:
     env:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
     steps:
       - uses: actions/checkout@v4
       - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
@@ -134,10 +126,6 @@ jobs:
     env:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
-    permissions:
-      contents: write
-      id-token: write
-      attestations: write
     steps:
       - uses: actions/checkout@v4
       - run: .github\build-mariadb-windows.ps1 $env:MARIADB_VERSION
