@@ -153,4 +153,4 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       - uses: actions/attest-build-provenance@v1
         with:
-          subject-path: ${{ runner.temp }}/*.zip
+          subject-path: C:\Temp\*.zip
