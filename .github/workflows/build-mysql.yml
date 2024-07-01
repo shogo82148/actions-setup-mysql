@@ -140,6 +140,10 @@ jobs:
     env:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
       - run: .github\build-mysql-windows.ps1 $env:MYSQL_VERSION
