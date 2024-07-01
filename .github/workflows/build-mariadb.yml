@@ -57,6 +57,9 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-$BUILD_OS-x64.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ runner.temp }}/*.tar.zstd
 
   build-darwin-x64:
     runs-on: macos-12
@@ -79,6 +82,9 @@ jobs:
         env:
           MARIADB_VERSION: ${{ matrix.mariadb }}
           GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ runner.temp }}/*.tar.zstd
 
   build-darwin-arm64:
     runs-on: macos-14
@@ -101,6 +107,9 @@ jobs:
         env:
           MARIADB_VERSION: ${{ matrix.mariadb }}
           GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ runner.temp }}/*.tar.zstd
 
   build-windows:
     runs-on: windows-2022
@@ -124,3 +133,6 @@ jobs:
         env:
           MARIADB_VERSION: ${{ matrix.mariadb }}
           GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ runner.temp }}/*.zip
