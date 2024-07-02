@@ -113,7 +113,7 @@ if ( $MYSQL_VERSION -match '^8[.]') # MySQL 8.0 or later
 
 # Bison
 Write-Host "::group::Set up Bison"
-if ( $MYSQL_VERSION -match '^8[.]' )
+if ( $MYSQL_VERSION -match '^[89][.]' )
 {
     # MySQL 8.0 or later
     $BISON_VERSION = "3.8.2"
@@ -130,7 +130,6 @@ if ( $MYSQL_VERSION -match '^8[.]' )
     Set-Item -Path "env:PATH" "$(Join-Path $BISON_PREFIX "bin");$env:PATH"
     Remove-Item -Path "bison-bin.zip"
     Remove-Item -Path "bison-dep.zip"
-
 }
 else
 {
