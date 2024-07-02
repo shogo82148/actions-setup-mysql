@@ -11,10 +11,17 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
 jobs:
   list:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - id: set-matrix
@@ -57,6 +64,9 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-$BUILD_OS-x64.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ runner.temp }}/*.tar.zstd
 
   build-darwin-x64:
     runs-on: macos-12
@@ -82,6 +92,9 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-x64.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ runner.temp }}/*.tar.zstd
 
   build-darwin-arm64:
     runs-on: macos-14
@@ -107,6 +120,9 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-arm64.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: ${{ runner.temp }}/*.tar.zstd
 
   build-windows:
     runs-on: ${{ startsWith(matrix.mysql, '5.') && 'windows-2019' || 'windows-2022' }}
@@ -129,3 +145,6 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$TEMP_DIR/mysql-$MYSQL_VERSION-win32-x64.zip"
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: C:\Temp\*.zip
