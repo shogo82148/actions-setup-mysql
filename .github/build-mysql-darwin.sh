@@ -24,13 +24,6 @@ esac
 PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/$MYSQL_ARCH
 export LDFLAGS=-Wl,-rpath,$PREFIX/lib
 
-# use the latest version of clang installed
-brew install llvm@17
-LLVM_ROOT=$(brew --prefix llvm@17)
-export PATH="$LLVM_ROOT/bin:$PATH"
-export LDFLAGS="-L$LLVM_ROOT/lib"
-export CPPFLAGS="-I$LLVM_ROOT/include"
-
 # detect the number of CPU Core
 JOBS=$(sysctl -n hw.logicalcpu_max)
 
