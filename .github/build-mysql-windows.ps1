@@ -113,23 +113,9 @@ if ( $MYSQL_VERSION -match '^8[.]') # MySQL 8.0 or later
 
 # Bison
 Write-Host "::group::Set up Bison"
-if ( $MYSQL_VERSION -match '^[89][.]' )
+if ( $MYSQL_VERSION -match '^[89][.]' ) # MySQL 8.0 or later
 {
-    # MySQL 8.0 or later
-    $BISON_VERSION = "3.8.2"
-    $BISON_PREFIX = Join-Path "C:" "GnuWin32"
-    Set-Location "$RUNNER_TEMP"
-    Write-Host "Downloading zip archive of binary..."
-    Invoke-WebRequest "https://versaweb.dl.sourceforge.net/project/gnuwin32/bison/$BISON_VERSION/bison-$BISON_VERSION-bin.zip" -OutFile "bison-bin.zip"
-    Write-Host "Unzipping..."
-    Expand-Archive -Path "bison-bin.zip" -DestinationPath "$BISON_PREFIX"
-    Write-Host "Downloading zip archive of dependencies..."
-    Invoke-WebRequest "https://versaweb.dl.sourceforge.net/project/gnuwin32/bison/$BISON_VERSION/bison-$BISON_VERSION-dep.zip" -OutFile "bison-dep.zip"
-    Write-Host "Unzipping..."
-    Expand-Archive -Path "bison-dep.zip" -DestinationPath "$BISON_PREFIX"
-    Set-Item -Path "env:PATH" "$(Join-Path $BISON_PREFIX "bin");$env:PATH"
-    Remove-Item -Path "bison-bin.zip"
-    Remove-Item -Path "bison-dep.zip"
+    choco install winflexbison3
 }
 else
 {
