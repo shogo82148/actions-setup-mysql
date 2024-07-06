@@ -34,7 +34,7 @@ ACTION_VERSION=$(jq -r '.version' < "$ROOT/../package.json")
 
 # system SSL/TLS library is too old. so we use custom build.
 
-if [[ "$MYSQL_VERSION" =~ ^[89][.] ]]; then # MySQL 8.0 or later
+if [[ "$MYSQL_VERSION" =~ ^([1-9][0-9][.]|[89][.]) ]]; then # MySQL 8.0 or later
     # build OpenSSL v3
     export OPENSSL_VERSION=$OPENSSL_VERSION3
     echo "::group::download OpenSSL source"

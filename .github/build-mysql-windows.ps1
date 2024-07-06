@@ -58,7 +58,7 @@ Write-Host "::endgroup::"
 
 
 # system SSL/TLS library is too old. so we use custom build.
-if ( $MYSQL_VERSION -match '^8[.]') # MySQL 8.0 or later
+if ( $MYSQL_VERSION -match '^([1-9][0-9][.]|[89][.])') # MySQL 8.0 or later
 {
     $OPENSSL_VERSION = $OPENSSL_VERSION3
     Write-Host "::group::fetch OpenSSL source"
@@ -113,7 +113,7 @@ if ( $MYSQL_VERSION -match '^8[.]') # MySQL 8.0 or later
 
 # Bison
 Write-Host "::group::Set up Bison"
-if ( $MYSQL_VERSION -match '^[89][.]' ) # MySQL 8.0 or later
+if ( $MYSQL_VERSION -match '^^([1-9][0-9][.]|[89][.])' ) # MySQL 8.0 or later
 {
     choco install winflexbison3
 }
