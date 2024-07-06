@@ -113,7 +113,7 @@ if ( $MYSQL_VERSION -match '^8[.]') # MySQL 8.0 or later
 
 # Bison
 Write-Host "::group::Set up Bison"
-if ( $MYSQL_VERSION -match '^8[.]' ) # MySQL 8.0 or later
+if ( $MYSQL_VERSION -match '^[89][.]' ) # MySQL 8.0 or later
 {
     choco install winflexbison3
 }
