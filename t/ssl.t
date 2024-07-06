@@ -10,7 +10,7 @@ use File::Spec;
 my ($version, $distribution) = detect_version('root', 'very-very-secret');
 my @ssl_options = ('--ssl');
 if ($distribution eq 'mysql') {
-    if ($version =~ /^(?:8\.[0-9]\.|5\.7\.)/) {
+    if ($version =~ /^(?:[1-9][0-9]\.|[89]\.|5\.7\.)/) {
         # --ssl-mode is available from MySQL 5.7
         @ssl_options = ('--ssl-mode=REQUIRED');
     } else {
