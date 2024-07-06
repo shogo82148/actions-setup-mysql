@@ -31,6 +31,7 @@ The version of MySQL or MariaDB.
 Available Versions are:
 
 - MySQL
+  - `9.0`
   - `8.4`
   - `8.3`
   - `8.2`
