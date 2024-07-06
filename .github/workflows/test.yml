@@ -80,7 +80,7 @@ jobs:
       - name: Set up perl
         uses: shogo82148/actions-setup-perl@v1
         with:
-          perl-version: "5.34"
+          perl-version: "5.40"
 
       - run: npm ci
       - run: npm run build

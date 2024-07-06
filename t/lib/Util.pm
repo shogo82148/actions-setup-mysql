@@ -1,7 +1,6 @@
 package Util;
 
-use strict;
-use warnings;
+use v5.40;
 use utf8;
 use IPC::Open3;
 
@@ -36,5 +35,3 @@ sub detect_version {
     }
     croak "unknown distribution: $version";
 }
-
-"NoSQL + SQL = MySQL"
