@@ -180,6 +180,7 @@ elseif ( $MYSQL_VERSION -match '^8[.])' ) # MySQL 8.0
 {
     cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
         -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" `
+        -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
         -DWITH_UNIT_TESTS=0 `
         -DCMAKE_INSTALL_PREFIX="$PREFIX" `
         -DWITH_SSL="$PREFIX" `

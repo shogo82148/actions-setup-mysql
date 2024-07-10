@@ -149,6 +149,7 @@ echo "::group::build MySQL"
     elif [[ "$MYSQL_VERSION" =~ ^8[.] ]]; then # MySQL 8.0
         cmake "../mysql-server-mysql-$MYSQL_VERSION" \
             -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
+            -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
             -DWITH_UNIT_TESTS=0 \
             -DCMAKE_INSTALL_PREFIX="$PREFIX" \
             -DWITH_SSL="$PREFIX"
