@@ -176,7 +176,7 @@ if ( $MYSQL_VERSION -match '^([1-9][0-9][.]|9[.])' ) # MySQL 8.0 or later
         -DWITH_SSL="$PREFIX" `
         -DCMAKE_BUILD_TYPE=Release
 }
-else if ( $MYSQL_VERSION -match '^8[.])' ) # MySQL 8.0
+elseif ( $MYSQL_VERSION -match '^8[.])' ) # MySQL 8.0
 {
     cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
         -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" `
