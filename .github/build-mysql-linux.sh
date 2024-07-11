@@ -183,13 +183,29 @@ echo "::group::build MySQL"
     cd "$RUNNER_TEMP"
     mkdir build
     cd build
-    cmake "../mysql-server-mysql-$MYSQL_VERSION" \
-        -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
-        -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
-        -DWITH_ROCKSDB_LZ4=OFF -DWITH_ROCKSDB_BZip2=OFF -DWITH_ROCKSDB_Snappy=OFF -DWITH_ROCKSDB_ZSTD=OFF \
-        -DWITH_UNIT_TESTS=OFF \
-        -DCMAKE_INSTALL_PREFIX="$PREFIX" \
-        -DWITH_SSL="$PREFIX"
+    if [[ "$MYSQL_VERSION" =~ ^([1-9][0-9][.]|9[.]) ]]; then # MySQL 9.0 or later
+        cmake "../mysql-server-mysql-$MYSQL_VERSION" \
+            -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
+            -DWITH_UNIT_TESTS=0 \
+            -DWITH_AUTHENTICATION_CLIENT_PLUGINS=1 \
+            -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+            -DWITH_SSL="$PREFIX"
+    elif [[ "$MYSQL_VERSION" =~ ^8[.] ]]; then # MySQL 8.0
+        cmake "../mysql-server-mysql-$MYSQL_VERSION" \
+            -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
+            -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
+            -DWITH_UNIT_TESTS=0 \
+            -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+            -DWITH_SSL="$PREFIX"
+    else
+        cmake "../mysql-server-mysql-$MYSQL_VERSION" \
+            -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
+            -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
+            -DWITH_ROCKSDB_LZ4=0 -DWITH_ROCKSDB_BZip2=0 -DWITH_ROCKSDB_Snappy=0 -DWITH_ROCKSDB_ZSTD=0 \
+            -DWITH_UNIT_TESTS=0 \
+            -DCMAKE_INSTALL_PREFIX="$PREFIX" \
+            -DWITH_SSL="$PREFIX"
+    fi
     make "-j$JOBS"
 )
 echo "::endgroup::"
