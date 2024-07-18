@@ -160,3 +160,7 @@ Here are some examples:
 ### `MYSQL_HOME`
 
 The path to the directory in which the server-specific my.cnf file resides.
+
+### `LIBMYSQL_PLUGIN_DIR`
+
+Directory in which to look for client plugins.
