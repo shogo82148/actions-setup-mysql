@@ -219,6 +219,9 @@ export async function startMySQL(
   // MYSQL_HOME: The path to the directory in which the server-specific my.cnf file resides.
   core.exportVariable("MYSQL_HOME", `${baseDir}${sep}etc`);
 
+  // LIBMYSQL_PLUGIN_DIR: Directory in which to look for client plugins.
+  core.exportVariable("LIBMYSQL_PLUGIN_DIR", `${mysql.toolPath}${sep}lib${sep}plugin`);
+
   return {
     pid,
     pidFile,
