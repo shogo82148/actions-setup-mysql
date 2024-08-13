@@ -1,23 +1,29 @@
 name: reviewdog
 on: [pull_request]
+permissions:
+  contents: read
+  pull-requests: write
 jobs:
-  eslint:
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: eslint
-        uses: reviewdog/action-eslint@v1
-        with:
-          reporter: github-pr-review
-          level: warning
-
   actionlint:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: reviewdog/action-actionlint@v1
+
+  eslint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: "package.json"
+          cache: "npm"
+      - run: npm ci
+      - uses: reviewdog/action-eslint@v1
         with:
           reporter: github-pr-review
           level: warning
+          eslint_flags: "src/**/*.ts __tests__/**/*.ts"
