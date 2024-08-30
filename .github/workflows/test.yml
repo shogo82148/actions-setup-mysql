@@ -95,6 +95,7 @@ jobs:
           user: my
           password: secret
       - name: ping
+        shell: bash
         run: |
           if command -v mariadb-admin; then
             mariadb-admin -u root --password=very-very-secret --skip-ssl ping
