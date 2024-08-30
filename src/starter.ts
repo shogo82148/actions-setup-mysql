@@ -145,7 +145,6 @@ export async function startMySQL(
     config["mysqld"]["ssl_ca"] ||= path.join(baseDir, "var", "ca.pem");
     config["mysqld"]["ssl_cert"] ||= path.join(baseDir, "var", "server-cert.pem");
     config["mysqld"]["ssl_key"] ||= path.join(baseDir, "var", "server-key.pem");
-    config["client"]["ssl_ca"] ||= config["mysqld"]["ssl_ca"];
 
     // configure my.cnf
     core.info(`add TLS/SSL setting into my.cnf`);
