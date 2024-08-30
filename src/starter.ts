@@ -196,8 +196,7 @@ export async function startMySQL(
           if (fs.existsSync(path.join(mysql.toolPath, "bin", `mariadb-admin${binExt}`))) {
             await execute(path.join(mysql.toolPath, "bin", `mariadb-admin${binExt}`), [
               `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-              `--ssl`,
-              `--ssl-ca=${config["mysqld"]["ssl_ca"]}`,
+              `--skip-ssl`,
               `--user=root`,
               `password`,
               rootPassword,
@@ -205,8 +204,7 @@ export async function startMySQL(
           } else {
             await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
               `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-              `--ssl`,
-              `--ssl-ca=${config["mysqld"]["ssl_ca"]}`,
+              `--skip-ssl`,
               `--user=root`,
               `password`,
               rootPassword,
