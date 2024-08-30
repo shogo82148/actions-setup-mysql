@@ -390,7 +390,7 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
     "-subj",
     "/CN=127.0.0.1",
     "-addext",
-    "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:[::1]",
+    "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:::1",
     "-out",
     `${datadir}${sep}server-req.pem`,
   ]);
