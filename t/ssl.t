@@ -21,10 +21,6 @@ if ($distribution eq 'mysql') {
     }
 } elsif ($distribution eq 'mariadb') {
     $command = $version =~ /^10[.][23]/ ? 'mysql' : 'mariadb';
-    my $basedir = $ENV{BASE_DIR};
-    die 'base-dir is not set' unless $basedir;
-    my $capath = File::Spec->catfile($basedir, 'var', 'ca.pem');
-    @ssl_options = ('--ssl', "--ssl-ca=$capath");
 }
 
 $ENV{MYSQL_PWD} = 'very-very-secret';
