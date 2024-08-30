@@ -39,7 +39,7 @@ sub _select_version($user) {
         my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '-e', 'SELECT VERSION()');
         return $version;
     } catch($e) {
-        say STDERR "Error: $e";
+        say STDERR "Warn: $e";
     }
 
     try {
@@ -47,6 +47,6 @@ sub _select_version($user) {
         my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '--skip-ssl', '-e', 'SELECT VERSION()');
         return $version;
     } catch($e) {
-        say STDERR "Error: $e";
+        say STDERR "Warn: $e";
     }
 }
