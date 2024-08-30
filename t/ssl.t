@@ -7,6 +7,10 @@ use Util qw(run detect_version);
 use File::Spec;
 use version qw(qv);
 
+my $basedir = $ENV{BASE_DIR};
+die 'base-dir is not set' unless $basedir;
+my $capath = File::Spec->catfile($basedir, 'var', 'ca.pem');
+
 my ($version, $distribution) = detect_version('root', 'very-very-secret');
 my $command = 'mysql';
 my @ssl_options;
@@ -15,16 +19,10 @@ if ($distribution eq 'mysql') {
         # --ssl-mode is available from MySQL 5.7
         @ssl_options = ('--ssl-mode=REQUIRED');
     } else {
-        my $basedir = $ENV{BASE_DIR};
-        die 'base-dir is not set' unless $basedir;
-        my $capath = File::Spec->catfile($basedir, 'var', 'ca.pem');
         @ssl_options = ('--ssl', "--ssl-ca=$capath");
     }
 } elsif ($distribution eq 'mariadb') {
     $command = qv($version) lt "10.5.0" ? 'mysql' : 'mariadb';
-    my $basedir = $ENV{BASE_DIR};
-    die 'base-dir is not set' unless $basedir;
-    my $capath = File::Spec->catfile($basedir, 'var', 'ca.pem');
     @ssl_options = qv($version) ge "11.4.0" ? ("--ssl-ca=$capath", '--ssl-verify-server-cert') : ('--ssl');
 
     if (qv($version) ge "11.4.0" && $^O eq 'darwin') {
