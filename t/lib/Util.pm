@@ -36,15 +36,15 @@ sub detect_version($user, $password) {
 
 sub _select_version($user) {
     try {
-        my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '-e', 'SELECT VERSION()');
+        # MariaDB 11.4 and later require `--skip-ssl` option
+        my $version = run('mariadb', '--host=127.0.0.1', "--user=$user", '--skip-ssl', '-e', 'SELECT VERSION()');
         return $version;
     } catch($e) {
         say STDERR "Warn: $e";
     }
 
     try {
-        # MariaDB 11.4 and later require `--skip-ssl` option
-        my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '--skip-ssl', '-e', 'SELECT VERSION()');
+        my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '-e', 'SELECT VERSION()');
         return $version;
     } catch($e) {
         say STDERR "Warn: $e";

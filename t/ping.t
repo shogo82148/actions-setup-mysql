@@ -9,10 +9,10 @@ my ($version, $distribution) = detect_version('root', 'very-very-secret');
 
 my ($command, @options);
 if ($distribution eq 'mysql') {
-  $command = 'mysqladmin';
+    $command = 'mysqladmin';
 } elsif ($distribution eq 'mariadb') {
-  $command = 'mariadb-admin';
-  @options = ('--skip-ssl');
+    $command = $version =~ /^10[.][23]/ ? 'mysqladmin' : 'mariadb-admin';
+    @options = ('--skip-ssl');
 }
 
 local $ENV{MYSQL_PWD} = 'very-very-secret';
