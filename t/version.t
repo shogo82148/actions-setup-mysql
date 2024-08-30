@@ -14,9 +14,6 @@ if ($want_ver =~ /^mariadb-([0-9.]+)$/i) {
     $want_dist = 'mariadb';
 }
 
-$ENV{MYSQL_PWD} = 'very-very-secret';
-diag "server version: " . run('mysql', '--host=127.0.0.1', '--user=root', '-e', 'SELECT VERSION()');
-
 my ($got_ver, $got_dist) = detect_version('root', 'very-very-secret');
 like $got_ver, qr/^\Q$want_ver\E\.[0-9]+$/, 'the server version';
 is $got_dist, $want_dist, 'the server distribution';
