@@ -4,6 +4,7 @@ use Test::More;
 use FindBin;
 use lib "$FindBin::Bin/lib";
 use Util qw(run detect_version);
+use version qw(qv);
 
 my ($version, $distribution) = detect_version('root', 'very-very-secret');
 
@@ -11,7 +12,7 @@ my ($command, @options);
 if ($distribution eq 'mysql') {
   $command = 'mysql';
 } elsif ($distribution eq 'mariadb') {
-  $command = $version =~ /^10[.][2-4]/ ? 'mysql' : 'mariadb';
+  $command = qv($version) lt "10.5.0" ? 'mysql' : 'mariadb';
   @options = ('--skip-ssl');
 }
 

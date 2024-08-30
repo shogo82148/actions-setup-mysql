@@ -5,7 +5,7 @@ use FindBin;
 use lib "$FindBin::Bin/lib";
 use Util qw(run detect_version);
 use File::Spec;
-use version;
+use version qw(qv);
 
 my ($version, $distribution) = detect_version('root', 'very-very-secret');
 my $command = 'mysql';
@@ -21,7 +21,7 @@ if ($distribution eq 'mysql') {
         @ssl_options = ('--ssl', "--ssl-ca=$capath");
     }
 } elsif ($distribution eq 'mariadb') {
-    $command = qv($version) le "10.4.0" ? 'mysql' : 'mariadb';
+    $command = qv($version) lt "10.5.0" ? 'mysql' : 'mariadb';
     my $basedir = $ENV{BASE_DIR};
     die 'base-dir is not set' unless $basedir;
     my $capath = File::Spec->catfile($basedir, 'var', 'ca.pem');
