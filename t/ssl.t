@@ -24,7 +24,8 @@ if ($distribution eq 'mysql') {
     my $basedir = $ENV{BASE_DIR};
     die 'base-dir is not set' unless $basedir;
     my $capath = File::Spec->catfile($basedir, 'var', 'ca.pem');
-    @ssl_options = ('--ssl', "--ssl-ca=$capath");
+    my $certpath = File::Spec->catfile($basedir, 'var', 'server-cert.pem');
+    @ssl_options = ('--ssl', "--ssl-ca=$capath", "--ssl-cert=$certpath");
 }
 
 $ENV{MYSQL_PWD} = 'very-very-secret';
