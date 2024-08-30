@@ -25,7 +25,14 @@ if ($distribution eq 'mysql') {
     my $basedir = $ENV{BASE_DIR};
     die 'base-dir is not set' unless $basedir;
     my $capath = File::Spec->catfile($basedir, 'var', 'ca.pem');
-    @ssl_options = qv($version) ge "11.4.0" ? ("--ssl-ca=$capath", '--ssl-verify-server-cert') : ('--ssl')
+    @ssl_options = qv($version) ge "11.4.0" ? ("--ssl-ca=$capath", '--ssl-verify-server-cert') : ('--ssl');
+
+    if (qv($version) ge "11.4.0" && $^O eq 'darwin') {
+        # I can't why, but MariaDB 11.4.0 on macOS fails
+        # to connect with `--ssl-verify-server-cert` option.
+        # So, I need to disable it.
+        @ssl_options = ('--ssl', '--disable-ssl-verify-server-cert');
+    }
 }
 
 $ENV{MYSQL_PWD} = 'very-very-secret';
