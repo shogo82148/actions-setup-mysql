@@ -388,7 +388,7 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
     "-keyout",
     `${datadir}${sep}server-key.pem`,
     "-subj",
-    "/CN=Actions_Setup_MySQL_Auto_Generated_Certificate",
+    "/CN=127.0.0.1",
     "-out",
     `${datadir}${sep}server-req.pem`,
   ]);
