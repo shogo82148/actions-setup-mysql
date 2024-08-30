@@ -151,7 +151,7 @@ Here are some examples:
 
 - name: configure the root certificate for connecting via SSL/TLS.
   run: mysql -uroot \
-    --ssl --ssl-mode=--ssl-mode=REQUIRED \
+    --ssl --ssl-mode=REQUIRED \
     --ssl-ca=${{ steps.setup-mysql.outputs.base-dir }}/var/ca.pem \
     -e 'SELECT version()'
 ```
