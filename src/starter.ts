@@ -193,12 +193,21 @@ export async function startMySQL(
     try {
       await core.group("configure root password", async () => {
         await retry(async () => {
-          await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
-            `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-            `--user=root`,
-            `password`,
-            rootPassword,
-          ]);
+          if (fs.existsSync(path.join(mysql.toolPath, "bin", `mariadb-admin${binExt}`))) {
+            await execute(path.join(mysql.toolPath, "bin", `mariadb-admin${binExt}`), [
+              `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+              `--user=root`,
+              `password`,
+              rootPassword,
+            ]);
+          } else {
+            await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
+              `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+              `--user=root`,
+              `password`,
+              rootPassword,
+            ]);
+          }
         });
       });
     } catch (error) {
