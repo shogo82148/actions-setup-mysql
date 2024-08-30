@@ -204,7 +204,6 @@ export async function startMySQL(
           } else {
             await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
               `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-              `--skip-ssl`,
               `--user=root`,
               `password`,
               rootPassword,
