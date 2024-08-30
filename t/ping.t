@@ -11,7 +11,7 @@ my ($command, @options);
 if ($distribution eq 'mysql') {
     $command = 'mysqladmin';
 } elsif ($distribution eq 'mariadb') {
-    $command = $version =~ /^10[.][23]/ ? 'mysqladmin' : 'mariadb-admin';
+    $command = $version =~ /^10[.][2-4]/ ? 'mysqladmin' : 'mariadb-admin';
     @options = ('--skip-ssl');
 }
 
