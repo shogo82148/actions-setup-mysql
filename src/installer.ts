@@ -9,10 +9,8 @@ const osPlat = os.platform();
 const osArch = os.arch();
 const virtualEnv = getVirtualEnvironmentName();
 
-type Distribution = "mysql" | "mariadb";
-
 export interface MySQL {
-  distribution: Distribution;
+  distribution: string;
   version: string;
   toolPath: string;
 }
@@ -30,24 +28,18 @@ async function getAvailableVersions(distribution: string): Promise<string[]> {
 }
 
 async function determineVersion(distribution: string, version: string): Promise<MySQL> {
-  let dist: Distribution = "mysql";
-  if (distribution === "mysql" || distribution === "mariadb") {
-    dist = distribution;
-  } else {
-    throw new Error(`unknown distribution: ${distribution}`);
-  }
   if (version.startsWith("mysql-")) {
-    dist = "mysql";
+    distribution = "mysql";
     version = version.substring("mysql-".length);
   } else if (version.startsWith("mariadb-")) {
-    dist = "mariadb";
+    distribution = "mariadb";
     version = version.substring("mariadb-".length);
   }
-  const availableVersions = await getAvailableVersions(dist);
+  const availableVersions = await getAvailableVersions(distribution);
   for (const v of availableVersions) {
     if (semver.satisfies(v, version)) {
       return {
-        distribution: dist,
+        distribution,
         version: v,
         toolPath: "",
       };
