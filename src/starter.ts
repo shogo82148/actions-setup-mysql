@@ -242,32 +242,62 @@ export async function startMySQL(
 }
 
 export async function createUser(state: MySQLState, user: string, password: string): Promise<void> {
-  const mysql = fs.existsSync(path.join(state.toolPath, "bin", `mariadb${binExt}`))
-    ? path.join(state.toolPath, "bin", `mariadb${binExt}`)
-    : path.join(state.toolPath, "bin", `mysql${binExt}`);
-  const env: Record<string, string> = {};
-  const args = [`--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`, `--user=root`];
-  if (state.rootPassword) {
-    env["MYSQL_PWD"] = state.rootPassword;
-  }
-  if (core.isDebug()) {
-    env["MYSQL_DEBUG"] = "1";
-  }
-  for (const host of ["localhost", "127.0.0.1", "::1"]) {
-    await execute(
-      mysql,
-      [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
-      {
-        env,
-      },
-    );
-    await execute(
-      mysql,
-      [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
-      {
-        env,
-      },
-    );
+  if (fs.existsSync(path.join(state.toolPath, "bin", `mariadb${binExt}`))) {
+    const mariadb = path.join(state.toolPath, "bin", `mariadb${binExt}`);
+    const env: Record<string, string> = {};
+    const args = [
+      `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
+      `--skip-ssl`,
+      `--user=root`,
+    ];
+    if (state.rootPassword) {
+      env["MYSQL_PWD"] = state.rootPassword;
+    }
+    if (core.isDebug()) {
+      env["MYSQL_DEBUG"] = "1";
+    }
+    for (const host of ["localhost", "127.0.0.1", "::1"]) {
+      await execute(
+        mariadb,
+        [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
+        {
+          env,
+        },
+      );
+      await execute(
+        mariadb,
+        [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
+        {
+          env,
+        },
+      );
+    }
+  } else {
+    const mysql = path.join(state.toolPath, "bin", `mysql${binExt}`);
+    const env: Record<string, string> = {};
+    const args = [`--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`, `--user=root`];
+    if (state.rootPassword) {
+      env["MYSQL_PWD"] = state.rootPassword;
+    }
+    if (core.isDebug()) {
+      env["MYSQL_DEBUG"] = "1";
+    }
+    for (const host of ["localhost", "127.0.0.1", "::1"]) {
+      await execute(
+        mysql,
+        [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
+        {
+          env,
+        },
+      );
+      await execute(
+        mysql,
+        [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
+        {
+          env,
+        },
+      );
+    }
   }
 }
 
