@@ -16,9 +16,9 @@ if ($distribution eq 'mysql') {
 }
 
 local $ENV{MYSQL_PWD} = 'very-very-secret';
-ok run($command, '--host=127.0.0.1', '--user=root', '-e', @options, 'SELECT 1'), "connect to the server as root user";
+ok run($command, '--host=127.0.0.1', '--user=root', @options, '-e', 'SELECT 1'), "connect to the server as root user";
 
 local $ENV{MYSQL_PWD} = 'secret';
-ok run($command, '--host=127.0.0.1', '--user=my', '-e', @options, 'SELECT 1'), "connect to the server as a custom user";
+ok run($command, '--host=127.0.0.1', '--user=my', @options, '-e', 'SELECT 1'), "connect to the server as a custom user";
 
 done_testing;
