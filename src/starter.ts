@@ -59,22 +59,23 @@ export async function startMySQL(
   rootPassword: string,
 ): Promise<MySQLState> {
   // configure mysqld
+  const db = mysql.distribution == "mysql" ? "mysqld" : "mariadb";
   const baseDir = await mkdtemp();
-  const config = mycnf.parse(`[mysqld]\n${cnf}`);
-  config["mysqld"] ||= {};
-  const pidFile = config["mysqld"]["pid-file"] || path.join(baseDir, "tmp", "mysqld.pid");
-  config["mysqld"]["lc-messages-dir"] ||= path.join(mysql.toolPath, "share");
-  config["mysqld"]["socket"] ||= path.join(baseDir, "tmp", "mysql.sock");
-  config["mysqld"]["datadir"] ||= path.join(baseDir, "var");
-  config["mysqld"]["pid-file"] = pidFile;
-  config["mysqld"]["port"] ||= "3306";
-  config["mysqld"]["tmpdir"] ||= path.join(baseDir, "tmp");
+  const config = mycnf.parse(`[${db}]\n${cnf}`);
+  config[db] ||= {};
+  const pidFile = config[db]["pid-file"] || path.join(baseDir, "tmp", "mysqld.pid");
+  config[db]["lc-messages-dir"] ||= path.join(mysql.toolPath, "share");
+  config[db]["socket"] ||= path.join(baseDir, "tmp", "mysql.sock");
+  config[db]["datadir"] ||= path.join(baseDir, "var");
+  config[db]["pid-file"] = pidFile;
+  config[db]["port"] ||= "3306";
+  config[db]["tmpdir"] ||= path.join(baseDir, "tmp");
 
   // configure mysql client
   config["client"] ||= {};
-  config["client"]["port"] = config["mysqld"]["port"];
+  config["client"]["port"] = config[db]["port"];
   config["client"]["host"] = "127.0.0.1";
-  config["client"]["socket"] = config["mysqld"]["socket"];
+  config["client"]["socket"] = config[db]["socket"];
 
   await core.group("setup MySQL Database", async () => {
     core.info(`creating the directory structure on ${baseDir}`);
@@ -142,9 +143,9 @@ export async function startMySQL(
 
   await core.group("configure TLS/SSL", async () => {
     // add TLS/SSL setting into my.cnf
-    config["mysqld"]["ssl_ca"] ||= path.join(baseDir, "var", "ca.pem");
-    config["mysqld"]["ssl_cert"] ||= path.join(baseDir, "var", "server-cert.pem");
-    config["mysqld"]["ssl_key"] ||= path.join(baseDir, "var", "server-key.pem");
+    config[db]["ssl_ca"] ||= path.join(baseDir, "var", "ca.pem");
+    config[db]["ssl_cert"] ||= path.join(baseDir, "var", "server-cert.pem");
+    config[db]["ssl_key"] ||= path.join(baseDir, "var", "server-key.pem");
 
     // configure my.cnf
     core.info(`add TLS/SSL setting into my.cnf`);
