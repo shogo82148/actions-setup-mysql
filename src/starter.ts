@@ -415,6 +415,8 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
       `${datadir}${sep}ca-key.pem`,
       "-set_serial",
       "01",
+      "-copy_extensions",
+      "copy",
       "-out",
       `${datadir}${sep}server-cert.pem`,
     ],
