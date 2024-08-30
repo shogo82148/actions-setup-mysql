@@ -242,7 +242,7 @@ export async function startMySQL(
 
 export async function createUser(state: MySQLState, user: string, password: string): Promise<void> {
   const mysql = path.join(state.toolPath, "bin", `mysql${binExt}`);
-  const env: { [key: string]: string } = {};
+  const env: Record<string, string> = {};
   const args = [`--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`, `--user=root`];
   if (state.rootPassword) {
     env["MYSQL_PWD"] = state.rootPassword;
@@ -289,7 +289,7 @@ async function verboseHelp(mysql: installer.MySQL): Promise<string> {
       options,
     );
   } catch (e) {
-    core.error("fail to get mysqld options");
+    core.error(`fail to get mysqld options: ${e}`);
     core.error(myOutput);
     return "";
   }
