@@ -33,9 +33,25 @@ if ($distribution eq 'mysql') {
     }
 }
 
-$ENV{MYSQL_PWD} = 'very-very-secret';
-my @command = ($command, '--host=127.0.0.1', '--user=root', @ssl_options, '-e', "SHOW SESSION STATUS LIKE 'Ssl_cipher'");
-my $cipher = run(@command);
-like $cipher, qr/^Ssl_cipher\s+\S+\s*$/m, 'Ssl_cipher is set';
+subtest 'connect 127.0.0.1' => sub {
+    local $ENV{MYSQL_PWD} = 'very-very-secret';
+    my @command = ($command, '--host=127.0.0.1', '--user=root', @ssl_options, '-e', "SHOW SESSION STATUS LIKE 'Ssl_cipher'");
+    my $cipher = run(@command);
+    like $cipher, qr/^Ssl_cipher\s+\S+\s*$/m, 'Ssl_cipher is set';
+};
+
+subtest 'connect ::1' => sub {
+    local $ENV{MYSQL_PWD} = 'very-very-secret';
+    my @command = ($command, '--host=::1', '--user=root', @ssl_options, '-e', "SHOW SESSION STATUS LIKE 'Ssl_cipher'");
+    my $cipher = run(@command);
+    like $cipher, qr/^Ssl_cipher\s+\S+\s*$/m, 'Ssl_cipher is set';
+};
+
+subtest 'connect localhost' => sub {
+    local $ENV{MYSQL_PWD} = 'very-very-secret';
+    my @command = ($command, '--host=127.0.0.1', '--user=root', @ssl_options, '-e', "SHOW SESSION STATUS LIKE 'Ssl_cipher'");
+    my $cipher = run(@command);
+    like $cipher, qr/^Ssl_cipher\s+\S+\s*$/m, 'Ssl_cipher is set';
+};
 
 done_testing;
