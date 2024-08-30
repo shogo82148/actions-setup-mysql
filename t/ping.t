@@ -7,16 +7,15 @@ use Util qw(run detect_version);
 
 my ($version, $distribution) = detect_version('root', 'very-very-secret');
 
+my ($command, @options);
 if ($distribution eq 'mysql') {
-
-  local $ENV{MYSQL_PWD} = 'very-very-secret';
-  ok eval { run('mysqladmin', '--host=127.0.0.1', '--user=root', 'ping') }, "ping";
-
+  $command = 'mysqladmin';
 } elsif ($distribution eq 'mariadb') {
-
-  local $ENV{MYSQL_PWD} = 'very-very-secret';
-  ok eval { run('mariadb-admin', '--host=127.0.0.1', '--user=root', '--skip-ssl', 'ping') }, "ping";
-
+  $command = 'mariadb-admin';
+  @options = ('--skip-ssl');
 }
+
+local $ENV{MYSQL_PWD} = 'very-very-secret';
+ok run($command, '--host=127.0.0.1', '--user=root', @options, 'ping'), "ping";
 
 done_testing;
