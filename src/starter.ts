@@ -340,6 +340,9 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
   process.env["LD_LIBRARY_PATH"] = `${mysql.toolPath}${sep}lib`;
   process.env["DYLD_LIBRARY_PATH"] = `${mysql.toolPath}${sep}lib`;
 
+  // show the version of openssl
+  await exec.exec(openssl, ["version"], options);
+
   // Generate CA Key and Certificate
   await exec.exec(
     openssl,
@@ -413,6 +416,8 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
       `${datadir}${sep}ca-key.pem`,
       "-set_serial",
       "01",
+      "-extfile",
+      `${__dirname}${sep}..${sep}subjectnames.txt`,
       "-out",
       `${datadir}${sep}server-cert.pem`,
     ],

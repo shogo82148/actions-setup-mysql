@@ -23,19 +23,35 @@ if ($distribution eq 'mysql') {
     }
 } elsif ($distribution eq 'mariadb') {
     $command = qv($version) lt "10.5.0" ? 'mysql' : 'mariadb';
-    @ssl_options = qv($version) ge "11.4.0" ? ("--ssl-ca=$capath", '--ssl-verify-server-cert') : ('--ssl');
+    @ssl_options = ('--ssl');
 
-    if (qv($version) ge "11.4.0" && $^O eq 'darwin') {
-        # I can't why, but MariaDB 11.4.0 on macOS fails
+    if (qv($version) ge "11.4.0") {
+        # I can't why, but MariaDB 11.4.0 fails
         # to connect with `--ssl-verify-server-cert` option.
         # So, I need to disable it.
         @ssl_options = ('--ssl', '--disable-ssl-verify-server-cert');
     }
 }
 
-$ENV{MYSQL_PWD} = 'very-very-secret';
-my @command = ($command, '--host=127.0.0.1', '--user=root', @ssl_options, '-e', "SHOW SESSION STATUS LIKE 'Ssl_cipher'");
-my $cipher = run(@command);
-like $cipher, qr/^Ssl_cipher\s+\S+\s*$/m, 'Ssl_cipher is set';
+subtest 'connect 127.0.0.1' => sub {
+    local $ENV{MYSQL_PWD} = 'very-very-secret';
+    my @command = ($command, '--host=127.0.0.1', '--user=root', @ssl_options, '-e', "SHOW SESSION STATUS LIKE 'Ssl_cipher'");
+    my $cipher = run(@command);
+    like $cipher, qr/^Ssl_cipher\s+\S+\s*$/m, 'Ssl_cipher is set';
+};
+
+subtest 'connect ::1' => sub {
+    local $ENV{MYSQL_PWD} = 'very-very-secret';
+    my @command = ($command, '--host=::1', '--user=root', @ssl_options, '-e', "SHOW SESSION STATUS LIKE 'Ssl_cipher'");
+    my $cipher = run(@command);
+    like $cipher, qr/^Ssl_cipher\s+\S+\s*$/m, 'Ssl_cipher is set';
+};
+
+subtest 'connect localhost' => sub {
+    local $ENV{MYSQL_PWD} = 'very-very-secret';
+    my @command = ($command, '--host=localhost', '--user=root', @ssl_options, '-e', "SHOW SESSION STATUS LIKE 'Ssl_cipher'");
+    my $cipher = run(@command);
+    like $cipher, qr/^Ssl_cipher\s+\S+\s*$/m, 'Ssl_cipher is set';
+};
 
 done_testing;
