@@ -12,6 +12,7 @@ perl -i -pe 's/^OPENSSL_VERSION1_1_1=.*$/OPENSSL_VERSION1_1_1=$ENV{OPENSSL_VERSI
 perl -i -pe 's/^\$OPENSSL_VERSION1_1_1\s*=.*$/\$OPENSSL_VERSION1_1_1 = "$ENV{OPENSSL_VERSION1_1_1}"/' build-mariadb-windows.ps1
 
 perl -i -pe 's/^OPENSSL_VERSION1_1_1=.*$/OPENSSL_VERSION1_1_1=$ENV{OPENSSL_VERSION1_1_1}/' build-mysql-darwin.sh
+perl -i -pe 's/^OPENSSL_VERSION1_1_1=.*$/OPENSSL_VERSION1_1_1=$ENV{OPENSSL_VERSION1_1_1}/' build-mysql-darwin-macos14.sh
 perl -i -pe 's/^OPENSSL_VERSION1_1_1=.*$/OPENSSL_VERSION1_1_1=$ENV{OPENSSL_VERSION1_1_1}/' build-mysql-linux.sh
 perl -i -pe 's/^\$OPENSSL_VERSION1_1_1\s*=.*$/\$OPENSSL_VERSION1_1_1 = "$ENV{OPENSSL_VERSION1_1_1}"/' build-mysql-windows.ps1
 
@@ -23,5 +24,6 @@ perl -i -pe 's/^OPENSSL_VERSION3=.*$/OPENSSL_VERSION3=$ENV{OPENSSL_VERSION3}/' b
 perl -i -pe 's/^\$OPENSSL_VERSION3\s*=.*$/\$OPENSSL_VERSION3 = "$ENV{OPENSSL_VERSION3}"/' build-mariadb-windows.ps1
 
 perl -i -pe 's/^OPENSSL_VERSION3=.*$/OPENSSL_VERSION3=$ENV{OPENSSL_VERSION3}/' build-mysql-darwin.sh
+perl -i -pe 's/^OPENSSL_VERSION3=.*$/OPENSSL_VERSION3=$ENV{OPENSSL_VERSION3}/' build-mysql-darwin-macos14.sh
 perl -i -pe 's/^OPENSSL_VERSION3=.*$/OPENSSL_VERSION3=$ENV{OPENSSL_VERSION3}/' build-mysql-linux.sh
 perl -i -pe 's/^\$OPENSSL_VERSION3\s*=.*$/\$OPENSSL_VERSION3 = "$ENV{OPENSSL_VERSION3}"/' build-mysql-windows.ps1
