@@ -32,7 +32,7 @@ cd "$RUNNER_TEMP"
 
 ACTION_VERSION=$(jq -r '.version' < "$ROOT/../package.json")
 
-if [[ "$MARIADB_VERSION" =~ ^(10\.([89]|[1-9][0-9]+)\.)|1[1-9]\. ]]; then # MariaDB 10.8 or later
+if [[ "$MARIADB_VERSION" =~ ^10\.([89]|[1-9][0-9]+)\.|^1[1-9]\. ]]; then # MariaDB 10.8 or later
     # build OpenSSL v3
     export OPENSSL_VERSION=$OPENSSL_VERSION3
     echo "::group::download OpenSSL 3 source"
