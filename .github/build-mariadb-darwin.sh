@@ -35,7 +35,7 @@ ACTION_VERSION=$(jq -r '.version' < "$ROOT/../package.json")
 if [[ "$MARIADB_VERSION" =~ ^(10\.([89]|[1-9][0-9]+)\.)|1[1-9]\. ]]; then # MariaDB 10.8 or later
     # build OpenSSL v3
     export OPENSSL_VERSION=$OPENSSL_VERSION3
-    echo "::group::download OpenSSL source"
+    echo "::group::download OpenSSL 3 source"
     (
         set -eux
         cd "$RUNNER_TEMP"
@@ -43,7 +43,7 @@ if [[ "$MARIADB_VERSION" =~ ^(10\.([89]|[1-9][0-9]+)\.)|1[1-9]\. ]]; then # Mari
     )
     echo "::endgroup::"
 
-    echo "::group::extract OpenSSL source"
+    echo "::group::extract OpenSSL 3 source"
     (
         set -eux
         cd "$RUNNER_TEMP"
@@ -51,7 +51,7 @@ if [[ "$MARIADB_VERSION" =~ ^(10\.([89]|[1-9][0-9]+)\.)|1[1-9]\. ]]; then # Mari
     )
     echo "::endgroup::"
 
-    echo "::group::build OpenSSL"
+    echo "::group::build OpenSSL 3"
     (
         set -eux
         cd "$RUNNER_TEMP/openssl-openssl-$OPENSSL_VERSION"
@@ -64,7 +64,7 @@ if [[ "$MARIADB_VERSION" =~ ^(10\.([89]|[1-9][0-9]+)\.)|1[1-9]\. ]]; then # Mari
 else
     # build OpenSSL v1.1.1
     export OPENSSL_VERSION=$OPENSSL_VERSION1_1_1
-    echo "::group::download OpenSSL source"
+    echo "::group::download OpenSSL 1.1 source"
     (
         set -eux
         cd "$RUNNER_TEMP"
@@ -72,7 +72,7 @@ else
     )
     echo "::endgroup::"
 
-    echo "::group::extract OpenSSL source"
+    echo "::group::extract OpenSSL 1.1 source"
     (
         set -eux
         cd "$RUNNER_TEMP"
@@ -80,7 +80,7 @@ else
     )
     echo "::endgroup::"
 
-    echo "::group::build OpenSSL"
+    echo "::group::build OpenSSL 1.1"
     (
         set -eux
         cd "$RUNNER_TEMP/openssl-OpenSSL_$OPENSSL_VERSION"
