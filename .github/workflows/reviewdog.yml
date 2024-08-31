@@ -26,4 +26,4 @@ jobs:
         with:
           reporter: github-pr-review
           level: warning
-          eslint_flags: "src/**/*.ts __tests__/**/*.ts"
+          eslint_flags: "."
