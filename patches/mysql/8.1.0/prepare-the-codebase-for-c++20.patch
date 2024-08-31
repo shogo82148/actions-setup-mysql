@@ -1,0 +1,2268 @@
+commit 138489f44fbfbf02f721b5686287538fa3651a8d
+Author: Tor Didriksen <tor.didriksen@oracle.com>
+Date:   Tue Apr 25 09:42:43 2023 +0200
+
+    Bug#35362952 Prepare the codebase for C++20
+    
+    At some point in the future, we will most likely want to switch from
+    C++17 to C++20.  Prepare the codebase for this, by rewriting it to be
+    valid for both C++17 and C++20.
+    
+    Details:
+    
+    ================
+    
+    All member functions Foo::operator==(const Foo&) must be const.
+    
+    Otherwise Clang will complain:
+    
+    ISO C++20 considers use of overloaded operator '==' ....
+    to be ambiguous despite there being a unique best viable function
+    [-Werror,-Wambiguous-reversed-operator]
+    
+    ================
+    
+    ICU cannot be built with -std=c++20
+    It has a homegrown type
+       typedef int8_t UBool;
+    
+    and there are plenty of warnings like: return type of virtual
+    UBool icu_69::TimeArrayTimeZoneRule::operator==(const icu_69::TimeZoneRule&)
+    const is not bool
+    
+    and there is no warning to disable, operator==() *must* return bool.
+    
+    The solution is to downgrade to -std=c++17 when building ICU.
+    
+    ================
+    
+    Several warnings of the type:
+    
+    increment of object of volatile-qualified type 'volatile int32'
+    (aka 'volatile int') is deprecated [-Werror,-Wdeprecated-volatile]
+    or alternatively volatile-qualified type is deprecated [-Werror=volatile]
+    
+    Most of these volatile variables should be converted to std::atomic<>
+    but some cannot, if they are members of classes which need copy
+    construction, or copy assignment.
+    
+    ================
+    
+    Both clang and gcc say:
+    pfs_example_continent.cc:273:50: error: no match for
+    operator= (operand types are PFS_engine_table_proxy and
+      <brace-enclosed initializer list>)
+    
+    The solution is to remove the default CTOR of PFS_engine_table_proxy.
+    
+    ================
+    
+    scheduler_imp.cc:420:49: error: memory_order_acquire is not a member
+    of std::memory_order
+    
+    ================
+    
+    Template arguments should not be repeated in CTORs/DTORs
+    error: expected unqualified-id before ) token
+      287 |     Lockless_hash<T>();
+    
+    ================
+    
+    package <utility> for gcc12, which an in_range() function.
+    
+    The macro is unused, so just remove it.
+    
+    ================
+    clang complains:
+    
+    router/src/harness/include/mysql/harness/net_ts/executor.h:173:46:
+    error: member access into incomplete type
+    'net::execution_context::service
+    
+    The solution is to move the implementation of a couple of member
+    functions later in the same source file.
+    
+    ================
+    
+    error: no matching function for call to object of type
+    '(lambda at router/src/http/tests/test_passwd.cc:100:19)
+    router/src/http/tests/test_passwd.cc:100:19: note:
+    candidate function not viable: expects an lvalue for 1st argument
+    
+    ================
+    
+    in sql/auth/sql_authorization.cc
+    move some 'bool operator==()' functions up so they are visible when we do
+    
+    find(granted_roles.begin(), granted_roles.end(), role_id)
+    
+    ================
+    
+    sql/field.cc:5570:22: warning: comparison of floating-point type double
+    with enumeration type Field_year::Limits is deprecated
+    [-Wdeprecated-enum-float-conversion]
+    
+    Add explicit static_cast.
+    ================
+    
+    log_event.cc
+    make slave_skip_counter std::atomic
+    
+    implicit capture of 'this' via [=] is deprecated in C++20 [-Wdeprecated]
+    Make an explicit list of captured variables instead.
+    
+    ================
+    
+    sql_bitmap.h
+    do not repeat template parameters in CTOR/DTOR
+    
+    ================
+    
+    sql_lex.h
+    sql/sql_lex.h:2860:45: error:
+    arithmetic between different enumeration types
+    ('Query_tables_list::enum_binlog_stmt_unsafe' and
+      'Query_tables_list::enum_binlog_stmt_type')
+    
+    is deprecated [-Werror,-Wdeprecated-enum-enum-conversion]
+    
+    ================
+    
+    Misc places in storage/innobase
+    
+    implicit capture of 'this' via [=] is deprecated in C++20 [-Wdeprecated]
+    
+    ================
+    
+    gcc12 complains about
+    test_net_ts_timer.cc:144:36:
+    error: redefinition of 'template<class CharT, class Traits, class Rep,
+    class Period> std::basic_ostream<_CharT, _Traits>&
+    std::chrono::operator<<(std::basic_ostream<_CharT, _Traits>&, const
+    duration<_Rep2, _Period2>&)'
+    
+    The fix is to  change the feature test.
+    
+    ================
+    clang on loki09:
+    
+    plugin/data_masking/datamask.cc:27:13:
+    error: instantiation of variable
+    'datamasking::Generator<std::basic_string<char>>::REGISTRY'
+    required here, but no definition is available [-Werror,-Wundefined-var-template]
+        switch (REGISTRY.has(token.get_blacklist(), ctx.m_in)) {
+    
+    the fix is to move implementation of
+    Generator<T>::generate(const Dictionary_token<T> &token, Context<T> &ctx)
+    to plugin/data_masking/udf/functions.cc
+    
+    ================
+    clang 13/14 on Linux:
+    sql/log_event.cc:7964:15: error: explicit capture of 'this' with a capture default of '=' is a C++20 extension [-Werror,-Wc++20-extensions]
+              [=, this](TABLE const *table, size_t column_index) -> bool
+    
+    ================
+    strings_strnxfrm-t.cc
+    error: invalid conversion from const char8_t* to const char*
+    
+    Change-Id: I51c24560bb72c071996fc2f4d85c5506fac523b5
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index c5886d05263..3829c28c11c 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -789,6 +789,33 @@ IF(WITH_DEFAULT_COMPILER_OPTIONS)
+   INCLUDE(${CMAKE_SOURCE_DIR}/cmake/build_configurations/compiler_options.cmake)
+ ENDIF()
+ 
++OPTION(WITH_EXPERIMENTAL_CPP20
++  "Build with -std=c++20, note: this is experimental" OFF)
++
++IF(WITH_EXPERIMENTAL_CPP20)
++  IF(MY_COMPILER_IS_GNU)
++    IF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 10.0)
++      MESSAGE(FATAL_ERROR "GCC 10 or newer is required for -std=c++20")
++    ENDIF()
++  ELSEIF(MY_COMPILER_IS_CLANG)
++    IF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 11.0)
++      MESSAGE(FATAL_ERROR "Clang 11 or newer is required for -std=c++20")
++    ENDIF()
++  ENDIF()
++  IF(UNIX)
++    STRING(REPLACE "-std=c++17" "-std=c++20"
++      CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
++  ELSE()
++    FOREACH(flag
++        CMAKE_CXX_FLAGS_MINSIZEREL
++        CMAKE_CXX_FLAGS_RELEASE  CMAKE_CXX_FLAGS_RELWITHDEBINFO
++        CMAKE_CXX_FLAGS_DEBUG    CMAKE_CXX_FLAGS_DEBUG_INIT
++        )
++      STRING(REPLACE "/std:c++17" "/std:c++20" ${flag} "${${flag}}")
++    ENDFOREACH()
++  ENDIF()
++ENDIF()
++
+ # Assume, for now at least, that we want build-id for all kinds of Linux builds.
+ IF(LINUX)
+   OPTION(WITH_BUILD_ID "Add --build-id=sha1 to all executables." ON)
+diff --git a/components/keyrings/common/data/data.cc b/components/keyrings/common/data/data.cc
+index 7f1ba4a4ce3..e627903d491 100644
+--- a/components/keyrings/common/data/data.cc
++++ b/components/keyrings/common/data/data.cc
+@@ -88,7 +88,7 @@ void Data::set_type(Type type) {
+ }
+ 
+ /** Comparison */
+-bool Data::operator==(const Data &other) {
++bool Data::operator==(const Data &other) const {
+   return data_ == other.data_ && type_ == other.type_ && valid_ == other.valid_;
+ }
+ 
+diff --git a/components/keyrings/common/data/data.h b/components/keyrings/common/data/data.h
+index 52e768b051f..276574e0590 100644
+--- a/components/keyrings/common/data/data.h
++++ b/components/keyrings/common/data/data.h
+@@ -62,7 +62,7 @@ class Data {
+ 
+   void set_type(Type type);
+ 
+-  bool operator==(const Data &other);
++  bool operator==(const Data &other) const;
+ 
+  protected:
+   void set_validity();
+diff --git a/extra/icu/CMakeLists.txt b/extra/icu/CMakeLists.txt
+index eb214dfc102..224de6b7c74 100644
+--- a/extra/icu/CMakeLists.txt
++++ b/extra/icu/CMakeLists.txt
+@@ -129,6 +129,31 @@ IF(HAS_WARN_FLAG)
+   LIST(APPEND ICU_LINUX_COMPILE_OPTIONS "${HAS_WARN_FLAG}")
+ ENDIF()
+ 
++# typedef int8_t UBool; results in
++# error: return type of virtual UBool xxx::operator==(const xxx&) is not bool
++IF(CMAKE_CXX_FLAGS MATCHES "-std=c..20")
++  STRING(REPLACE "-std=c++20" "-std=c++17" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
++ENDIF()
++
++IF(WIN32)
++  # In case we have switched on c++20 elsewhere
++  FOREACH(flag
++      CMAKE_CXX_FLAGS_MINSIZEREL
++      CMAKE_CXX_FLAGS_RELEASE  CMAKE_CXX_FLAGS_RELWITHDEBINFO
++      CMAKE_CXX_FLAGS_DEBUG    CMAKE_CXX_FLAGS_DEBUG_INIT
++      )
++    IF("${${flag}}" MATCHES "/std:c..20")
++      STRING(REPLACE "/std:c++20" "/std:c++17" ${flag} "${${flag}}")
++    ENDIF()
++  ENDFOREACH()
++ENDIF()
++
++# warning: arithmetic between different enumeration types is deprecated
++MY_CHECK_CXX_COMPILER_WARNING("-Wdeprecated-enum-enum-conversion" HAS_WARN_FLAG)
++IF(HAS_WARN_FLAG)
++  LIST(APPEND ICU_LINUX_COMPILE_OPTIONS "${HAS_WARN_FLAG}")
++ENDIF()
++
+ IF(WIN32)
+   ADD_DEFINITIONS(
+     -DU_STATIC_IMPLEMENTATION=1
+diff --git a/extra/zlib/zlib-1.2.13/CMakeLists.txt b/extra/zlib/zlib-1.2.13/CMakeLists.txt
+index 5aff8f51365..11409f96d8b 100644
+--- a/extra/zlib/zlib-1.2.13/CMakeLists.txt
++++ b/extra/zlib/zlib-1.2.13/CMakeLists.txt
+@@ -156,10 +156,11 @@ IF(HAS_MISSING_PROFILE)
+   ADD_COMPILE_FLAGS(${ZLIB_SRCS} COMPILE_FLAGS ${HAS_MISSING_PROFILE})
+ ENDIF()
+ 
+-MY_CHECK_CXX_COMPILER_WARNING("-Wdeprecated-non-prototype"
++# clang has this, but clang++ does not.
++MY_CHECK_C_COMPILER_FLAG("-Wdeprecated-non-prototype"
+   HAS_DEPRECATED_NON_PROTOTYPE)
+ IF(HAS_DEPRECATED_NON_PROTOTYPE)
+-  ADD_COMPILE_FLAGS(${ZLIB_SRCS} COMPILE_FLAGS ${HAS_DEPRECATED_NON_PROTOTYPE})
++  ADD_COMPILE_FLAGS(${ZLIB_SRCS} COMPILE_FLAGS "-Wno-deprecated-non-prototype")
+ ENDIF()
+ 
+ IF(NOT WIN32)
+diff --git a/include/mysql/components/services/log_builtins_filter.h b/include/mysql/components/services/log_builtins_filter.h
+index e06996c6f65..0264bbbcc1a 100644
+--- a/include/mysql/components/services/log_builtins_filter.h
++++ b/include/mysql/components/services/log_builtins_filter.h
+@@ -23,6 +23,8 @@
+ #ifndef LOG_BUILTINS_FILTER_H
+ #define LOG_BUILTINS_FILTER_H
+ 
++#include <atomic>
++
+ #include <mysql/components/component_implementation.h>
+ #include <mysql/components/my_service.h>
+ #include <mysql/components/service_implementation.h>
+@@ -138,10 +140,27 @@ typedef struct _log_filter_rule {
+   ulong flags;
+ 
+   /** how often did this rule match? */
+-  volatile int32 match_count;
++  std::atomic<int32> match_count;
+ 
+   /** lock an individual rule (to update state keeping) */
+   mysql_rwlock_t rule_lock;
++
++  _log_filter_rule &operator=(const _log_filter_rule &other) {
++    if (this == &other) return *this;
++    id = other.id;
++    jump = other.jump;
++    match = other.match;
++    cond = other.cond;
++    verb = other.verb;
++    aux = other.aux;
++    throttle_window_end = other.throttle_window_end;
++    throttle_window_size = other.throttle_window_size;
++    throttle_matches = other.throttle_matches;
++    flags = other.flags;
++    match_count = other.match_count.load();
++    rule_lock = other.rule_lock;
++    return *this;
++  }
+ } log_filter_rule;
+ 
+ #define LOG_FILTER_RULE_MAX 512
+diff --git a/include/mysql/components/services/pfs_plugin_table_service.h b/include/mysql/components/services/pfs_plugin_table_service.h
+index 3b5be1085dd..829fe6e0209 100644
+--- a/include/mysql/components/services/pfs_plugin_table_service.h
++++ b/include/mysql/components/services/pfs_plugin_table_service.h
+@@ -410,22 +410,21 @@ typedef void (*close_table_t)(PSI_table_handle *handle);
+  plugin/component.
+ */
+ struct PFS_engine_table_proxy {
+-  rnd_next_t rnd_next;
+-  rnd_init_t rnd_init;
+-  rnd_pos_t rnd_pos;
+-  index_init_t index_init;
+-  index_read_t index_read;
+-  index_next_t index_next;
+-  read_column_value_t read_column_value;
+-  reset_position_t reset_position;
+-  write_column_value_t write_column_value;
+-  write_row_values_t write_row_values;
+-  update_column_value_t update_column_value;
+-  update_row_values_t update_row_values;
+-  delete_row_values_t delete_row_values;
+-  open_table_t open_table;
+-  close_table_t close_table;
+-  PFS_engine_table_proxy() = default;
++  rnd_next_t rnd_next{nullptr};
++  rnd_init_t rnd_init{nullptr};
++  rnd_pos_t rnd_pos{nullptr};
++  index_init_t index_init{nullptr};
++  index_read_t index_read{nullptr};
++  index_next_t index_next{nullptr};
++  read_column_value_t read_column_value{nullptr};
++  reset_position_t reset_position{nullptr};
++  write_column_value_t write_column_value{nullptr};
++  write_row_values_t write_row_values{nullptr};
++  update_column_value_t update_column_value{nullptr};
++  update_row_values_t update_row_values{nullptr};
++  delete_row_values_t delete_row_values{nullptr};
++  open_table_t open_table{nullptr};
++  close_table_t close_table{nullptr};
+ };
+ typedef struct PFS_engine_table_proxy PFS_engine_table_proxy;
+ 
+diff --git a/include/mysql/service_rules_table.h b/include/mysql/service_rules_table.h
+index ab7ff7be234..608e6e87aaf 100644
+--- a/include/mysql/service_rules_table.h
++++ b/include/mysql/service_rules_table.h
+@@ -113,7 +113,7 @@ class Cursor {
+     Equality operator. The only cursors that are equal are past-the-end
+     cursors.
+   */
+-  bool operator==(const Cursor &other) {
++  bool operator==(const Cursor &other) const {
+     return (m_is_finished == other.m_is_finished);
+   }
+ 
+diff --git a/plugin/audit_null/audit_null.cc b/plugin/audit_null/audit_null.cc
+index c4c487cb8fb..efff0f1bd04 100644
+--- a/plugin/audit_null/audit_null.cc
++++ b/plugin/audit_null/audit_null.cc
+@@ -161,6 +161,12 @@ static SHOW_VAR simple_status[] = {
+ 
+     {nullptr, nullptr, SHOW_UNDEF, SHOW_SCOPE_GLOBAL}};
+ 
++static void increment_counter(volatile int *counter) {
++  int value = *counter;
++  int new_value = value + 1;
++  *counter = new_value;
++}
++
+ /*
+   Define plugin variables.
+ */
+@@ -455,7 +461,7 @@ static int audit_null_notify(MYSQL_THD thd, mysql_event_class_t event_class,
+   bool consume_event = true;
+ 
+   /* prone to races, oh well */
+-  number_of_calls++;
++  increment_counter(&number_of_calls);
+ 
+   if (event_class == MYSQL_AUDIT_GENERAL_CLASS) {
+     const struct mysql_event_general *event_general =
+@@ -463,16 +469,16 @@ static int audit_null_notify(MYSQL_THD thd, mysql_event_class_t event_class,
+ 
+     switch (event_general->event_subclass) {
+       case MYSQL_AUDIT_GENERAL_LOG:
+-        number_of_calls_general_log++;
++        increment_counter(&number_of_calls_general_log);
+         break;
+       case MYSQL_AUDIT_GENERAL_ERROR:
+-        number_of_calls_general_error++;
++        increment_counter(&number_of_calls_general_error);
+         break;
+       case MYSQL_AUDIT_GENERAL_RESULT:
+-        number_of_calls_general_result++;
++        increment_counter(&number_of_calls_general_result);
+         break;
+       case MYSQL_AUDIT_GENERAL_STATUS:
+-        number_of_calls_general_status++;
++        increment_counter(&number_of_calls_general_status);
+         break;
+       default:
+         break;
+@@ -483,16 +489,16 @@ static int audit_null_notify(MYSQL_THD thd, mysql_event_class_t event_class,
+ 
+     switch (event_connection->event_subclass) {
+       case MYSQL_AUDIT_CONNECTION_CONNECT:
+-        number_of_calls_connection_connect++;
++        increment_counter(&number_of_calls_connection_connect);
+         break;
+       case MYSQL_AUDIT_CONNECTION_DISCONNECT:
+-        number_of_calls_connection_disconnect++;
++        increment_counter(&number_of_calls_connection_disconnect);
+         break;
+       case MYSQL_AUDIT_CONNECTION_CHANGE_USER:
+-        number_of_calls_connection_change_user++;
++        increment_counter(&number_of_calls_connection_change_user);
+         break;
+       case MYSQL_AUDIT_CONNECTION_PRE_AUTHENTICATE:
+-        number_of_calls_connection_pre_authenticate++;
++        increment_counter(&number_of_calls_connection_pre_authenticate);
+         break;
+       default:
+         break;
+@@ -503,10 +509,10 @@ static int audit_null_notify(MYSQL_THD thd, mysql_event_class_t event_class,
+ 
+     switch (event_parse->event_subclass) {
+       case MYSQL_AUDIT_PARSE_PREPARSE:
+-        number_of_calls_parse_preparse++;
++        increment_counter(&number_of_calls_parse_preparse);
+         break;
+       case MYSQL_AUDIT_PARSE_POSTPARSE:
+-        number_of_calls_parse_postparse++;
++        increment_counter(&number_of_calls_parse_postparse);
+         break;
+       default:
+         break;
+@@ -558,11 +564,11 @@ static int audit_null_notify(MYSQL_THD thd, mysql_event_class_t event_class,
+   else if (event_class == MYSQL_AUDIT_SERVER_STARTUP_CLASS) {
+     /* const struct mysql_event_server_startup *event_startup=
+        (const struct mysql_event_server_startup *) event; */
+-    number_of_calls_server_startup++;
++    increment_counter(&number_of_calls_server_startup);
+   } else if (event_class == MYSQL_AUDIT_SERVER_SHUTDOWN_CLASS) {
+     /* const struct mysql_event_server_shutdown *event_startup=
+        (const struct mysql_event_server_shutdown *) event; */
+-    number_of_calls_server_shutdown++;
++    increment_counter(&number_of_calls_server_shutdown);
+   } else if (event_class == MYSQL_AUDIT_COMMAND_CLASS) {
+     const struct mysql_event_command *local_event_command =
+         (const struct mysql_event_command *)event;
+@@ -572,10 +578,10 @@ static int audit_null_notify(MYSQL_THD thd, mysql_event_class_t event_class,
+ 
+     switch (local_event_command->event_subclass) {
+       case MYSQL_AUDIT_COMMAND_START:
+-        number_of_calls_command_start++;
++        increment_counter(&number_of_calls_command_start);
+         break;
+       case MYSQL_AUDIT_COMMAND_END:
+-        number_of_calls_command_end++;
++        increment_counter(&number_of_calls_command_end);
+         break;
+       default:
+         break;
+@@ -589,16 +595,16 @@ static int audit_null_notify(MYSQL_THD thd, mysql_event_class_t event_class,
+ 
+     switch (event_query->event_subclass) {
+       case MYSQL_AUDIT_QUERY_START:
+-        number_of_calls_query_start++;
++        increment_counter(&number_of_calls_query_start);
+         break;
+       case MYSQL_AUDIT_QUERY_NESTED_START:
+-        number_of_calls_query_nested_start++;
++        increment_counter(&number_of_calls_query_nested_start);
+         break;
+       case MYSQL_AUDIT_QUERY_STATUS_END:
+-        number_of_calls_query_status_end++;
++        increment_counter(&number_of_calls_query_status_end);
+         break;
+       case MYSQL_AUDIT_QUERY_NESTED_STATUS_END:
+-        number_of_calls_query_nested_status_end++;
++        increment_counter(&number_of_calls_query_nested_status_end);
+         break;
+       default:
+         break;
+@@ -613,16 +619,16 @@ static int audit_null_notify(MYSQL_THD thd, mysql_event_class_t event_class,
+ 
+     switch (event_table->event_subclass) {
+       case MYSQL_AUDIT_TABLE_ACCESS_INSERT:
+-        number_of_calls_table_access_insert++;
++        increment_counter(&number_of_calls_table_access_insert);
+         break;
+       case MYSQL_AUDIT_TABLE_ACCESS_DELETE:
+-        number_of_calls_table_access_delete++;
++        increment_counter(&number_of_calls_table_access_delete);
+         break;
+       case MYSQL_AUDIT_TABLE_ACCESS_UPDATE:
+-        number_of_calls_table_access_update++;
++        increment_counter(&number_of_calls_table_access_update);
+         break;
+       case MYSQL_AUDIT_TABLE_ACCESS_READ:
+-        number_of_calls_table_access_read++;
++        increment_counter(&number_of_calls_table_access_read);
+         break;
+       default:
+         break;
+@@ -649,10 +655,10 @@ static int audit_null_notify(MYSQL_THD thd, mysql_event_class_t event_class,
+ 
+     switch (event_gvar->event_subclass) {
+       case MYSQL_AUDIT_GLOBAL_VARIABLE_GET:
+-        number_of_calls_global_variable_get++;
++        increment_counter(&number_of_calls_global_variable_get);
+         break;
+       case MYSQL_AUDIT_GLOBAL_VARIABLE_SET:
+-        number_of_calls_global_variable_set++;
++        increment_counter(&number_of_calls_global_variable_set);
+         break;
+       default:
+         break;
+@@ -699,10 +705,10 @@ static int audit_null_notify(MYSQL_THD thd, mysql_event_class_t event_class,
+ 
+     switch (evt->event_subclass) {
+       case MYSQL_AUDIT_MESSAGE_INTERNAL:
+-        number_of_calls_message_internal++;
++        increment_counter(&number_of_calls_message_internal);
+         break;
+       case MYSQL_AUDIT_MESSAGE_USER:
+-        number_of_calls_message_user++;
++        increment_counter(&number_of_calls_message_user);
+         break;
+       default:
+         break;
+diff --git a/plugin/group_replication/libmysqlgcs/src/bindings/xcom/xcom/xdr_utils.h b/plugin/group_replication/libmysqlgcs/src/bindings/xcom/xcom/xdr_utils.h
+index 69f8eb82c80..092a2187478 100644
+--- a/plugin/group_replication/libmysqlgcs/src/bindings/xcom/xcom/xdr_utils.h
++++ b/plugin/group_replication/libmysqlgcs/src/bindings/xcom/xcom/xdr_utils.h
+@@ -55,9 +55,6 @@ extern "C" u_long xdr_sizeof(xdrproc_t, void *);
+     x->name##_array_len = 0;   \
+   }
+ 
+-#define in_range(x, name, n) \
+-  (((int)n) >= 0 && ((int)n) < ((int)(x).name##_array_len))
+-
+ /**
+     Resize an array
+  */
+diff --git a/plugin/keyring/digest.cc b/plugin/keyring/digest.cc
+index e0ad33f757c..ef90a1182d3 100644
+--- a/plugin/keyring/digest.cc
++++ b/plugin/keyring/digest.cc
+@@ -56,7 +56,7 @@ void Digest::assign(const char *value) {
+   is_empty = false;
+ }
+ 
+-bool Digest::operator==(const Digest &digest) {
++bool Digest::operator==(const Digest &digest) const {
+   return this->is_empty == digest.is_empty && this->length == digest.length &&
+          memcmp(this->value, digest.value, this->length) == 0;
+ }
+diff --git a/plugin/keyring/digest.h b/plugin/keyring/digest.h
+index 99ccc570f1c..872c4c97ae2 100644
+--- a/plugin/keyring/digest.h
++++ b/plugin/keyring/digest.h
+@@ -40,7 +40,7 @@ class Digest {
+   ~Digest();
+ 
+   void assign(const char *value);
+-  bool operator==(const Digest &digest);
++  bool operator==(const Digest &digest) const;
+   Digest &operator=(const Digest &digest);
+   void compute(uchar *memory, size_t memory_size);
+ 
+diff --git a/router/src/harness/include/mysql/harness/net_ts/executor.h b/router/src/harness/include/mysql/harness/net_ts/executor.h
+index 5de5329642f..d9a8a5e8e21 100644
+--- a/router/src/harness/include/mysql/harness/net_ts/executor.h
++++ b/router/src/harness/include/mysql/harness/net_ts/executor.h
+@@ -166,28 +166,11 @@ class execution_context {
+   }
+ 
+   // 13.7.3 [async.exec.ctx.ops]
+-  void notify_fork(fork_event e) {
+-    // prepare is in reverse
+-    if (e == fork_event::prepare) {
+-      std::for_each(services_.rbegin(), services_.rend(),
+-                    [e](auto &svc) { svc.ptr_->notify_fork(e); });
+-    } else {
+-      std::for_each(services_.begin(), services_.end(),
+-                    [e](auto &svc) { svc.ptr_->notify_fork(e); });
+-    }
+-  }
++  void notify_fork(fork_event e);
+ 
+  protected:
+   // 13.7.4 [async.exec.ctx.protected]
+-  void shutdown() noexcept {
+-    // shutdown in reverse insert-order
+-    std::for_each(services_.rbegin(), services_.rend(), [](auto &svc) {
+-      if (svc.active_) {
+-        svc.ptr_->shutdown();
+-        svc.active_ = false;
+-      }
+-    });
+-  }
++  void shutdown() noexcept;
+ 
+   void destroy() noexcept {
+     // destroy in reverse insert-order
+@@ -934,6 +917,29 @@ bool operator!=(const strand<Executor> &a, const strand<Executor> &b) {
+ 
+ // 13.27 [async.packaged.task.spec] - not implemented
+ 
++// 13.7.3 [async.exec.ctx.ops]
++inline void execution_context::notify_fork(fork_event e) {
++  // prepare is in reverse
++  if (e == fork_event::prepare) {
++    std::for_each(services_.rbegin(), services_.rend(),
++                  [e](auto &svc) { svc.ptr_->notify_fork(e); });
++  } else {
++    std::for_each(services_.begin(), services_.end(),
++                  [e](auto &svc) { svc.ptr_->notify_fork(e); });
++  }
++}
++
++// 13.7.4 [async.exec.ctx.protected]
++inline void execution_context::shutdown() noexcept {
++  // shutdown in reverse insert-order
++  std::for_each(services_.rbegin(), services_.rend(), [](auto &svc) {
++    if (svc.active_) {
++      svc.ptr_->shutdown();
++      svc.active_ = false;
++    }
++  });
++}
++
+ }  // namespace net
+ 
+ #endif
+diff --git a/router/src/harness/src/filesystem-posix.cc b/router/src/harness/src/filesystem-posix.cc
+index 6f429ecb425..17095d8165a 100644
+--- a/router/src/harness/src/filesystem-posix.cc
++++ b/router/src/harness/src/filesystem-posix.cc
+@@ -52,7 +52,6 @@
+ #include "mysql/harness/stdx/expected.h"
+ 
+ namespace {
+-const std::string dirsep("/");
+ const std::string extsep(".");
+ }  // namespace
+ 
+diff --git a/router/src/harness/src/utilities.h b/router/src/harness/src/utilities.h
+index 3358978f665..689a5378c2b 100644
+--- a/router/src/harness/src/utilities.h
++++ b/router/src/harness/src/utilities.h
+@@ -54,9 +54,9 @@ class Range {
+       return *this;
+     }
+ 
+-    bool operator==(const iterator &rhs) { return ptr_ == rhs.ptr_; }
++    bool operator==(const iterator &rhs) const { return ptr_ == rhs.ptr_; }
+ 
+-    bool operator!=(const iterator &rhs) { return ptr_ != rhs.ptr_; }
++    bool operator!=(const iterator &rhs) const { return ptr_ != rhs.ptr_; }
+ 
+     Type &operator*() { return *ptr_; }
+ 
+diff --git a/router/src/harness/tests/test_common.cc b/router/src/harness/tests/test_common.cc
+index a36ff42cdb0..f7829940455 100644
+--- a/router/src/harness/tests/test_common.cc
++++ b/router/src/harness/tests/test_common.cc
+@@ -68,7 +68,9 @@ TEST(TestCommon, SerialComma) {
+   using mysql_harness::serial_comma;
+ 
+   auto expect_output = [](int count, const std::string &expect) {
+-    constexpr int primes[]{2, 3, 5, 7, 11};
++    // Was constexpr, but Visual Studio said
++    // error C2101 '&' on constant
++    int primes[]{2, 3, 5, 7, 11};
+ 
+     std::string res = "Primes are ";
+     res += serial_comma(&primes[0], &primes[count]);
+diff --git a/router/src/harness/tests/test_net_ts_timer.cc b/router/src/harness/tests/test_net_ts_timer.cc
+index 12226ddc226..0c10efce951 100644
+--- a/router/src/harness/tests/test_net_ts_timer.cc
++++ b/router/src/harness/tests/test_net_ts_timer.cc
+@@ -134,7 +134,7 @@ TYPED_TEST(NetTS_timer, timer_expires_after_async_short) {
+   EXPECT_GE(clock_type::now() - before, wait_duration);
+ }
+ 
+-#if !defined(__cpp_lib_chrono) || __cpp_lib_chrono < 201907L
++#if !defined(__cpp_lib_chrono) || __cpp_lib_chrono < 201611L
+ // __cpp_lib_chrono is defined in c++17 and later
+ //
+ // operator<< is defined in <chrono> with C++20
+diff --git a/router/src/http/src/http_auth_backend.cc b/router/src/http/src/http_auth_backend.cc
+index ed5aad556f4..d498fcf550a 100644
+--- a/router/src/http/src/http_auth_backend.cc
++++ b/router/src/http/src/http_auth_backend.cc
+@@ -66,7 +66,7 @@ static bool st_mtime_eq(const struct stat &a, const struct stat &b) {
+ #endif
+ }
+ 
+-bool FileModified::operator==(const FileModified &b) {
++bool FileModified::operator==(const FileModified &b) const {
+   // ignores atime, ctime, dev and rdev
+   return (meta_.res.first == b.meta_.res.first) &&
+          (meta_.res.second.st_size == b.meta_.res.second.st_size) &&
+diff --git a/router/src/http/src/http_auth_backend.h b/router/src/http/src/http_auth_backend.h
+index 3b31b1461fe..53cd6ee57fd 100644
+--- a/router/src/http/src/http_auth_backend.h
++++ b/router/src/http/src/http_auth_backend.h
+@@ -86,7 +86,7 @@ class FileModified {
+   /**
+    * check if two FileModified's are equal.
+    */
+-  bool operator==(const FileModified &b);
++  bool operator==(const FileModified &b) const;
+ 
+  private:
+   FileMeta meta_;
+diff --git a/router/src/http/tests/test_passwd.cc b/router/src/http/tests/test_passwd.cc
+index ffba9ecbc22..ff8da56fe6f 100644
+--- a/router/src/http/tests/test_passwd.cc
++++ b/router/src/http/tests/test_passwd.cc
+@@ -97,7 +97,7 @@ static std::string format_desc_opt(const Option &opt) {
+   auto val = opt.arg;
+   return join(std::accumulate(
+                   opt.opts.begin(), opt.opts.end(), std::vector<std::string>(),
+-                  [&val](std::vector<std::string> &acc, std::string cur) {
++                  [&val](std::vector<std::string> acc, std::string cur) {
+                     acc.push_back(cur + (val.empty() ? "" : " " + val));
+ 
+                     return acc;
+diff --git a/router/src/metadata_cache/tests/test_cache_plugin.cc b/router/src/metadata_cache/tests/test_cache_plugin.cc
+index 281cd06539c..9115eea9ee3 100644
+--- a/router/src/metadata_cache/tests/test_cache_plugin.cc
++++ b/router/src/metadata_cache/tests/test_cache_plugin.cc
+@@ -44,7 +44,6 @@
+  * Constants that are used throughout the test cases.
+  */
+ const unsigned kRouterId = 2;
+-const std::string replication_group_id = "0000-0000-0001";
+ const std::string kDefaultMetadataHost = "127.0.0.1";  // 127.0.0.1
+ const std::string kDefaultMetadataUser = "admin";      // admin
+ const std::string kDefaultMetadataPassword = "";       //
+diff --git a/router/src/router/src/router_app.cc b/router/src/router/src/router_app.cc
+index 2c6e967eb33..fcb22bb7ff5 100644
+--- a/router/src/router/src/router_app.cc
++++ b/router/src/router/src/router_app.cc
+@@ -74,7 +74,6 @@
+ #include <unistd.h>
+ #include <csignal>
+ const char dir_sep = '/';
+-const std::string path_sep = ":";
+ #else
+ #include <process.h>
+ #include <windows.h>
+@@ -85,7 +84,6 @@ const std::string path_sep = ":";
+ #include "mysqlrouter/windows/service_operations.h"
+ #define strtok_r strtok_s
+ const char dir_sep = '\\';
+-const std::string path_sep = ";";
+ #endif
+ 
+ IMPORT_LOG_FUNCTIONS()
+diff --git a/router/src/router/tests/test_keyring_frontend.cc b/router/src/router/tests/test_keyring_frontend.cc
+index 02f1cd36569..340d98f35fe 100644
+--- a/router/src/router/tests/test_keyring_frontend.cc
++++ b/router/src/router/tests/test_keyring_frontend.cc
+@@ -113,7 +113,7 @@ static std::string format_desc_opt(const Option &opt) {
+   auto val = opt.arg;
+   return join(std::accumulate(
+                   opt.opts.begin(), opt.opts.end(), std::vector<std::string>(),
+-                  [&val](std::vector<std::string> &acc, std::string cur) {
++                  [&val](std::vector<std::string> acc, std::string cur) {
+                     acc.push_back(cur + (val.empty() ? "" : " " + val));
+ 
+                     return acc;
+diff --git a/router/tests/component/test_rest_metadata_cache.cc b/router/tests/component/test_rest_metadata_cache.cc
+index 1aa49e065b7..a1631b6ee57 100644
+--- a/router/tests/component/test_rest_metadata_cache.cc
++++ b/router/tests/component/test_rest_metadata_cache.cc
+@@ -50,7 +50,6 @@
+ using namespace std::chrono_literals;
+ 
+ static const std::string http_auth_realm_name("somerealm");
+-static const std::string http_auth_backend_name("somebackend");
+ 
+ // init_keyring() creates it
+ static const std::string keyring_username("mysql_router1_user");
+diff --git a/sql/auth/sql_authorization.cc b/sql/auth/sql_authorization.cc
+index aeda0429a91..9d6c8c14527 100644
+--- a/sql/auth/sql_authorization.cc
++++ b/sql/auth/sql_authorization.cc
+@@ -230,6 +230,16 @@ opt_always_activate_roles_on_login is set to true.
+ 
+  */
+ 
++bool operator==(const Role_id &a, const std::string &b) {
++  std::string tmp;
++  a.auth_str(&tmp);
++  return tmp == b;
++}
++
++bool operator==(const std::pair<Role_id, bool> &a, const std::string &b) {
++  return a.first == b;
++}
++
+ /**
+   Class to handle sanity checks for GRANT ... AS ... statement
+ */
+@@ -7431,16 +7441,6 @@ Sctx_ptr<Security_context> Security_context_factory::create() {
+   });
+ }
+ 
+-bool operator==(const Role_id &a, const std::string &b) {
+-  std::string tmp;
+-  a.auth_str(&tmp);
+-  return tmp == b;
+-}
+-
+-bool operator==(const std::pair<Role_id, bool> &a, const std::string &b) {
+-  return a.first == b;
+-}
+-
+ bool operator==(const Role_id &a, const Auth_id_ref &b) {
+   return ((a.user().length() == b.first.length) &&
+           (a.host().length() == b.second.length) &&
+diff --git a/sql/field.cc b/sql/field.cc
+index ae7aa696a60..a03bdfbc284 100644
+--- a/sql/field.cc
++++ b/sql/field.cc
+@@ -5574,7 +5574,7 @@ type_conversion_status Field_year::store(const char *from, size_t len,
+ }
+ 
+ type_conversion_status Field_year::store(double nr) {
+-  if (nr < 0.0 || nr > MAX_YEAR) {
++  if (nr < 0.0 || nr > static_cast<double>(MAX_YEAR)) {
+     Field_year::store(-1LL, false);
+     return TYPE_WARN_OUT_OF_RANGE;
+   }
+diff --git a/sql/log_event.cc b/sql/log_event.cc
+index dbfc29241f0..6381e311c84 100644
+--- a/sql/log_event.cc
++++ b/sql/log_event.cc
+@@ -1016,11 +1016,12 @@ Log_event::enum_skip_reason Log_event::do_shall_skip(Relay_log_info *rli) {
+     - Other events will decrease the counter unless OPTION_BEGIN is
+       set.
+   */
+-  DBUG_PRINT("info", ("ev->server_id=%lu, ::server_id=%lu,"
+-                      " rli->replicate_same_server_id=%d,"
+-                      " rli->replica_skip_counter=%d",
+-                      (ulong)server_id, (ulong)::server_id,
+-                      rli->replicate_same_server_id, rli->slave_skip_counter));
++  DBUG_PRINT("info",
++             ("ev->server_id=%lu, ::server_id=%lu,"
++              " rli->replicate_same_server_id=%d,"
++              " rli->replica_skip_counter=%d",
++              (ulong)server_id, (ulong)::server_id,
++              rli->replicate_same_server_id, rli->slave_skip_counter.load()));
+   if ((server_id == ::server_id && !rli->replicate_same_server_id) ||
+       (rli->slave_skip_counter == 1 && rli->is_in_group()))
+     return EVENT_SKIP_IGNORE;
+@@ -7899,7 +7900,8 @@ int Rows_log_event::unpack_current_row(const Relay_log_info *const rli,
+           // A table view for generated columns that need to be updated on the
+           // replica, excluding columns for functional indexes
+           this->m_table,
+-          [=](TABLE const *table, size_t column_index) -> bool {
++          [is_after_image, this](TABLE const *table,
++                                 size_t column_index) -> bool {
+             auto field = table->field[column_index];
+             if (field->is_field_for_functional_index())  // Always exclude
+                                                          // functional indexes
+diff --git a/sql/rpl_applier_reader.cc b/sql/rpl_applier_reader.cc
+index 9f8c50de100..fc7abbbebe4 100644
+--- a/sql/rpl_applier_reader.cc
++++ b/sql/rpl_applier_reader.cc
+@@ -522,7 +522,7 @@ void Rpl_applier_reader::debug_print_next_event_positions() {
+   DBUG_PRINT(
+       "info",
+       ("assertion skip %u file pos %llu event relay log pos %llu file %s\n",
+-       m_rli->slave_skip_counter, m_relaylog_file_reader.position(),
++       m_rli->slave_skip_counter.load(), m_relaylog_file_reader.position(),
+        m_rli->get_event_relay_log_pos(), m_rli->get_event_relay_log_name()));
+ 
+   /* This is an assertion which sometimes fails, let's try to track it */
+diff --git a/sql/rpl_replica.cc b/sql/rpl_replica.cc
+index e62c5284dc3..bee98f684dc 100644
+--- a/sql/rpl_replica.cc
++++ b/sql/rpl_replica.cc
+@@ -4614,7 +4614,7 @@ apply_event_and_update_pos(Log_event **ptr_ev, THD *thd, Relay_log_info *rli) {
+           LogErr(INFORMATION_LEVEL, ER_RPL_MTA_STATISTICS,
+                  rli->get_for_channel_str(),
+                  static_cast<unsigned long>(my_now - rli->mts_last_online_stat),
+-                 rli->mts_events_assigned, rli->mts_wq_overrun_cnt,
++                 rli->mts_events_assigned, rli->mts_wq_overrun_cnt.load(),
+                  rli->mts_wq_overfill_cnt, rli->wq_size_waits_cnt,
+                  rli->mts_total_wait_overlap.load(),
+                  rli->mts_wq_no_underrun_cnt, rli->mts_total_wait_worker_avail);
+@@ -6850,7 +6850,7 @@ static void slave_stop_workers(Relay_log_info *rli, bool *mts_inited) {
+        "found (count) workers occupied = %lu "
+        "waited when workers occupied = %llu",
+        rli->mts_events_assigned, diff_timespec(&stats_end, &rli->stats_begin),
+-       rli->mts_wq_overrun_cnt, rli->mts_wq_overfill_cnt,
++       rli->mts_wq_overrun_cnt.load(), rli->mts_wq_overfill_cnt,
+        rli->wq_size_waits_cnt, rli->mts_total_wait_overlap.load(),
+        rli->mts_wq_no_underrun_cnt, rli->mts_total_wait_worker_avail));
+ 
+diff --git a/sql/rpl_rli.cc b/sql/rpl_rli.cc
+index 093d40fe3fe..0ee49d8c727 100644
+--- a/sql/rpl_rli.cc
++++ b/sql/rpl_rli.cc
+@@ -273,8 +273,10 @@ void Relay_log_info::init_workers(ulong n_workers) {
+     Parallel slave parameters initialization is done regardless
+     whether the feature is or going to be active or not.
+   */
+-  mts_groups_assigned = mts_events_assigned = pending_jobs = wq_size_waits_cnt =
+-      0;
++  mts_groups_assigned = 0;
++  mts_events_assigned = 0;
++  pending_jobs = 0;
++  wq_size_waits_cnt = 0;
+   mts_wq_excess_cnt = mts_wq_no_underrun_cnt = mts_wq_overfill_cnt = 0;
+   mts_total_wait_overlap = 0;
+   mts_total_wait_worker_avail = 0;
+@@ -670,7 +672,7 @@ int Relay_log_info::wait_for_pos(THD *thd, String *log_name, longlong log_pos,
+     int cmp_result = 0;
+ 
+     DBUG_PRINT("info", ("init_abort_pos_wait: %ld  abort_pos_wait: %ld",
+-                        init_abort_pos_wait, abort_pos_wait));
++                        init_abort_pos_wait, abort_pos_wait.load()));
+     DBUG_PRINT("info", ("group_source_log_name: '%s'  pos: %lu",
+                         group_master_log_name, (ulong)group_master_log_pos));
+ 
+@@ -846,7 +848,7 @@ int Relay_log_info::wait_for_gtid_set(THD *thd, const Gtid_set *wait_gtid_set,
+   while (!thd->killed && init_abort_pos_wait == abort_pos_wait &&
+          slave_running) {
+     DBUG_PRINT("info", ("init_abort_pos_wait: %ld  abort_pos_wait: %ld",
+-                        init_abort_pos_wait, abort_pos_wait));
++                        init_abort_pos_wait, abort_pos_wait.load()));
+ 
+     // wait for master update, with optional timeout.
+ 
+diff --git a/sql/rpl_rli.h b/sql/rpl_rli.h
+index cdf30fba66f..6bcf21802f8 100644
+--- a/sql/rpl_rli.h
++++ b/sql/rpl_rli.h
+@@ -926,8 +926,8 @@ class Relay_log_info : public Rpl_info {
+     skipping one or more events in the master log that have caused
+     errors, and have been manually applied by DBA already.
+   */
+-  volatile uint32 slave_skip_counter;
+-  volatile ulong abort_pos_wait; /* Incremented on change master */
++  std::atomic<uint32> slave_skip_counter;
++  std::atomic<ulong> abort_pos_wait; /* Incremented on change master */
+   mysql_mutex_t log_space_lock;
+   mysql_cond_t log_space_cond;
+ 
+@@ -1182,7 +1182,7 @@ class Relay_log_info : public Rpl_info {
+   */
+   bool workers_array_initialized;
+ 
+-  volatile ulong pending_jobs;
++  std::atomic<ulong> pending_jobs;
+   mysql_mutex_t pending_jobs_lock;
+   mysql_cond_t pending_jobs_cond;
+   mysql_mutex_t exit_count_lock;  // mutex of worker exit count
+@@ -1222,7 +1222,7 @@ class Relay_log_info : public Rpl_info {
+      are experiencing and is used as a parameter to compute a nap time for
+      Coordinator in order to avoid reaching WQ limits.
+   */
+-  volatile long mts_wq_excess_cnt;
++  std::atomic<long> mts_wq_excess_cnt;
+   long mts_worker_underrun_level;   // % of WQ size at which W is considered
+                                     // hungry
+   ulong mts_coordinator_basic_nap;  // C sleeps to avoid WQs overrun
+@@ -1274,7 +1274,7 @@ class Relay_log_info : public Rpl_info {
+   */
+   ulonglong mts_events_assigned;  // number of events (statements) scheduled
+   ulonglong mts_groups_assigned;  // number of groups (transactions) scheduled
+-  volatile ulong
++  std::atomic<ulong>
+       mts_wq_overrun_cnt;   // counter of all mts_wq_excess_cnt increments
+   ulong wq_size_waits_cnt;  // number of times C slept due to WQ:s oversize
+   /*
+diff --git a/sql/rpl_rli_pdb.cc b/sql/rpl_rli_pdb.cc
+index 5310a0c3f20..a812431b395 100644
+--- a/sql/rpl_rli_pdb.cc
++++ b/sql/rpl_rli_pdb.cc
+@@ -350,11 +350,15 @@ int Slave_worker::init_worker(Relay_log_info *rli, ulong i) {
+   server_version = version_product(rli->slave_version_split);
+   bitmap_shifted = 0;
+   workers = c_rli->workers;  // shallow copying is sufficient
+-  wq_empty_waits = wq_size_waits_cnt = groups_done = events_done = curr_jobs =
+-      0;
++  wq_empty_waits = 0;
++  wq_size_waits_cnt = 0;
++  groups_done = 0;
++  events_done = 0;
++  curr_jobs = 0;
+   usage_partition = 0;
+   end_group_sets_max_dbs = false;
+-  gaq_index = last_group_done_index = c_rli->gaq->capacity;  // out of range
++  gaq_index = c_rli->gaq->capacity;              // out of range
++  last_group_done_index = c_rli->gaq->capacity;  // out of range
+   last_groups_assigned_index = 0;
+   assert(!jobs.inited_queue);
+   jobs.avail = 0;
+diff --git a/sql/rpl_rli_pdb.h b/sql/rpl_rli_pdb.h
+index ba582faf9cd..22ac655dac2 100644
+--- a/sql/rpl_rli_pdb.h
++++ b/sql/rpl_rli_pdb.h
+@@ -534,7 +534,7 @@ class Slave_worker : public Relay_log_info {
+   ulong wq_empty_waits;            // how many times got idle
+   ulong events_done;               // how many events (statements) processed
+   ulong groups_done;               // how many groups (transactions) processed
+-  volatile int curr_jobs;          // number of active  assignments
++  std::atomic<int> curr_jobs;      // number of active  assignments
+   // number of partitions allocated to the worker at point in time
+   long usage_partition;
+   // symmetric to rli->mts_end_group_sets_max_dbs
+diff --git a/sql/server_component/log_builtins_filter.cc b/sql/server_component/log_builtins_filter.cc
+index 5299292e559..308df1d4a5c 100644
+--- a/sql/server_component/log_builtins_filter.cc
++++ b/sql/server_component/log_builtins_filter.cc
+@@ -124,7 +124,7 @@ static log_filter_rule *log_builtins_filter_rule_init(
+     log_filter_ruleset *ruleset) {
+   log_filter_rule *r = &ruleset->rule[ruleset->count];
+ 
+-  memset(r, 0, sizeof(log_filter_rule));
++  new (r) log_filter_rule{};
+ 
+   r->id = ++filter_rule_uuid;
+   r->throttle_window_size =
+@@ -205,7 +205,7 @@ static log_filter_ruleset *log_builtins_filter_ruleset_new(log_filter_tag *tag,
+       (log_filter_ruleset *)my_malloc(0, sizeof(log_filter_ruleset), MYF(0));
+ 
+   if (ruleset != nullptr) {
+-    memset(ruleset, 0, sizeof(log_filter_ruleset));
++    new (ruleset) log_filter_ruleset{};
+     ruleset->tag = tag;
+     ruleset->alloc = (count < 1) ? LOG_FILTER_RULE_MAX : count;
+ 
+@@ -1034,7 +1034,7 @@ DEFINE_METHOD(int, log_builtins_filter_imp::filter_ruleset_move,
+ 
+   for (rule_index = 0; rule_index < from->count; rule_index++) {
+     to->rule[rule_index] = from->rule[rule_index];
+-    memset(&from->rule[rule_index], 0, sizeof(log_filter_rule));
++    new (&from->rule[rule_index]) log_filter_rule{};
+   }
+ 
+   to->count = from->count;
+diff --git a/sql/sql_bitmap.h b/sql/sql_bitmap.h
+index 0f4a54070ea..bd81a403cea 100644
+--- a/sql/sql_bitmap.h
++++ b/sql/sql_bitmap.h
+@@ -145,10 +145,10 @@ class Bitmap<64> {
+   ulonglong map;
+ 
+  public:
+-  Bitmap<64>() { init(); }
++  Bitmap() { init(); }
+   enum { ALL_BITS = 64 };
+ 
+-  explicit Bitmap<64>(uint prefix_to_set) { set_prefix(prefix_to_set); }
++  explicit Bitmap(uint prefix_to_set) { set_prefix(prefix_to_set); }
+   void init() { clear_all(); }
+   void init(uint prefix_to_set) { set_prefix(prefix_to_set); }
+   uint length() const { return 64; }
+diff --git a/sql/sql_const_folding.cc b/sql/sql_const_folding.cc
+index 93dbc7b73fa..c543e1b5a52 100644
+--- a/sql/sql_const_folding.cc
++++ b/sql/sql_const_folding.cc
+@@ -724,11 +724,12 @@ static bool analyze_year_field_constant(THD *thd, Item **const_val,
+     case REAL_RESULT:
+     case INT_RESULT: {
+       const double year = (*const_val)->val_real();
+-      if (year > Field_year::MAX_YEAR) {
++      if (year > static_cast<double>(Field_year::MAX_YEAR)) {
+         *place = RP_OUTSIDE_HIGH;
+       } else if (year < 0.0) {
+         *place = RP_OUTSIDE_LOW;
+-      } else if (year > 0.0 && year < Field_year::MIN_YEAR) {
++      } else if (year > 0.0 &&
++                 year < static_cast<double>(Field_year::MIN_YEAR)) {
+         /*
+           These values can be given as constants, but are not allowed to be
+           stored in the field, so an = or <> comparison can be folded. For
+diff --git a/sql/sql_lex.h b/sql/sql_lex.h
+index 98974ee8d02..fb4e06c3f98 100644
+--- a/sql/sql_lex.h
++++ b/sql/sql_lex.h
+@@ -32,6 +32,7 @@
+ #include <sys/types.h>  // TODO: replace with cstdint
+ 
+ #include <algorithm>
++#include <cstdint>
+ #include <cstring>
+ #include <functional>
+ #include <map>
+@@ -2866,8 +2867,10 @@ class Query_tables_list {
+     @retval nonzero if the statement is a row injection
+   */
+   inline bool is_stmt_row_injection() const {
+-    return binlog_stmt_flags &
+-           (1U << (BINLOG_STMT_UNSAFE_COUNT + BINLOG_STMT_TYPE_ROW_INJECTION));
++    constexpr uint32_t shift =
++        static_cast<uint32_t>(BINLOG_STMT_UNSAFE_COUNT) +
++        static_cast<uint32_t>(BINLOG_STMT_TYPE_ROW_INJECTION);
++    return binlog_stmt_flags & (1U << shift);
+   }
+ 
+   /**
+@@ -2876,10 +2879,11 @@ class Query_tables_list {
+     the slave SQL thread.
+   */
+   inline void set_stmt_row_injection() {
++    constexpr uint32_t shift =
++        static_cast<uint32_t>(BINLOG_STMT_UNSAFE_COUNT) +
++        static_cast<uint32_t>(BINLOG_STMT_TYPE_ROW_INJECTION);
+     DBUG_TRACE;
+-    binlog_stmt_flags |=
+-        (1U << (BINLOG_STMT_UNSAFE_COUNT + BINLOG_STMT_TYPE_ROW_INJECTION));
+-    return;
++    binlog_stmt_flags |= (1U << shift);
+   }
+ 
+   enum enum_stmt_accessed_table {
+diff --git a/sql/stream_cipher.cc b/sql/stream_cipher.cc
+index 49d60be5c62..401ce6d9e16 100644
+--- a/sql/stream_cipher.cc
++++ b/sql/stream_cipher.cc
+@@ -68,7 +68,7 @@ bool Aes_ctr_cipher<TYPE>::open(const Key_string &password, int header_size) {
+ }
+ 
+ template <Cipher_type TYPE>
+-Aes_ctr_cipher<TYPE>::~Aes_ctr_cipher<TYPE>() {
++Aes_ctr_cipher<TYPE>::~Aes_ctr_cipher() {
+   close();
+ }
+ 
+diff --git a/storage/innobase/ddl/ddl0loader.cc b/storage/innobase/ddl/ddl0loader.cc
+index c912f815ce1..ff7e9249de0 100644
+--- a/storage/innobase/ddl/ddl0loader.cc
++++ b/storage/innobase/ddl/ddl0loader.cc
+@@ -309,7 +309,7 @@ dberr_t Loader::load() noexcept {
+   std::vector<std::thread> threads{};
+ 
+   if (!sync) {
+-    auto fn = [=](PSI_thread_seqnum seqnum) -> dberr_t {
++    auto fn = [this](PSI_thread_seqnum seqnum) -> dberr_t {
+ #ifdef UNIV_PFS_THREAD
+       Runnable runnable{ddl_thread_key, seqnum};
+ #else
+diff --git a/storage/innobase/dict/dict0mem.cc b/storage/innobase/dict/dict0mem.cc
+index e5acae27a00..f3170c9f1f6 100644
+--- a/storage/innobase/dict/dict0mem.cc
++++ b/storage/innobase/dict/dict0mem.cc
+@@ -572,7 +572,7 @@ void dict_col_t::set_default(const byte *value, size_t length,
+   instant_default->len = length;
+ }
+ 
+-bool dict_col_default_t::operator==(const dict_col_default_t &other) {
++bool dict_col_default_t::operator==(const dict_col_default_t &other) const {
+   /* If the lengths are different, trivially the default values are not
+   the same, return false immediately */
+   if (len != other.len) {
+@@ -594,7 +594,7 @@ bool dict_col_default_t::operator==(const dict_col_default_t &other) {
+   return true;
+ }
+ 
+-bool dict_col_default_t::operator!=(const dict_col_default_t &other) {
++bool dict_col_default_t::operator!=(const dict_col_default_t &other) const {
+   return !(*this == other);
+ }
+ 
+diff --git a/storage/innobase/fsp/fsp0fsp.cc b/storage/innobase/fsp/fsp0fsp.cc
+index 73c1f918cf0..2a4380ac7b9 100644
+--- a/storage/innobase/fsp/fsp0fsp.cc
++++ b/storage/innobase/fsp/fsp0fsp.cc
+@@ -4744,7 +4744,7 @@ static bool load_encryption_from_header(fil_space_t *space) {
+ 
+ static const std::string enc("ENCRYPTION");
+ static const std::string dec("DECRYPTION");
+-static const std::string none("NONE");
++[[maybe_unused]] static const std::string none("NONE");
+ 
+ static inline const std::string &get_encryption_op_str(
+     Encryption::Progress op) {
+diff --git a/storage/innobase/handler/handler0alter.cc b/storage/innobase/handler/handler0alter.cc
+index 23931bfa535..587f284b256 100644
+--- a/storage/innobase/handler/handler0alter.cc
++++ b/storage/innobase/handler/handler0alter.cc
+@@ -6137,7 +6137,8 @@ bool ha_innobase::inplace_alter_table_impl(TABLE *altered_table,
+ 
+   DEBUG_SYNC(m_user_thd, "innodb_inplace_alter_table_enter");
+ 
+-  auto all_ok = [=]() -> bool {
++  auto all_ok = [this]() -> bool {
++    (void)this;
+     DEBUG_SYNC(m_user_thd, "innodb_after_inplace_alter_table");
+     return false;
+   };
+diff --git a/storage/innobase/include/dict0mem.h b/storage/innobase/include/dict0mem.h
+index 02502a1cdae..4e093fcd905 100644
+--- a/storage/innobase/include/dict0mem.h
++++ b/storage/innobase/include/dict0mem.h
+@@ -480,8 +480,8 @@ struct dict_col_default_t {
+   /** Length of default value */
+   size_t len;
+ 
+-  bool operator==(const dict_col_default_t &other);
+-  bool operator!=(const dict_col_default_t &other);
++  bool operator==(const dict_col_default_t &other) const;
++  bool operator!=(const dict_col_default_t &other) const;
+ };
+ 
+ /** Data structure for a column in a table */
+diff --git a/storage/innobase/include/sync0rw.h b/storage/innobase/include/sync0rw.h
+index 5f61e82ab40..5c31bc92b46 100644
+--- a/storage/innobase/include/sync0rw.h
++++ b/storage/innobase/include/sync0rw.h
+@@ -40,6 +40,9 @@ this program; if not, write to the Free Software Foundation, Inc.,
+ #ifndef sync0rw_h
+ #define sync0rw_h
+ 
++#include <atomic>
++#include <cstdint>
++
+ #include "univ.i"
+ #ifndef UNIV_HOTBACKUP
+ #include "os0event.h"
+@@ -384,7 +387,20 @@ struct rw_lock_t
+   std::atomic<bool> recursive;
+ 
+   /** number of granted SX locks. */
+-  volatile ulint sx_recursive;
++  std::atomic<uint64_t> sx_recursive;
++
++  void decrement_sx_recursive() {
++    auto old_value = sx_recursive.load(std::memory_order_relaxed);
++    auto new_value = old_value - 1;
++    sx_recursive.store(new_value, std::memory_order_relaxed);
++  }
++
++  uint64_t increment_sx_recursive() {
++    auto old_value = sx_recursive.load(std::memory_order_relaxed);
++    auto new_value = old_value + 1;
++    sx_recursive.store(new_value, std::memory_order_relaxed);
++    return old_value;
++  }
+ 
+   /** Thread id of writer thread. Is only guaranteed to have non-stale value if
+   recursive flag is set, otherwise it may contain native thread ID of a
+diff --git a/storage/innobase/include/sync0rw.ic b/storage/innobase/include/sync0rw.ic
+index e695e76cd4c..229fc8502e5 100644
+--- a/storage/innobase/include/sync0rw.ic
++++ b/storage/innobase/include/sync0rw.ic
+@@ -430,7 +430,7 @@ static inline void rw_lock_sx_unlock_func(IF_DEBUG(ulint pass, )
+   ut_ad(rw_lock_get_sx_lock_count(lock));
+   ut_ad(lock->sx_recursive > 0);
+ 
+-  --lock->sx_recursive;
++  lock->decrement_sx_recursive();
+ 
+   ut_d(rw_lock_remove_debug_info(lock, pass, RW_LOCK_SX));
+ 
+diff --git a/storage/innobase/row/row0pread-adapter.cc b/storage/innobase/row/row0pread-adapter.cc
+index 59993eb8200..31e68996d93 100644
+--- a/storage/innobase/row/row0pread-adapter.cc
++++ b/storage/innobase/row/row0pread-adapter.cc
+@@ -76,7 +76,7 @@ void Parallel_reader_adapter::set(row_prebuilt_t *prebuilt) {
+   m_mysql_row.m_max_len = static_cast<ulong>(prebuilt->mysql_row_len);
+ 
+   m_parallel_reader.set_start_callback(
+-      [=](Parallel_reader::Thread_ctx *reader_thread_ctx) {
++      [this, prebuilt](Parallel_reader::Thread_ctx *reader_thread_ctx) {
+         if (reader_thread_ctx->get_state() == Parallel_reader::State::THREAD) {
+           return init(reader_thread_ctx, prebuilt);
+         } else {
+@@ -85,7 +85,7 @@ void Parallel_reader_adapter::set(row_prebuilt_t *prebuilt) {
+       });
+ 
+   m_parallel_reader.set_finish_callback(
+-      [=](Parallel_reader::Thread_ctx *reader_thread_ctx) {
++      [this](Parallel_reader::Thread_ctx *reader_thread_ctx) {
+         if (reader_thread_ctx->get_state() == Parallel_reader::State::THREAD) {
+           return end(reader_thread_ctx);
+         } else {
+diff --git a/storage/innobase/row/row0pread-histogram.cc b/storage/innobase/row/row0pread-histogram.cc
+index fe0abfc2e2a..7096cae7697 100644
+--- a/storage/innobase/row/row0pread-histogram.cc
++++ b/storage/innobase/row/row0pread-histogram.cc
+@@ -64,7 +64,7 @@ Histogram_sampler::Histogram_sampler(size_t max_threads, int sampling_seed,
+ #endif /* UNIV_DEBUG */
+ 
+   m_parallel_reader.set_start_callback(
+-      [=](Parallel_reader::Thread_ctx *thread_ctx) {
++      [this IF_DEBUG(, thd)](Parallel_reader::Thread_ctx *thread_ctx) {
+         if (thread_ctx->get_state() == Parallel_reader::State::THREAD) {
+ #ifdef UNIV_DEBUG
+           /* for debug sync calls */
+@@ -77,7 +77,7 @@ Histogram_sampler::Histogram_sampler(size_t max_threads, int sampling_seed,
+       });
+ 
+   m_parallel_reader.set_finish_callback(
+-      [=](Parallel_reader::Thread_ctx *thread_ctx) {
++      [this](Parallel_reader::Thread_ctx *thread_ctx) {
+         if (thread_ctx->get_state() == Parallel_reader::State::THREAD) {
+           return finish_callback(thread_ctx);
+         } else {
+@@ -156,7 +156,8 @@ bool Histogram_sampler::init(trx_t *trx, dict_index_t *index,
+   Parallel_reader::Config config(full_scan, index, read_level);
+ 
+   dberr_t err = m_parallel_reader.add_scan(
+-      trx, config, [=](const Parallel_reader::Ctx *ctx) {
++      trx, config,
++      [this, read_level, prebuilt](const Parallel_reader::Ctx *ctx) {
+         if (read_level == 0) {
+           return (process_leaf_rec(ctx, prebuilt));
+         } else {
+diff --git a/storage/innobase/sync/sync0rw.cc b/storage/innobase/sync/sync0rw.cc
+index d26c7915bd3..168ba32598c 100644
+--- a/storage/innobase/sync/sync0rw.cc
++++ b/storage/innobase/sync/sync0rw.cc
+@@ -517,7 +517,7 @@ bool rw_lock_sx_lock_low(rw_lock_t *lock, ulint pass, ut::Location location) {
+     /* Decrement occurred: we are the SX lock owner. */
+     rw_lock_set_writer_id_and_recursion_flag(lock, !pass);
+ 
+-    lock->sx_recursive = 1;
++    lock->sx_recursive.store(1, std::memory_order_relaxed);
+ 
+   } else {
+     /* Decrement failed: It already has an X or SX lock by this
+@@ -527,7 +527,7 @@ bool rw_lock_sx_lock_low(rw_lock_t *lock, ulint pass, ut::Location location) {
+         lock->writer_thread.load(std::memory_order_relaxed) ==
+             std::this_thread::get_id()) {
+       /* This thread owns an X or SX lock */
+-      if (lock->sx_recursive++ == 0) {
++      if (lock->increment_sx_recursive() == 0) {
+         /* This thread is making first SX-lock request
+         and it must be holding at least one X-lock here
+         because:
+diff --git a/storage/ndb/nodejs/jones-ndb/impl/include/common/AsyncMethodCall.h b/storage/ndb/nodejs/jones-ndb/impl/include/common/AsyncMethodCall.h
+index 006b82ed65a..c92a694c294 100644
+--- a/storage/ndb/nodejs/jones-ndb/impl/include/common/AsyncMethodCall.h
++++ b/storage/ndb/nodejs/jones-ndb/impl/include/common/AsyncMethodCall.h
+@@ -128,7 +128,7 @@ class AsyncCall {
+ template<typename T>
+ class ReturnValueHandler {
+ public:
+-  ReturnValueHandler<T>()                                    {}
++  ReturnValueHandler()                                       {}
+   void wrapReturnValueAs(Envelope * e)                       { assert(false); }
+   Local<Value> getJsValue(Isolate * isolate, T value) {
+     return toJS(isolate, value);
+@@ -141,7 +141,7 @@ class ReturnValueHandler<T*> {
+ private:
+   Envelope * envelope;
+ public:
+-  ReturnValueHandler<T *>() : envelope(0)                     {}
++  ReturnValueHandler() :      envelope(0)                     {}
+   void wrapReturnValueAs(Envelope * e)                        { envelope = e; }
+   Local<Value> getJsValue(Isolate * isolate, T * objPtr) {
+     return envelope->wrap(objPtr);
+@@ -158,7 +158,7 @@ class AsyncCall_Returning : public AsyncCall,
+ {
+ protected:
+   /* Protected Constructor Chain */
+-  AsyncCall_Returning<RETURN_TYPE>(Isolate * isol, Local<Function> jsCallback) :
++  AsyncCall_Returning(Isolate * isol, Local<Function> jsCallback) :
+     AsyncCall(isol, jsCallback), ReturnValueHandler<RETURN_TYPE>(), error(0)  {}
+     
+ public:
+@@ -167,15 +167,15 @@ public:
+   RETURN_TYPE return_val;
+ 
+   /* Constructors */
+-  AsyncCall_Returning<RETURN_TYPE>(Isolate * isol, Local<Value> jsCallback) :
++  AsyncCall_Returning(Isolate * isol, Local<Value> jsCallback) :
+     AsyncCall(isol, jsCallback), ReturnValueHandler<RETURN_TYPE>(), error(0)  {}
+ 
+-  AsyncCall_Returning<RETURN_TYPE>(Isolate * isol, Local<Value> jsCallback, RETURN_TYPE rv) :
++  AsyncCall_Returning(Isolate * isol, Local<Value> jsCallback, RETURN_TYPE rv) :
+     AsyncCall(isol, jsCallback), ReturnValueHandler<RETURN_TYPE>(), error(0),
+     return_val(rv)                                                          {}
+ 
+   /* Destructor */
+-  virtual ~AsyncCall_Returning<RETURN_TYPE>() override {
++  virtual ~AsyncCall_Returning() override {
+     if(error) delete error;
+   }
+ 
+@@ -219,7 +219,7 @@ public:
+   errorHandler_fn_t errorHandler;
+ 
+   /* Constructor */
+-  NativeMethodCall<R, C>(const Arguments &args, int callback_idx) :
++  NativeMethodCall(const Arguments &args, int callback_idx) :
+     AsyncCall_Returning<R>(args.GetIsolate(), args[callback_idx]),
+     errorHandler(0)
+   {
+@@ -235,9 +235,9 @@ public:
+   
+ protected:
+   /* Alternative constructor used only by AsyncAsyncCall */
+-  NativeMethodCall<R, C>(C * obj, 
+-                         Local<Function> jsCallback,
+-                         errorHandler_fn_t errHandler) :
++  NativeMethodCall(C * obj,
++                   Local<Function> jsCallback,
++                   errorHandler_fn_t errHandler) :
+     AsyncCall_Returning<R>(v8::Isolate::GetCurrent(), jsCallback),
+     native_obj(obj),
+     errorHandler(errHandler)                                {}
+@@ -252,8 +252,8 @@ public:
+   typedef NativeCodeError * (*errorHandler_fn_t)(R, C *);
+ 
+   /* Constructor */
+-  AsyncAsyncCall<R, C>(C * obj, Local<Function> jsCallback,
+-                       errorHandler_fn_t errHandler) :
++  AsyncAsyncCall(C * obj, Local<Function> jsCallback,
++                 errorHandler_fn_t errHandler) :
+     NativeMethodCall<R, C>(obj, jsCallback, errHandler)     {}
+   
+   /* Methods */
+@@ -271,7 +271,7 @@ public:
+   C * native_obj;
+   
+   /* Constructor */
+-  NativeVoidMethodCall<C>(const Arguments &args, int callback_idx) :
++  NativeVoidMethodCall(const Arguments &args, int callback_idx) :
+     AsyncCall_Returning<int>(args.GetIsolate(), args[callback_idx], 1)
+   {
+     native_obj = unwrapPointer<C *>(args.Holder());
+@@ -297,7 +297,7 @@ public:
+   JsValueConverter<A7> arg7converter;       A7 arg7;
+ 
+   /* Constructor */
+-  Call_8_<A0, A1, A2, A3, A4, A5, A6, A7>(const Arguments &args) :
++  Call_8_(const Arguments &args) :
+     arg0converter(args[0]),
+     arg1converter(args[1]),
+     arg2converter(args[2]),
+@@ -333,7 +333,7 @@ public:
+   JsValueConverter<A6> arg6converter;       A6 arg6;
+ 
+   /* Constructor */
+-  Call_7_<A0, A1, A2, A3, A4, A5, A6>(const Arguments &args) :
++  Call_7_(const Arguments &args) :
+     arg0converter(args[0]),
+     arg1converter(args[1]),
+     arg2converter(args[2]),
+@@ -366,7 +366,7 @@ public:
+   JsValueConverter<A5> arg5converter;       A5 arg5;
+ 
+   /* Constructor */
+-  Call_6_<A0, A1, A2, A3, A4, A5>(const Arguments &args) :
++  Call_6_(const Arguments &args) :
+     arg0converter(args[0]),
+     arg1converter(args[1]),
+     arg2converter(args[2]),
+@@ -395,7 +395,7 @@ public:
+   JsValueConverter<A4> arg4converter;       A4 arg4;
+ 
+   /* Constructor */
+-  Call_5_<A0, A1, A2, A3, A4>(const Arguments &args) :
++  Call_5_(const Arguments &args) :
+     arg0converter(args[0]),
+     arg1converter(args[1]),
+     arg2converter(args[2]),
+@@ -421,7 +421,7 @@ public:
+   JsValueConverter<A3> arg3converter;       A3 arg3;
+ 
+   /* Constructor */
+-  Call_4_<A0, A1, A2, A3>(const Arguments &args) :
++  Call_4_(const Arguments &args) :
+     arg0converter(args[0]),
+     arg1converter(args[1]),
+     arg2converter(args[2]),
+@@ -444,7 +444,7 @@ public:
+   JsValueConverter<A2> arg2converter;       A2 arg2;
+ 
+   /* Constructor */
+-  Call_3_<A0, A1, A2>(const Arguments &args) :
++  Call_3_(const Arguments &args) :
+     arg0converter(args[0]),
+     arg1converter(args[1]),
+     arg2converter(args[2])
+@@ -464,7 +464,7 @@ public:
+   JsValueConverter<A1> arg1converter;       A1 arg1;
+ 
+   /* Constructor */
+-  Call_2_<A0, A1>(const Arguments &args) :
++  Call_2_(const Arguments &args) :
+     arg0converter(args[0]),
+     arg1converter(args[1])
+   {
+@@ -481,7 +481,7 @@ public:
+   JsValueConverter<A0> arg0converter;       A0 arg0;
+ 
+   /* Constructor */
+-  Call_1_<A0>(const Arguments &args) :
++  Call_1_(const Arguments &args) :
+     arg0converter(args[0])
+   {
+     arg0 = arg0converter.toC();
+diff --git a/storage/ndb/nodejs/jones-ndb/impl/include/common/NativeCFunctionCall.h b/storage/ndb/nodejs/jones-ndb/impl/include/common/NativeCFunctionCall.h
+index fcf3879ab10..a12918b792c 100644
+--- a/storage/ndb/nodejs/jones-ndb/impl/include/common/NativeCFunctionCall.h
++++ b/storage/ndb/nodejs/jones-ndb/impl/include/common/NativeCFunctionCall.h
+@@ -46,7 +46,7 @@ public:
+   Function_T function;
+ 
+   /* Constructor */
+-  NativeCFunctionCall_0_<R>(Function_T f, const Arguments &args) :
++  NativeCFunctionCall_0_(Function_T f, const Arguments &args) :
+   AsyncCall_Returning<R>(args.GetIsolate(), args[0]) /*callback*/ ,
+   function(f)
+   { }
+@@ -73,7 +73,7 @@ public:
+   Function_T function;
+ 
+   /* Constructor */
+-  NativeCFunctionCall_1_<R, A0>(Function_T f, const Arguments &args) :
++  NativeCFunctionCall_1_(Function_T f, const Arguments &args) :
+     AsyncCall_Returning<R>(args.GetIsolate(), args[1]), /* callback */
+     Call_1_<A0>(args),
+     function(f)
+@@ -101,7 +101,7 @@ public:
+   Function_T function;
+ 
+   /* Constructor */
+-  NativeCFunctionCall_2_<R, A0, A1>(Function_T f, const Arguments &args) :
++  NativeCFunctionCall_2_(Function_T f, const Arguments &args) :
+     AsyncCall_Returning<R>(args.GetIsolate(), args[2]), // callback
+     Call_2_<A0, A1>(args),
+     function(f)
+@@ -132,7 +132,7 @@ public:
+   Function_T function;
+ 
+   /* Constructor */
+-  NativeCFunctionCall_3_<R, A0, A1, A2>(Function_T f, const Arguments &args) :
++  NativeCFunctionCall_3_(Function_T f, const Arguments &args) :
+     AsyncCall_Returning<R>(args.GetIsolate(), args[3]), /* callback */
+     Call_3_<A0, A1, A2>(args),
+     function(f)
+@@ -165,7 +165,7 @@ public:
+   Function_T function;
+   
+   /* Constructor */
+-  NativeCFunctionCall_4_<R, A0, A1, A2, A3>(Function_T f, const Arguments &args) :
++  NativeCFunctionCall_4_(Function_T f, const Arguments &args) :
+     AsyncCall_Returning<R>(args.GetIsolate(), args[4]),  /* callback */
+     Call_4_<A0, A1, A2, A3>(args),
+     function(f)
+@@ -199,7 +199,7 @@ public:
+   Function_T function;
+   
+   /* Constructor */
+-  NativeCFunctionCall_6_<R, A0, A1, A2, A3, A4, A5>(Function_T f, const Arguments &args) :
++  NativeCFunctionCall_6_(Function_T f, const Arguments &args) :
+     AsyncCall_Returning<R>(args.GetIsolate(), args[6]),  /* callback */
+     Call_6_<A0, A1, A2, A3, A4, A5>(args),
+     function(f)
+@@ -235,7 +235,7 @@ public:
+   Function_T function;
+   
+   /* Constructor */
+-  NativeCFunctionCall_8_<R, A0, A1, A2, A3, A4, A5, A6, A7>(Function_T f, const Arguments &args) :
++  NativeCFunctionCall_8_(Function_T f, const Arguments &args) :
+     AsyncCall_Returning<R>(args.GetIsolate(), args[8]),  /* callback */
+     Call_8_<A0, A1, A2, A3, A4, A5, A6, A7>(args),
+     function(f)
+@@ -301,7 +301,7 @@ public:
+   Function_T function;
+ 
+   /* Constructor */
+-  NativeCVoidFunctionCall_1_<A0>(Function_T f, const Arguments &args) :
++  NativeCVoidFunctionCall_1_(Function_T f, const Arguments &args) :
+     AsyncCall_Returning<int>(args.GetIsolate(), args[1], 1), // callback
+     Call_1_<A0>(args),
+     function(f)
+diff --git a/storage/ndb/nodejs/jones-ndb/impl/include/common/NativeMethodCall.h b/storage/ndb/nodejs/jones-ndb/impl/include/common/NativeMethodCall.h
+index d785b46da15..b3c8108b75f 100644
+--- a/storage/ndb/nodejs/jones-ndb/impl/include/common/NativeMethodCall.h
++++ b/storage/ndb/nodejs/jones-ndb/impl/include/common/NativeMethodCall.h
+@@ -38,7 +38,7 @@ template <typename C>
+ class NativeDestructorCall : public NativeVoidMethodCall<C> {
+ public:
+   /* Constructor */
+-  NativeDestructorCall<C>(const Arguments &args) :
++  NativeDestructorCall(const Arguments &args) :
+     NativeVoidMethodCall<C>(args, 0)
+   { }
+ 
+@@ -62,7 +62,7 @@ public:
+   Method_T method;
+   
+   /* Constructors */
+-   NativeVoidMethodCall_0_<C>(Method_T m, const Arguments &args) :
++   NativeVoidMethodCall_0_(Method_T m, const Arguments &args) :
+     NativeVoidMethodCall<C>(args, 0),
+     method(m)
+   {  } 
+@@ -87,7 +87,7 @@ public:
+   Method_T method;
+ 
+   /* Constructors */
+-  NativeMethodCall_0_<R, C>(Method_T m, const Arguments &args) :
++  NativeMethodCall_0_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 0),
+     method(m)
+   {  }
+@@ -115,7 +115,7 @@ public:
+   Method_T method;
+ 
+   /* Constructors */
+-  NativeMethodCall_1_<R, C, A0>(Method_T m, const Arguments &args) :
++  NativeMethodCall_1_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 1),
+     Call_1_<A0>(args),
+     method(m)
+@@ -145,7 +145,7 @@ public:
+   Method_T method;
+ 
+   /* Constructor */
+-  NativeVoidMethodCall_1_<C, A0>(Method_T m, const Arguments &args) :
++  NativeVoidMethodCall_1_(Method_T m, const Arguments &args) :
+     NativeVoidMethodCall<C>(args, 1),
+     Call_1_<A0>(args),
+     method(m)
+@@ -173,7 +173,7 @@ public:
+   Method_T method;
+ 
+   /* Constructor */
+-  NativeMethodCall_2_<R, C, A0, A1>(Method_T m, const Arguments &args) :
++  NativeMethodCall_2_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 2),
+     Call_2_<A0, A1>(args),
+     method(m)
+@@ -202,7 +202,7 @@ public:
+   Method_T method;
+ 
+   /* Constructor */
+-  NativeVoidMethodCall_2_<C, A0, A1>(Method_T m, const Arguments &args) :
++  NativeVoidMethodCall_2_(Method_T m, const Arguments &args) :
+     NativeVoidMethodCall<C>(args, 2),
+     Call_2_<A0, A1>(args),
+     method(m)
+@@ -231,7 +231,7 @@ public:
+   Method_T method;
+ 
+   /* Constructor */
+-  NativeMethodCall_3_<R, C, A0, A1, A2>(Method_T m, const Arguments &args) :
++  NativeMethodCall_3_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 3),
+     Call_3_<A0, A1, A2>(args),
+     method(m)
+@@ -264,7 +264,7 @@ public:
+   Method_T method;
+   
+   /* Constructor */
+-  NativeVoidMethodCall_3_<C, A0, A1, A2>(Method_T m, const Arguments &args) :
++  NativeVoidMethodCall_3_(Method_T m, const Arguments &args) :
+     NativeVoidMethodCall<C>(args, 3),
+     Call_3_<A0, A1, A2>(args),
+     method(m)
+@@ -296,7 +296,7 @@ public:
+   Method_T method;
+ 
+   /* Constructor */
+-  NativeMethodCall_4_<R, C, A0, A1, A2, A3>(Method_T m, const Arguments &args) :
++  NativeMethodCall_4_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 4),
+     Call_4_<A0, A1, A2, A3>(args),
+     method(m)
+@@ -330,7 +330,7 @@ public:
+   Method_T method;
+   
+   /* Constructor */
+-  NativeVoidMethodCall_4_<C, A0, A1, A2, A3>(Method_T m, const Arguments &args) :
++  NativeVoidMethodCall_4_(Method_T m, const Arguments &args) :
+     NativeVoidMethodCall<C>(args, 4),
+     Call_4_<A0, A1, A2, A3>(args),
+     method(m)
+@@ -363,7 +363,7 @@ public:
+   Method_T method;
+   
+   /* Constructor */
+-  NativeMethodCall_5_<R, C, A0, A1, A2, A3, A4>(Method_T m, const Arguments &args) :
++  NativeMethodCall_5_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 5),
+     Call_5_<A0, A1, A2, A3, A4>(args),
+     method(m)
+@@ -399,7 +399,7 @@ public:
+   Method_T method;
+   
+   /* Constructor */
+-  NativeMethodCall_6_<R, C, A0, A1, A2, A3, A4, A5>(Method_T m, const Arguments &args) :
++  NativeMethodCall_6_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 6),
+     Call_6_<A0, A1, A2, A3, A4, A5>(args),
+     method(m)
+@@ -436,7 +436,7 @@ public:
+   Method_T method;
+   
+   /* Constructor */
+-  NativeMethodCall_7_<R, C, A0, A1, A2, A3, A4, A5, A6>(Method_T m, const Arguments &args) :
++  NativeMethodCall_7_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 7),
+     Call_7_<A0, A1, A2, A3, A4, A5, A6>(args),
+     method(m)
+@@ -474,7 +474,7 @@ public:
+   Method_T method;
+ 
+   /* Constructor */
+-  NativeMethodCall_8_<R, C, A0, A1, A2, A3, A4, A5, A6, A7>(Method_T m, const Arguments &args) :
++  NativeMethodCall_8_(Method_T m, const Arguments &args) :
+     NativeMethodCall<C, R>(args, 8),
+     Call_8_<A0, A1, A2, A3, A4, A5, A6, A7>(args),
+     method(m)
+@@ -510,7 +510,7 @@ public:
+   Method_T method;
+   
+   /* Constructors */
+-  NativeConstMethodCall_0_<R, C>(Method_T m, const Arguments &args) :
++  NativeConstMethodCall_0_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 0),
+     method(m)
+   {  }
+@@ -537,7 +537,7 @@ public:
+   Method_T method;
+ 
+   /* Constructors */
+-  NativeConstMethodCall_1_<R, C, A0>(Method_T m, const Arguments &args) :
++  NativeConstMethodCall_1_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 1),
+     Call_1_<A0>(args),
+     method(m)
+@@ -564,7 +564,7 @@ public:
+   Method_T method;
+ 
+   /* Constructor */
+-  NativeVoidConstMethodCall_2_<C, A0, A1>(Method_T m, const Arguments &args) :
++  NativeVoidConstMethodCall_2_(Method_T m, const Arguments &args) :
+     NativeVoidMethodCall<C>(args, 2),
+     Call_2_<A0, A1>(args),
+     method(m)
+@@ -590,7 +590,7 @@ public:
+   Method_T method;
+ 
+   /* Constructor */
+-  NativeConstMethodCall_2_<R, C, A0, A1>(Method_T m, const Arguments &args) :
++  NativeConstMethodCall_2_(Method_T m, const Arguments &args) :
+     NativeMethodCall<R, C>(args, 2),
+     Call_2_<A0, A1>(args),
+     method(m)
+diff --git a/storage/ndb/nodejs/jones-ndb/impl/include/common/SharedList.h b/storage/ndb/nodejs/jones-ndb/impl/include/common/SharedList.h
+index f20cd1f4d5b..4f67250425e 100644
+--- a/storage/ndb/nodejs/jones-ndb/impl/include/common/SharedList.h
++++ b/storage/ndb/nodejs/jones-ndb/impl/include/common/SharedList.h
+@@ -48,7 +48,7 @@ private:
+ 
+ public:
+   /* Constructor */
+-  ListNode<T>(T *t) : next(0), item(t), signalinfo(0)
++  ListNode(T *t) : next(0), item(t), signalinfo(0)
+   {
+     note[0] = '\0';
+   }
+@@ -72,14 +72,14 @@ private:
+   ListNode<T> * head;
+   
+ public:
+-  SharedList<T>() : head(0)
++  SharedList() : head(0)
+   {
+     int i = uv_mutex_init(& lock);
+     assert(i == 0);
+   }
+   
+   
+-  ~SharedList<T>()
++  ~SharedList()
+   {
+     uv_mutex_destroy(& lock);
+   }
+diff --git a/storage/ndb/src/kernel/blocks/dbtup/Dbtup.hpp b/storage/ndb/src/kernel/blocks/dbtup/Dbtup.hpp
+index d74bf4640f0..6c8d89a5f50 100644
+--- a/storage/ndb/src/kernel/blocks/dbtup/Dbtup.hpp
++++ b/storage/ndb/src/kernel/blocks/dbtup/Dbtup.hpp
+@@ -3366,7 +3366,7 @@ private:
+                         Tablerec* regTabPtr);
+ 
+   void ndbmtd_buffer_suma_trigger(Signal* signal, Uint32 len,
+-                                  LinearSectionPtr ptr[]);
++                                  LinearSectionPtr ptr[3]);
+   void flush_ndbmtd_suma_buffer(Signal*);
+ 
+   struct SumaTriggerBuffer
+@@ -3965,7 +3965,7 @@ private:
+ #endif
+ 
+   void expand_tuple(KeyReqStruct*,
+-                    Uint32 sizes[4],
++                    Uint32 sizes[2],
+                     Tuple_header *org, 
+ 		    const Tablerec*,
+                     bool disk,
+diff --git a/storage/ndb/src/kernel/vm/NdbSeqLock.hpp b/storage/ndb/src/kernel/vm/NdbSeqLock.hpp
+index d26702b293b..01288234f04 100644
+--- a/storage/ndb/src/kernel/vm/NdbSeqLock.hpp
++++ b/storage/ndb/src/kernel/vm/NdbSeqLock.hpp
+@@ -23,7 +23,10 @@
+ #ifndef NDB_SEQLOCK_HPP
+ #define NDB_SEQLOCK_HPP
+ 
+-#include <ndb_types.h>
++#include <atomic>
++#include <cstdint>
++
++#include "ndb_types.h"
+ #include "portlib/mt-asm.h"
+ 
+ #define JAM_FILE_ID 251
+@@ -32,8 +35,8 @@
+ #if defined (NDB_HAVE_RMB) && defined(NDB_HAVE_WMB)
+ struct NdbSeqLock
+ {
+-  NdbSeqLock() { m_seq = 0;}
+-  volatile Uint32 m_seq;
++  std::atomic<uint32_t> m_seq = 0;
++  static_assert(decltype(m_seq)::is_always_lock_free);
+ 
+   void write_lock();
+   void write_unlock();
+@@ -46,8 +49,11 @@ inline
+ void
+ NdbSeqLock::write_lock()
+ {
+-  assert((m_seq & 1) == 0);
+-  m_seq++;
++  // atomic read not needed but since m_seq is atomic do it relaxed
++  Uint32 val = m_seq.load(std::memory_order_relaxed);
++  assert((val & 1) == 0);
++  val++;
++  m_seq.store(val, std::memory_order_relaxed);
+   wmb();
+ }
+ 
+@@ -55,9 +61,12 @@ inline
+ void
+ NdbSeqLock::write_unlock()
+ {
+-  assert((m_seq & 1) == 1);
++  // atomic read not needed but since m_seq is atomic do it relaxed
++  Uint32 val = m_seq.load(std::memory_order_relaxed);
++  assert((val & 1) == 1);
+   wmb();
+-  m_seq++;
++  val++;
++  m_seq.store(val, std::memory_order_relaxed);
+ }
+ 
+ inline
+@@ -65,7 +74,7 @@ Uint32
+ NdbSeqLock::read_lock()
+ {
+ loop:
+-  Uint32 val = m_seq;
++  Uint32 val = m_seq.load(std::memory_order_relaxed);
+   rmb();
+   if (unlikely(val & 1))
+   {
+@@ -82,7 +91,7 @@ bool
+ NdbSeqLock::read_unlock(Uint32 val) const
+ {
+   rmb();
+-  return val == m_seq;
++  return val == m_seq.load(std::memory_order_relaxed);
+ }
+ #else /** ! rmb() or wmb() */
+ /**
+diff --git a/storage/ndb/tools/restore/consumer_restore.cpp b/storage/ndb/tools/restore/consumer_restore.cpp
+index 7782fef2625..f3a57f89475 100644
+--- a/storage/ndb/tools/restore/consumer_restore.cpp
++++ b/storage/ndb/tools/restore/consumer_restore.cpp
+@@ -3676,7 +3676,7 @@ bool BackupRestore::tuple(const TupleS & tup, Uint32 fragmentId)
+ 
+   while (m_free_callback == 0)
+   {
+-    assert(m_transactions == m_parallelism);
++    assert(m_transactions.load(std::memory_order_relaxed) == m_parallelism);
+     // send-poll all transactions
+     // close transaction is done in callback
+     m_ndb->sendPollNdb(3000, 1);
+@@ -3912,7 +3912,7 @@ void BackupRestore::tuple_a(restore_callback_t *cb)
+     cb->n_bytes= n_bytes;
+     cb->connection->executeAsynchPrepare(NdbTransaction::Commit,
+ 					 &callback, cb);
+-    m_transactions++;
++    m_transactions.fetch_add(1, std::memory_order_relaxed);
+     return;
+   }
+   restoreLogger.log_error("Retried transaction %u times.\nLast error %u %s"
+@@ -3971,7 +3971,8 @@ bool BackupRestore::isMissingTable(const TableS& table)
+ void BackupRestore::cback(int result, restore_callback_t *cb)
+ {
+ #ifdef ERROR_INSERT
+-    if (m_error_insert == NDB_RESTORE_ERROR_INSERT_FAIL_RESTORE_TUPLE && m_transactions > 10)
++    if (m_error_insert == NDB_RESTORE_ERROR_INSERT_FAIL_RESTORE_TUPLE &&
++        m_transactions.load(std::memory_order_relaxed) > 10)
+     {
+       restoreLogger.log_error("Error insert NDB_RESTORE_ERROR_INSERT_FAIL_RESTORE_TUPLE");
+       m_error_insert = 0;
+@@ -3979,7 +3980,7 @@ void BackupRestore::cback(int result, restore_callback_t *cb)
+     }
+ #endif
+ 
+-  m_transactions--;
++  m_transactions.fetch_sub(1, std::memory_order_relaxed);
+ 
+   if (result < 0)
+   {
+@@ -4077,7 +4078,7 @@ BackupRestore::tuple_free()
+     return;
+ 
+   // Poll all transactions
+-  while (m_transactions)
++  while (m_transactions.load(std::memory_order_relaxed))
+   {
+     m_ndb->sendPollNdb(3000);
+   }
+@@ -4449,7 +4450,7 @@ BackupRestore::logEntry(const LogEntry &le)
+   logEntry_a(cb);
+ 
+   // Poll existing logentry transaction
+-  while (m_transactions > 0)
++  while (m_transactions.load(std::memory_order_relaxed) > 0)
+   {
+     m_ndb->sendPollNdb(3000);
+   }
+@@ -4742,13 +4743,13 @@ retry:
+ 
+   trans->executeAsynchPrepare(NdbTransaction::Commit,
+                                  &callback_logentry, cb);
+-  m_transactions++;
++  m_transactions.fetch_add(1, std::memory_order_relaxed);
+   return;
+ }
+ 
+ void BackupRestore::cback_logentry(int result, restore_callback_t *cb)
+ {
+-  m_transactions--;
++  m_transactions.fetch_sub(1, std::memory_order_relaxed);
+   const NdbError errobj = cb->connection->getNdbError();
+   m_ndb->closeTransaction(cb->connection);
+   cb->connection = NULL;
+diff --git a/storage/ndb/tools/restore/consumer_restore.hpp b/storage/ndb/tools/restore/consumer_restore.hpp
+index 582c544c3b3..b6a1078910d 100644
+--- a/storage/ndb/tools/restore/consumer_restore.hpp
++++ b/storage/ndb/tools/restore/consumer_restore.hpp
+@@ -27,6 +27,8 @@
+ 
+ #include "consumer.hpp"
+ 
++#include <atomic>
++#include <cstdint>
+ #include <functional>
+ 
+ struct restore_callback_t {
+@@ -93,7 +95,6 @@ public:
+     m_no_upgrade = false;
+     m_tableChangesMask = 0;
+     m_preserve_trailing_spaces = false;
+-    m_transactions = 0;
+     m_pk_update_warning_count = 0;
+     m_cache.m_old_table = 0;
+     m_disable_indexes = false;
+@@ -262,7 +263,8 @@ public:
+   char m_instance_name[INSTANCE_ID_LEN];
+ 
+   Uint32 m_parallelism;
+-  volatile Uint32 m_transactions;
++  std::atomic<uint32_t> m_transactions{0};
++  static_assert(decltype(m_transactions)::is_always_lock_free);
+ 
+   restore_callback_t *m_callback;
+   restore_callback_t *m_free_callback;
+diff --git a/storage/ndb/tools/restore/consumer_restorem.cpp b/storage/ndb/tools/restore/consumer_restorem.cpp
+index ede5002c17b..4337b33356b 100644
+--- a/storage/ndb/tools/restore/consumer_restorem.cpp
++++ b/storage/ndb/tools/restore/consumer_restorem.cpp
+@@ -328,7 +328,7 @@ void BackupRestore::tuple_a(restore_callback_t *cb)
+ 
+     // Prepare transaction (the transaction is NOT yet sent to NDB)
+     cb->connection->executeAsynchPrepare(Commit, &callback, cb);
+-    m_transactions++;
++    m_transactions.fetch_add(1, std::memory_order_relaxed);
+   }
+   ndbout_c("Unable to recover from errors. Exiting...");
+   asynchExitHandler();
+@@ -362,7 +362,7 @@ void BackupRestore::cback(int result, restore_callback_t *cb)
+      */
+     m_ndb->closeTransaction(cb->connection);
+     delete cb->tup;
+-    m_transactions--;
++    m_transactions.fetch_sub(1, std::memory_order_relaxed);
+   }
+ }
+ 
+@@ -457,7 +457,7 @@ BackupRestore::endOfTuples()
+   m_ndb->sendPreparedTransactions(0);
+ 
+   // Poll all transactions
+-  m_ndb->pollNdb(3000, m_transactions);
++  m_ndb->pollNdb(3000, m_transactions.load(std::memory_order_relaxed));
+ 
+   // Close all transactions
+   //  for (int i = 0; i < nPreparedTransactions; i++) 
+diff --git a/storage/perfschema/pfs_buffer_container.h b/storage/perfschema/pfs_buffer_container.h
+index 31f550db2be..ddef43cab8f 100644
+--- a/storage/perfschema/pfs_buffer_container.h
++++ b/storage/perfschema/pfs_buffer_container.h
+@@ -968,7 +968,7 @@ class PFS_buffer_scalable_iterator {
+ template <class T>
+ class PFS_buffer_processor {
+  public:
+-  virtual ~PFS_buffer_processor<T>() = default;
++  virtual ~PFS_buffer_processor() = default;
+   virtual void operator()(T *element) = 0;
+ };
+ 
+diff --git a/storage/perfschema/pfs_name.h b/storage/perfschema/pfs_name.h
+index 20fcd89fa27..e1c5d2296b2 100644
+--- a/storage/perfschema/pfs_name.h
++++ b/storage/perfschema/pfs_name.h
+@@ -46,9 +46,9 @@ class Field;
+ template <int max_length>
+ struct PFS_any_name {
+  public:
+-  PFS_any_name<max_length>() { m_length = 0; }
++  PFS_any_name() { m_length = 0; }
+ 
+-  PFS_any_name<max_length>(const PFS_any_name<max_length> &other) {
++  PFS_any_name(const PFS_any_name &other) {
+     assert(other.m_length <= max_length);
+ 
+     if (0 < other.m_length && other.m_length <= max_length) {
+diff --git a/unittest/gunit/locks/shared_spin_lock-t.cc b/unittest/gunit/locks/shared_spin_lock-t.cc
+index cee8b98d98d..782493089b2 100644
+--- a/unittest/gunit/locks/shared_spin_lock-t.cc
++++ b/unittest/gunit/locks/shared_spin_lock-t.cc
+@@ -42,8 +42,13 @@ class Shared_spin_lock_test : public ::testing::Test {
+ TEST_F(Shared_spin_lock_test, Lock_unlock_test) {
+   lock::Shared_spin_lock lock1;
+   lock::Shared_spin_lock lock2;
+-  std::atomic_flag t1_sync{true};
+-  std::atomic_flag t2_sync{true};
++  std::atomic_flag t1_sync;
++  std::atomic_flag t2_sync;
++
++  // Workaround for Visual Studio. error C2440:
++  // 'initializing': cannot convert from 'bool' to 'std::atomic_flag'
++  (void)atomic_flag_test_and_set(&t1_sync);
++  (void)atomic_flag_test_and_set(&t2_sync);
+ 
+   lock1.try_exclusive();
+   lock2.acquire_shared();
+@@ -149,7 +154,10 @@ TEST_F(Shared_spin_lock_test, Lock_unlock_test) {
+ 
+ TEST_F(Shared_spin_lock_test, Starvation_test) {
+   lock::Shared_spin_lock lock;
+-  std::atomic_flag sync{true};
++  std::atomic_flag sync;
++
++  // Workaround for Visual Studio, see above.
++  (void)atomic_flag_test_and_set(&sync);
+ 
+   lock.acquire_shared();
+   EXPECT_EQ(lock.acquire_exclusive().is_shared_acquisition(),
+@@ -193,8 +201,12 @@ TEST_F(Shared_spin_lock_test, Starvation_test) {
+ 
+ TEST_F(Shared_spin_lock_test, Sentry_class_test) {
+   lock::Shared_spin_lock lock1;
+-  std::atomic_flag t1_sync{true};
+-  std::atomic_flag t2_sync{true};
++  std::atomic_flag t1_sync;
++  std::atomic_flag t2_sync;
++
++  // Workaround for Visual Studio, see above.
++  (void)atomic_flag_test_and_set(&t1_sync);
++  (void)atomic_flag_test_and_set(&t2_sync);
+ 
+   std::thread t1([&]() -> void {
+     lock::Shared_spin_lock::Guard sentry1{
+diff --git a/unittest/gunit/partitioned_rwlock-t.cc b/unittest/gunit/partitioned_rwlock-t.cc
+index 58970cffaba..7e7d073f07c 100644
+--- a/unittest/gunit/partitioned_rwlock-t.cc
++++ b/unittest/gunit/partitioned_rwlock-t.cc
+@@ -22,6 +22,8 @@
+ 
+ /* Simple unit tests for thread id partitioned rwlocks. */
+ 
++#include <atomic>
++
+ #include <gtest/gtest.h>
+ #include <sys/types.h>
+ 
+@@ -57,7 +59,7 @@ TEST(PartitionedRwlock, InitDestroy) {
+ class Reader_thread : public Thread {
+  public:
+   void init(uint thread_id, Partitioned_rwlock *rwlock,
+-            volatile uint *shared_counter) {
++            std::atomic<uint> *shared_counter) {
+     m_thread_id = thread_id;
+     m_rwlock = rwlock;
+     m_shared_counter = shared_counter;
+@@ -76,12 +78,12 @@ class Reader_thread : public Thread {
+  private:
+   uint m_thread_id;
+   Partitioned_rwlock *m_rwlock;
+-  volatile uint *m_shared_counter;
++  std::atomic<uint> *m_shared_counter;
+ };
+ 
+ class Writer_thread : public Thread {
+  public:
+-  Writer_thread(Partitioned_rwlock *rwlock, volatile uint *shared_counter)
++  Writer_thread(Partitioned_rwlock *rwlock, std::atomic<uint> *shared_counter)
+       : m_rwlock(rwlock), m_shared_counter(shared_counter) {}
+   void run() override {
+     for (uint i = 0; i < 1000; ++i) {
+@@ -98,7 +100,7 @@ class Writer_thread : public Thread {
+ 
+  private:
+   Partitioned_rwlock *m_rwlock;
+-  volatile uint *m_shared_counter;
++  std::atomic<uint> *m_shared_counter;
+ };
+ 
+ /**
+@@ -110,7 +112,7 @@ TEST(PartitionedRwlock, Concurrent) {
+   const uint PARTS_NUM = 32;
+ 
+   Partitioned_rwlock rwlock;
+-  volatile uint shared_counter = 0;
++  std::atomic<uint> shared_counter = 0;
+   rwlock.init(PARTS_NUM
+ #ifdef HAVE_PSI_INTERFACE
+               ,
+diff --git a/unittest/gunit/strings_strnxfrm-t.cc b/unittest/gunit/strings_strnxfrm-t.cc
+index e5adfe67f41..f99ab79e514 100644
+--- a/unittest/gunit/strings_strnxfrm-t.cc
++++ b/unittest/gunit/strings_strnxfrm-t.cc
+@@ -118,6 +118,18 @@ int compare_through_strxfrm(CHARSET_INFO *cs, const char *a, const char *b) {
+   }
+ }
+ 
++#if defined(__cpp_char8_t) && __cpp_char8_t
++int compare_through_strxfrm(CHARSET_INFO *cs, const char *a, const char8_t *b) {
++  return compare_through_strxfrm(cs, a, pointer_cast<const char *>(b));
++}
++
++int compare_through_strxfrm(CHARSET_INFO *cs, const char8_t *a,
++                            const char8_t *b) {
++  return compare_through_strxfrm(cs, pointer_cast<const char *>(a),
++                                 pointer_cast<const char *>(b));
++}
++#endif
++
+ }  // namespace
+ 
+ #if !defined(NDEBUG)
+@@ -2254,6 +2266,12 @@ uint64 hash(CHARSET_INFO *cs, const char *str) {
+   return nr1;
+ }
+ 
++#if defined(__cpp_char8_t) && __cpp_char8_t
++uint64 hash(CHARSET_INFO *cs, const char8_t *str) {
++  return hash(cs, pointer_cast<const char *>(str));
++}
++#endif
++
+ /*
+   NOTE: In this entire test, there's an infinitesimal chance
+   that something that we expect doesn't match, still matches
+diff --git a/unittest/gunit/strings_utf8-t.cc b/unittest/gunit/strings_utf8-t.cc
+index 873ee9f25b7..33215b60ae4 100644
+--- a/unittest/gunit/strings_utf8-t.cc
++++ b/unittest/gunit/strings_utf8-t.cc
+@@ -574,6 +574,18 @@ class StringsUTF8mb4_900Test : public ::testing::Test {
+                pointer_cast<const uchar *>(b), strlen(b)) == 0;
+   }
+ 
++#if defined(__cpp_char8_t) && __cpp_char8_t
++  bool equals(const char *a, const char8_t *b) {
++    return equals(a, pointer_cast<const char *>(b));
++  }
++  bool equals(const char8_t *a, const char *b) {
++    return equals(pointer_cast<const char *>(a), b);
++  }
++  bool equals(const char8_t *a, const char8_t *b) {
++    return equals(pointer_cast<const char *>(a), pointer_cast<const char *>(b));
++  }
++#endif
++
+  private:
+   CHARSET_INFO *m_charset;
+ };
+@@ -664,6 +676,13 @@ static bool uca_wildcmp(const CHARSET_INFO *cs, const char *str,
+                             '%');
+ }
+ 
++#if defined(__cpp_char8_t) && __cpp_char8_t
++static bool uca_wildcmp(const CHARSET_INFO *cs, const char *str,
++                        const char8_t *pattern) {
++  return uca_wildcmp(cs, str, pointer_cast<const char *>(pattern));
++}
++#endif
++
+ TEST(UCAWildCmpTest, UCA900WildCmp) {
+   CHARSET_INFO *cs = get_charset_by_name("utf8mb4_0900_ai_ci", MYF(0));
+ 
+@@ -766,6 +785,15 @@ static bool test_well_formed_copy_nchars(const CHARSET_INFO *to_cs,
+   return well_formed;
+ }
+ 
++#if defined(__cpp_char8_t) && __cpp_char8_t
++static bool test_well_formed_copy_nchars(const CHARSET_INFO *to_cs,
++                                         const CHARSET_INFO *from_cs,
++                                         const char8_t *input_str) {
++  return test_well_formed_copy_nchars(to_cs, from_cs,
++                                      pointer_cast<const char *>(input_str));
++}
++#endif
++
+ TEST(WellFormedCopy, TooLongWellFormed) {
+   EXPECT_TRUE(test_well_formed_copy_nchars(
+       &my_charset_utf8mb4_0900_ai_ci, &my_charset_utf8mb4_0900_ai_ci,
