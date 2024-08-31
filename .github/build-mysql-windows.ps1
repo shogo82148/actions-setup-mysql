@@ -61,7 +61,7 @@ Write-Host "::endgroup::"
 if ( $MYSQL_VERSION -match '^([1-9][0-9][.]|[89][.])') # MySQL 8.0 or later
 {
     $OPENSSL_VERSION = $OPENSSL_VERSION3
-    Write-Host "::group::fetch OpenSSL source"
+    Write-Host "::group::fetch OpenSSL 3 source"
     Set-Location "$RUNNER_TEMP"
     Write-Host "Downloading zip archive..."
     Invoke-WebRequest "https://github.com/openssl/openssl/archive/openssl-$OPENSSL_VERSION.zip" -OutFile "openssl.zip"
@@ -70,7 +70,7 @@ if ( $MYSQL_VERSION -match '^([1-9][0-9][.]|[89][.])') # MySQL 8.0 or later
     Remove-Item -Path "openssl.zip"
     Write-Host "::endgroup::"
 
-    Write-Host "::group::build OpenSSL"
+    Write-Host "::group::build OpenSSL 3"
     Set-Location "$RUNNER_TEMP"
     Set-Location "openssl-openssl-$OPENSSL_VERSION"
 
@@ -86,7 +86,7 @@ if ( $MYSQL_VERSION -match '^([1-9][0-9][.]|[89][.])') # MySQL 8.0 or later
     Write-Host "::endgroup::"
 } else {
     $OPENSSL_VERSION = $OPENSSL_VERSION1_1_1
-    Write-Host "::group::fetch OpenSSL source"
+    Write-Host "::group::fetch OpenSSL 1.1 source"
     Set-Location "$RUNNER_TEMP"
     Write-Host "Downloading zip archive..."
     Invoke-WebRequest "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.zip" -OutFile "openssl.zip"
@@ -95,7 +95,7 @@ if ( $MYSQL_VERSION -match '^([1-9][0-9][.]|[89][.])') # MySQL 8.0 or later
     Remove-Item -Path "openssl.zip"
     Write-Host "::endgroup::"
 
-    Write-Host "::group::build OpenSSL"
+    Write-Host "::group::build OpenSSL 1.1"
     Set-Location "$RUNNER_TEMP"
     Set-Location "openssl-OpenSSL_$OPENSSL_VERSION"
 
@@ -166,7 +166,7 @@ New-Item "boost" -ItemType Directory -Force
 $BOOST = Join-Path $RUNNER_TEMP "boost"
 New-Item "build" -ItemType Directory -Force
 Set-Location build
-if ( $MYSQL_VERSION -match '^([1-9][0-9][.]|9[.])' ) # MySQL 8.0 or later
+if ( $MYSQL_VERSION -match '^([1-9][0-9][.]|9[.])' ) # MySQL 9.0 or later
 {
     cmake ( Join-Path $RUNNER_TEMP "mysql-server-mysql-$MYSQL_VERSION" ) `
         -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" `
