@@ -39,10 +39,10 @@ Write-Host "::endgroup::"
 
 
 # system SSL/TLS library is too old. so we use custom build.
-if ( $MARIADB_VERSION -match '^[1-9][0-9][.]([89]|1[0-9]+)[.]') # # MariaDB 10.8 or later
+if ( $MARIADB_VERSION -match '^10\.([89]|[1-9][0-9]+)\.|^1[1-9]\.' ) # # MariaDB 10.8 or later
 {
     $OPENSSL_VERSION = $OPENSSL_VERSION3
-    Write-Host "::group::fetch OpenSSL source"
+    Write-Host "::group::fetch OpenSSL 3 source"
     Set-Location "$RUNNER_TEMP"
     Write-Host "Downloading zip archive..."
     Invoke-WebRequest "https://github.com/openssl/openssl/archive/openssl-$OPENSSL_VERSION.zip" -OutFile "openssl.zip"
@@ -67,7 +67,7 @@ if ( $MARIADB_VERSION -match '^[1-9][0-9][.]([89]|1[0-9]+)[.]') # # MariaDB 10.8
     Write-Host "::endgroup::"
 } else {
     $OPENSSL_VERSION = $OPENSSL_VERSION1_1_1
-    Write-Host "::group::fetch OpenSSL source"
+    Write-Host "::group::fetch OpenSSL 1.1 source"
     Set-Location "$RUNNER_TEMP"
     Write-Host "Downloading zip archive..."
     Invoke-WebRequest "https://github.com/openssl/openssl/archive/OpenSSL_$OPENSSL_VERSION.zip" -OutFile "openssl.zip"

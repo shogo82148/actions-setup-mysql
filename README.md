@@ -40,6 +40,7 @@ Available Versions are:
   - `5.7`
   - `5.6`
 - MariaDB
+  - `11.6`
   - `11.5`
   - `11.4`
   - `11.3`
@@ -150,7 +151,7 @@ Here are some examples:
 
 - name: configure the root certificate for connecting via SSL/TLS.
   run: mysql -uroot \
-    --ssl --ssl-mode=--ssl-mode=REQUIRED \
+    --ssl --ssl-mode=REQUIRED \
     --ssl-ca=${{ steps.setup-mysql.outputs.base-dir }}/var/ca.pem \
     -e 'SELECT version()'
 ```

@@ -9,8 +9,7 @@ our @EXPORT_OK = qw(run detect_version);
 
 use Carp qw/croak/;
 
-sub run {
-    my @args = @_;
+sub run(@args) {
     my $pid = open3(my $in, my $out, 0, @args);
     close($in);
     my $result = do { local $/; <$out> };
@@ -23,10 +22,9 @@ sub run {
     return $result;
 }
 
-sub detect_version {
-    my ($user, $password) = @_;
+sub detect_version($user, $password) {
     local $ENV{MYSQL_PWD} = $password;
-    my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '-e', 'SELECT VERSION()');
+    my $version = _select_version($user);
     if ($version =~ /([0-9.]*)-MariaDB/i) {
         return $1, 'mariadb';
     }
@@ -34,4 +32,22 @@ sub detect_version {
         return $1, 'mysql';
     }
     croak "unknown distribution: $version";
+}
+
+sub _select_version($user) {
+    try {
+        # MariaDB 11.4 and later require `--skip-ssl` option
+        my $version = run('mariadb', '--host=127.0.0.1', "--user=$user", '--skip-ssl', '-e', 'SELECT VERSION()');
+        return $version;
+    } catch($e) {
+        # ignore
+    }
+
+    try {
+        my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '-e', 'SELECT VERSION()');
+        return $version;
+    } catch($e) {
+        # ignore
+    }
+    die 'failed to detect the server version';
 }

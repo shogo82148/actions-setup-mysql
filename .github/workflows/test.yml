@@ -51,6 +51,7 @@ jobs:
           - "8.0"
           - "5.7"
           - "5.6"
+          - "mariadb-11.6"
           - "mariadb-11.5"
           - "mariadb-11.4"
           - "mariadb-11.3"
@@ -93,9 +94,6 @@ jobs:
           root-password: very-very-secret
           user: my
           password: secret
-      - name: ping
-        run: |
-          mysqladmin -u root --password=very-very-secret ping
       - name: test
         run: |
           prove -v t

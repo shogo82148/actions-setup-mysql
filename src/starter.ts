@@ -193,12 +193,22 @@ export async function startMySQL(
     try {
       await core.group("configure root password", async () => {
         await retry(async () => {
-          await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
-            `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
-            `--user=root`,
-            `password`,
-            rootPassword,
-          ]);
+          if (fs.existsSync(path.join(mysql.toolPath, "bin", `mariadb-admin${binExt}`))) {
+            await execute(path.join(mysql.toolPath, "bin", `mariadb-admin${binExt}`), [
+              `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+              `--skip-ssl`,
+              `--user=root`,
+              `password`,
+              rootPassword,
+            ]);
+          } else {
+            await execute(path.join(mysql.toolPath, "bin", `mysqladmin${binExt}`), [
+              `--defaults-file=${baseDir}${sep}etc${sep}my.cnf`,
+              `--user=root`,
+              `password`,
+              rootPassword,
+            ]);
+          }
         });
       });
     } catch (error) {
@@ -232,30 +242,62 @@ export async function startMySQL(
 }
 
 export async function createUser(state: MySQLState, user: string, password: string): Promise<void> {
-  const mysql = path.join(state.toolPath, "bin", `mysql${binExt}`);
-  const env: { [key: string]: string } = {};
-  const args = [`--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`, `--user=root`];
-  if (state.rootPassword) {
-    env["MYSQL_PWD"] = state.rootPassword;
-  }
-  if (core.isDebug()) {
-    env["MYSQL_DEBUG"] = "1";
-  }
-  for (const host of ["localhost", "127.0.0.1", "::1"]) {
-    await execute(
-      mysql,
-      [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
-      {
-        env,
-      },
-    );
-    await execute(
-      mysql,
-      [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
-      {
-        env,
-      },
-    );
+  if (fs.existsSync(path.join(state.toolPath, "bin", `mariadb${binExt}`))) {
+    const mariadb = path.join(state.toolPath, "bin", `mariadb${binExt}`);
+    const env: Record<string, string> = {};
+    const args = [
+      `--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`,
+      `--skip-ssl`,
+      `--user=root`,
+    ];
+    if (state.rootPassword) {
+      env["MYSQL_PWD"] = state.rootPassword;
+    }
+    if (core.isDebug()) {
+      env["MYSQL_DEBUG"] = "1";
+    }
+    for (const host of ["localhost", "127.0.0.1", "::1"]) {
+      await execute(
+        mariadb,
+        [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
+        {
+          env,
+        },
+      );
+      await execute(
+        mariadb,
+        [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
+        {
+          env,
+        },
+      );
+    }
+  } else {
+    const mysql = path.join(state.toolPath, "bin", `mysql${binExt}`);
+    const env: Record<string, string> = {};
+    const args = [`--defaults-file=${state.baseDir}${sep}etc${sep}my.cnf`, `--user=root`];
+    if (state.rootPassword) {
+      env["MYSQL_PWD"] = state.rootPassword;
+    }
+    if (core.isDebug()) {
+      env["MYSQL_DEBUG"] = "1";
+    }
+    for (const host of ["localhost", "127.0.0.1", "::1"]) {
+      await execute(
+        mysql,
+        [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
+        {
+          env,
+        },
+      );
+      await execute(
+        mysql,
+        [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
+        {
+          env,
+        },
+      );
+    }
   }
 }
 
@@ -280,7 +322,7 @@ async function verboseHelp(mysql: installer.MySQL): Promise<string> {
       options,
     );
   } catch (e) {
-    core.error("fail to get mysqld options");
+    core.error(`fail to get mysqld options: ${e}`);
     core.error(myOutput);
     return "";
   }
@@ -297,6 +339,9 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
 
   process.env["LD_LIBRARY_PATH"] = `${mysql.toolPath}${sep}lib`;
   process.env["DYLD_LIBRARY_PATH"] = `${mysql.toolPath}${sep}lib`;
+
+  // show the version of openssl
+  await exec.exec(openssl, ["version"], options);
 
   // Generate CA Key and Certificate
   await exec.exec(
@@ -346,7 +391,7 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
     "-keyout",
     `${datadir}${sep}server-key.pem`,
     "-subj",
-    "/CN=Actions_Setup_MySQL_Auto_Generated_Certificate",
+    "/CN=127.0.0.1",
     "-out",
     `${datadir}${sep}server-req.pem`,
   ]);
@@ -371,6 +416,8 @@ async function setupTls(mysql: installer.MySQL, baseDir: string): Promise<void> 
       `${datadir}${sep}ca-key.pem`,
       "-set_serial",
       "01",
+      "-extfile",
+      `${__dirname}${sep}..${sep}subjectnames.txt`,
       "-out",
       `${datadir}${sep}server-cert.pem`,
     ],
