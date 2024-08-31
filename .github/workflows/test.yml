@@ -94,10 +94,6 @@ jobs:
           root-password: very-very-secret
           user: my
           password: secret
-      - uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.os }}-${{ matrix.mysql }}
-          path: ${{ steps.action.outputs.base-dir }}/var/server-cert.pem
       - name: test
         run: |
           prove -v t
