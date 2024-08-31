@@ -40,13 +40,14 @@ sub _select_version($user) {
         my $version = run('mariadb', '--host=127.0.0.1', "--user=$user", '--skip-ssl', '-e', 'SELECT VERSION()');
         return $version;
     } catch($e) {
-        say STDERR "Warn: $e";
+        # ignore
     }
 
     try {
         my $version = run('mysql', '--host=127.0.0.1', "--user=$user", '-e', 'SELECT VERSION()');
         return $version;
     } catch($e) {
-        say STDERR "Warn: $e";
+        # ignore
     }
+    die 'failed to detect the server version';
 }
