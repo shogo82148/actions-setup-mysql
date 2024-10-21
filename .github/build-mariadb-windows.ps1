@@ -110,7 +110,7 @@ Write-Host "Untar..."
 tar zxvf mariadb-src.tar.gz
 Remove-Item -Path "mariadb-src.tar.gz"
 if (Test-Path ( Join-Path $ROOT .. "patches" "mariadb" $MARIADB_VERSION )) {
-    Set-Location "mariadb-$MARIADB_VERSION"
+    Set-Location "server-mariadb-$MARIADB_VERSION"
     Get-Content ( Join-Path $ROOT .. "patches" "mariadb" $MARIADB_VERSION *.patch ) | patch -s -f -p1
 }
 Write-Host "::endgroup::"
@@ -122,7 +122,7 @@ New-Item "boost" -ItemType Directory -Force
 $BOOST = Join-Path $RUNNER_TEMP "boost"
 New-Item "build" -ItemType Directory -Force
 Set-Location build
-cmake ( Join-Path $RUNNER_TEMP "mariadb-$MARIADB_VERSION" ) `
+cmake ( Join-Path $RUNNER_TEMP "server-mariadb-$MARIADB_VERSION" ) `
     -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" `
     -DDOWNLOAD_BOOST=1 -DWITH_BOOST="$BOOST" `
     -DWITH_ROCKSDB_LZ4=OFF -DWITH_ROCKSDB_BZip2=OFF -DWITH_ROCKSDB_Snappy=OFF -DWITH_ROCKSDB_ZSTD=OFF `
