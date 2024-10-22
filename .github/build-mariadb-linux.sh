@@ -138,7 +138,7 @@ echo "::group::download MariaDB source"
 (
     set -eux
     cd "$RUNNER_TEMP"
-    curl --retry 3 -sSL "https://github.com/MariaDB/server/archive/refs/tags/mariadb-$MARIADB_VERSION.tar.gz" -o mariadb-src.tar.gz
+    curl --retry 3 -sSL "https://downloads.mariadb.org/rest-api/mariadb/$MARIADB_VERSION/mariadb-$MARIADB_VERSION.tar.gz" -o mariadb-src.tar.gz
 )
 echo "::endgroup::"
 
@@ -151,7 +151,7 @@ echo "::group::extract MariaDB source"
     # apply patches
     if [[ -d "$ROOT/../patches/mariadb/$MARIADB_VERSION" ]]
     then
-        cd "server-mariadb-$MARIADB_VERSION"
+        cd "mariadb-$MARIADB_VERSION"
         cat "$ROOT/../patches/mariadb/$MARIADB_VERSION"/*.patch | patch -s -f -p1
     fi
 )
@@ -163,7 +163,7 @@ echo "::group::build MariaDB"
     cd "$RUNNER_TEMP"
     mkdir build
     cd build
-    cmake "../server-mariadb-$MARIADB_VERSION" \
+    cmake "../mariadb-$MARIADB_VERSION" \
         -DCOMPILATION_COMMENT="shogo82148/actions-setup-mysql@v$ACTION_VERSION" \
         -DDOWNLOAD_BOOST=1 -DWITH_BOOST=../boost \
         -DWITH_ROCKSDB_LZ4=OFF -DWITH_ROCKSDB_BZip2=OFF -DWITH_ROCKSDB_Snappy=OFF -DWITH_ROCKSDB_ZSTD=OFF \
