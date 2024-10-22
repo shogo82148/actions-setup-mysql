@@ -105,7 +105,7 @@ New-Item "$RUNNER_TEMP" -ItemType Directory -Force
 Write-Host "::group::fetch MariaDB source"
 Set-Location "$RUNNER_TEMP"
 Write-Host "Downloading zip archive..."
-Invoke-WebRequest "https://downloads.mariadb.com/MariaDB/mariadb-$MARIADB_VERSION/source/mariadb-$MARIADB_VERSION.tar.gz" -OutFile "mariadb-src.tar.gz"
+Invoke-WebRequest "https://downloads.mariadb.org/rest-api/mariadb/$MARIADB_VERSION/mariadb-$MARIADB_VERSION.tar.gz" -OutFile "mariadb-src.tar.gz"
 Write-Host "Untar..."
 tar zxvf mariadb-src.tar.gz
 Remove-Item -Path "mariadb-src.tar.gz"
