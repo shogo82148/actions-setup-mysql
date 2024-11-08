@@ -75,6 +75,11 @@ export async function startMySQL(
   config["client"]["port"] = config["mysqld"]["port"];
   config["client"]["host"] = "127.0.0.1";
   config["client"]["socket"] = config["mysqld"]["socket"];
+  // MariaDB 11.4 enables ssl-verify-server-cert by default.
+  // But our server cert and ca cert cause verify error when ssl-verify-server-cert or ssl-mode=VERIFY_CA.
+  // We need to disable server cert verification until we fix our CA & server certs.
+  config["client-mariadb"] ||= {};
+  config["client-mariadb"]["ssl-verify-server-cert"] = "0";
 
   await core.group("setup MySQL Database", async () => {
     core.info(`creating the directory structure on ${baseDir}`);
