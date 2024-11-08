@@ -13,7 +13,7 @@ if ($distribution eq 'mysql') {
   $command = 'mysql';
 } elsif ($distribution eq 'mariadb') {
   $command = qv($version) lt "10.5.0" ? 'mysql' : 'mariadb';
-  @options = ('--skip-ssl');
+  # @options = ('--skip-ssl');
 }
 
 local $ENV{MYSQL_PWD} = 'very-very-secret';

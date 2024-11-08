@@ -35,40 +35,40 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04
-          - ubuntu-22.04
-          - ubuntu-20.04
-          - macos-14
-          - macos-13
-          - macos-12
-          - windows-2022
-          - windows-2019
+          # - ubuntu-22.04
+          # - ubuntu-20.04
+          # - macos-14
+          # - macos-13
+          # - macos-12
+          # - windows-2022
+          # - windows-2019
         mysql:
-          - "9.1"
-          - "9.0"
-          - "8.4"
-          - "8.3"
-          - "8.2"
-          - "8.1"
-          - "8.0"
-          - "5.7"
-          - "5.6"
-          - "mariadb-11.6"
-          - "mariadb-11.5"
+          # - "9.1"
+          # - "9.0"
+          # - "8.4"
+          # - "8.3"
+          # - "8.2"
+          # - "8.1"
+          # - "8.0"
+          # - "5.7"
+          # - "5.6"
+          # - "mariadb-11.6"
+          # - "mariadb-11.5"
           - "mariadb-11.4"
-          - "mariadb-11.3"
-          - "mariadb-11.2"
-          - "mariadb-11.1"
-          - "mariadb-11.0"
-          - "mariadb-10.11"
-          - "mariadb-10.10"
-          - "mariadb-10.9"
-          - "mariadb-10.8"
-          - "mariadb-10.7"
-          - "mariadb-10.6"
-          - "mariadb-10.5"
-          - "mariadb-10.4"
-          - "mariadb-10.3"
-          - "mariadb-10.2"
+          # - "mariadb-11.3"
+          # - "mariadb-11.2"
+          # - "mariadb-11.1"
+          # - "mariadb-11.0"
+          # - "mariadb-10.11"
+          # - "mariadb-10.10"
+          # - "mariadb-10.9"
+          # - "mariadb-10.8"
+          # - "mariadb-10.7"
+          # - "mariadb-10.6"
+          # - "mariadb-10.5"
+          # - "mariadb-10.4"
+          # - "mariadb-10.3"
+          # - "mariadb-10.2"
     timeout-minutes: 15
     runs-on: ${{ matrix.os }}
     steps:

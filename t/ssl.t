@@ -25,12 +25,12 @@ if ($distribution eq 'mysql') {
     $command = qv($version) lt "10.5.0" ? 'mysql' : 'mariadb';
     @ssl_options = ('--ssl');
 
-    if (qv($version) ge "11.4.0") {
-        # I can't why, but MariaDB 11.4.0 fails
-        # to connect with `--ssl-verify-server-cert` option.
-        # So, I need to disable it.
-        @ssl_options = ('--ssl', '--disable-ssl-verify-server-cert');
-    }
+    # if (qv($version) ge "11.4.0") {
+    #     # I can't why, but MariaDB 11.4.0 fails
+    #     # to connect with `--ssl-verify-server-cert` option.
+    #     # So, I need to disable it.
+    #     @ssl_options = ('--ssl', '--disable-ssl-verify-server-cert');
+    # }
 }
 
 subtest 'connect 127.0.0.1' => sub {
