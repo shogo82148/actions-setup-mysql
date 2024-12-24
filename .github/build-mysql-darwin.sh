@@ -24,17 +24,6 @@ esac
 PREFIX=$RUNNER_TOOL_CACHE/mysql/$MYSQL_VERSION/$MYSQL_ARCH
 export LDFLAGS=-Wl,-rpath,$PREFIX/lib
 
-if [[ "$MYSQL_VERSION" =~ ^([1-9][0-9][.]|9[.]|8[.]4[.]) ]]; then # MySQL 8.4 or later
-    # install LLVM
-    brew install llvm@17
-    LLVM_PATH=$(brew --prefix llvm@17)
-    export PATH="$LLVM_PATH/bin:$PATH"
-    export LDFLAGS="$LDFLAGS -L$LLVM_PATH/lib"
-    export CPPFLAGS="$CPPFLAGS -I$LLVM_PATH/include"
-    export CC=$LLVM_PATH/bin/clang
-    export CXX=$LLVM_PATH/bin/clang++
-fi
-
 # detect the number of CPU Core
 JOBS=$(sysctl -n hw.logicalcpu_max)
 
