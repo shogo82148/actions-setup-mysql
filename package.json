@@ -28,7 +28,7 @@
   "license": "MIT",
   "dependencies": {
     "@actions/core": "^1.11.1",
-    "@actions/tool-cache": "^2.0.1",
+    "@actions/tool-cache": "^2.0.2",
     "semver": "^7.6.3"
   },
   "devDependencies": {
