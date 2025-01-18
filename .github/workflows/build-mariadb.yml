@@ -31,7 +31,7 @@ jobs:
             export MARIADB_VERSIONS
           fi
           {
-            echo "matrix-linux=$(printenv MARIADB_VERSIONS | jq -c '{mariadb: . , os: ["ubuntu-20.04", "ubuntu-22.04", "ubuntu-24.04"]}')"
+            echo "matrix-linux=$(printenv MYSQL_VERSIONS | jq -c '{mysql: . , os: ["ubuntu-24.04", "ubuntu-22.04", "ubuntu-20.04", "ubuntu-24.04-arm", "ubuntu-22.04-arm"]}')"
             echo "matrix-darwin=$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
             echo "matrix-windows=$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
           } >> "$GITHUB_OUTPUT"
@@ -59,8 +59,20 @@ jobs:
         shell: bash
         run: |
           ACTIONS_VERSION=v$(< "$GITHUB_WORKSPACE/package.json" jq -r .version)
-          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-$BUILD_OS-x64.tar.zstd"
-          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-$BUILD_OS-x64.tar.zstd"
+          case "$(uname -m)" in
+              "x86_64")
+                  MARIADB_ARCH="x64"
+                  ;;
+              "arm64" | "aarch64")
+                  MARIADB_ARCH="arm64"
+                  ;;
+              *)
+                  echo "unsupported architecture: $(uname -m)"
+                  exit 1
+                  ;;
+          esac
+          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-$BUILD_OS-$MARIADB_ARCH.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-$BUILD_OS-$MARIADB_ARCH.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - uses: actions/attest-build-provenance@v2
