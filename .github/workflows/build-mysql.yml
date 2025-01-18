@@ -72,8 +72,8 @@ jobs:
                   exit 1
                   ;;
           esac
-          mv "$RUNNER_TEMP/mysql.tar.zstd" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-$BUILD_OS-$MYSQL_ARCH.tar.zstd"
-          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-$BUILD_OS-$MYSQL_ARCH.tar.zstd"
+          mv "$RUNNER_TEMP/mysql.tar.zstd" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-${BUILD_OS%-arm}-$MYSQL_ARCH.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-${BUILD_OS%-arm}-$MYSQL_ARCH.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - uses: actions/attest-build-provenance@v2

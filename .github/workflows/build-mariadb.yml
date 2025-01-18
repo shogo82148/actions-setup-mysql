@@ -71,8 +71,8 @@ jobs:
                   exit 1
                   ;;
           esac
-          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-$BUILD_OS-$MARIADB_ARCH.tar.zstd"
-          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-$BUILD_OS-$MARIADB_ARCH.tar.zstd"
+          mv "$RUNNER_TEMP/mariadb.tar.zstd" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-${BUILD_OS%-arm}-$MARIADB_ARCH.tar.zstd"
+          gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-${BUILD_OS%-arm}-$MARIADB_ARCH.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
       - uses: actions/attest-build-provenance@v2
