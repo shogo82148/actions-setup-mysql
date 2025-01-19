@@ -13,7 +13,7 @@ case "$(uname -m)" in
     "x86_64")
         MYSQL_ARCH="x64"
         ;;
-    "arm64")
+    "arm64" | "aarch64")
         MYSQL_ARCH="arm64"
         ;;
     *)
