@@ -9,11 +9,11 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - name: update
         run: |
           ./.github/update-dependencies.sh
         env:
           GH_TOKEN: ${{ github.token }}
       - name: commit and create a pull request
-        uses: shogo82148/actions-commit-and-create-pr@v1
+        uses: shogo82148/actions-commit-and-create-pr@b1322fe9da4037e9720e34ea221997cffcd3498d # v1.1.4
