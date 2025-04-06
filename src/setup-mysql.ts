@@ -4,6 +4,7 @@ import * as starter from "./starter";
 
 async function run(): Promise<void> {
   try {
+    const githubToken = core.getInput("github-token");
     const version = core.getInput("mysql-version");
     const distribution = core.getInput("distribution");
     const autoStart = core.getBooleanInput("auto-start");
@@ -13,7 +14,7 @@ async function run(): Promise<void> {
     const password = core.getInput("password");
 
     const mysql = await core.group("install MySQL", async () => {
-      return installer.getMySQL(distribution, version);
+      return installer.getMySQL(distribution, version, githubToken);
     });
 
     if (autoStart) {

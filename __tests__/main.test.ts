@@ -2,6 +2,7 @@ import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
 
+const githubToken = process.env["GITHUB_TOKEN"] || "";
 const toolDir = path.join(__dirname, "runner", "tools");
 const tempDir = path.join(__dirname, "runner", "temp");
 
@@ -27,7 +28,7 @@ describe("installer tests", () => {
   }, 100000);
 
   it("Acquires version of MySQL if no matching version is installed", async () => {
-    await installer.getMySQL("mysql", "5.6");
+    await installer.getMySQL("mysql", "5.6", githubToken);
     const mysqlDir = path.join(toolDir, "mysql", "5.6.51", os.arch());
 
     expect(fs.existsSync(`${mysqlDir}.complete`)).toBe(true);

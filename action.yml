@@ -2,6 +2,9 @@ name: "actions-setup-mysql"
 description: "Setup MySQL and MariaDB GitHub Action"
 author: "Ichinose, Shogo"
 inputs:
+  github-token:
+    description: "the github token for verifying MySQL binary."
+    default: "${{ github.token }}"
   mysql-version:
     description: "The version of MySQL and MariaDB"
     default: ""
