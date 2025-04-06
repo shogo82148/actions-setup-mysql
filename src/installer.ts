@@ -4,6 +4,7 @@ import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
 import * as tc from "@actions/tool-cache";
+import { verify } from "@shogo82148/attestation-verify";
 
 const osPlat = os.platform();
 const osArch = os.arch();
@@ -38,17 +39,17 @@ async function determineVersion(distribution: string, version: string): Promise<
   const availableVersions = await getAvailableVersions(distribution);
   for (const v of availableVersions) {
     if (semver.satisfies(v, version)) {
-      return {
-        distribution,
-        version: v,
-        toolPath: "",
-      };
+      return { distribution, version: v, toolPath: "" };
     }
   }
   throw new Error("unable to get latest version");
 }
 
-export async function getMySQL(distribution: string, version: string): Promise<MySQL> {
+export async function getMySQL(
+  distribution: string,
+  version: string,
+  githubToken: string,
+): Promise<MySQL> {
   const selected = await determineVersion(distribution, version);
 
   // check cache
@@ -57,7 +58,7 @@ export async function getMySQL(distribution: string, version: string): Promise<M
 
   if (!toolPath) {
     // download, extract, cache
-    toolPath = await acquireMySQL(selected.distribution, selected.version);
+    toolPath = await acquireMySQL(selected.distribution, selected.version, githubToken);
     core.debug(`MySQL tool is cached under ${toolPath}`);
   }
 
@@ -67,14 +68,14 @@ export async function getMySQL(distribution: string, version: string): Promise<M
   const bin = path.join(toolPath, "bin");
   core.addPath(bin);
 
-  return {
-    distribution: selected.distribution,
-    version: selected.version,
-    toolPath,
-  };
+  return { distribution: selected.distribution, version: selected.version, toolPath };
 }
 
-async function acquireMySQL(distribution: string, version: string): Promise<string> {
+async function acquireMySQL(
+  distribution: string,
+  version: string,
+  githubToken: string,
+): Promise<string> {
   //
   // Download - a tool installer intimately knows how to get the tool (and construct urls)
   //
@@ -93,6 +94,15 @@ async function acquireMySQL(distribution: string, version: string): Promise<stri
 
     throw new Error(`Failed to download version ${version}: ${error}`);
   }
+
+  //
+  // Verify
+  //
+  core.info(`verifying ${downloadPath}`);
+  await verify(downloadPath, {
+    githubToken: githubToken,
+    repository: "shogo82148/actions-setup-mysql",
+  });
 
   //
   // Extract Zstandard compressed tar
