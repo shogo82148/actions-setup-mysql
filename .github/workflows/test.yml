@@ -28,6 +28,8 @@ jobs:
 
       - run: npm ci
       - run: npm run test
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
   test:
     strategy:
