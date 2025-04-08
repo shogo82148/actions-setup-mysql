@@ -75,6 +75,7 @@ fi
 echo "::group::install dependencies"
 (
     set -eux
+    sudo apt-get update
     sudo apt-get install -y libtirpc-dev libudev-dev
 )
 echo "::endgroup::"
