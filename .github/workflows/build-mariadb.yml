@@ -31,7 +31,7 @@ jobs:
             export MARIADB_VERSIONS
           fi
           {
-            echo "matrix-linux=$(printenv MARIADB_VERSIONS | jq -c '{mariadb: . , os: ["ubuntu-24.04", "ubuntu-22.04", "ubuntu-20.04", "ubuntu-24.04-arm", "ubuntu-22.04-arm"]}')"
+            echo "matrix-linux=$(printenv MARIADB_VERSIONS | jq -c '{mariadb: . , os: ["ubuntu-24.04", "ubuntu-22.04", "ubuntu-24.04-arm", "ubuntu-22.04-arm"]}')"
             echo "matrix-darwin=$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
             echo "matrix-windows=$(printenv MARIADB_VERSIONS | jq -c '{mariadb: .}')"
           } >> "$GITHUB_OUTPUT"
