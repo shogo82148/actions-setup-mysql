@@ -137,7 +137,7 @@ jobs:
           subject-path: ${{ runner.temp }}/*.tar.zstd
 
   build-windows:
-    runs-on: ${{ startsWith(matrix.mysql, '5.') && 'windows-2019' || 'windows-2022' }}
+    runs-on: "windows-2022"
     needs: list
     strategy:
       fail-fast: false
