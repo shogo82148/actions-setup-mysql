@@ -46,7 +46,7 @@ jobs:
           - windows-2025
           - windows-2022
         mysql:
-          - "9.2"
+          - "9.4"
           - "8.4" # LTS
           - "8.0"
           - "mariadb-11.7"
