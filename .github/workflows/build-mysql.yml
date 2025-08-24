@@ -23,7 +23,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - id: set-matrix
         name: list available MySQL versions
         run: |
@@ -54,7 +54,7 @@ jobs:
       BUILD_OS: ${{ matrix.os }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - run: .github/build-mysql-linux.sh "$MYSQL_VERSION"
       - name: upload
         shell: bash
@@ -76,7 +76,7 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-${BUILD_OS%-arm}-$MYSQL_ARCH.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: ${{ runner.temp }}/*.tar.zstd
 
@@ -90,7 +90,7 @@ jobs:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - run: |
           # pre-installed version is too old.
           # install new one.
@@ -104,7 +104,7 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-x64.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: ${{ runner.temp }}/*.tar.zstd
 
@@ -118,7 +118,7 @@ jobs:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - run: |
           # pre-installed version is too old.
           # install new one.
@@ -132,12 +132,12 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-arm64.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: ${{ runner.temp }}/*.tar.zstd
 
   build-windows:
-    runs-on: ${{ startsWith(matrix.mysql, '5.') && 'windows-2019' || 'windows-2022' }}
+    runs-on: "windows-2022"
     needs: list
     strategy:
       fail-fast: false
@@ -146,7 +146,7 @@ jobs:
       MYSQL_VERSION: ${{ matrix.mysql }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - run: .github\build-mysql-windows.ps1 $env:MYSQL_VERSION
       - name: upload
         shell: bash
@@ -157,6 +157,6 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$TEMP_DIR/mysql-$MYSQL_VERSION-win32-x64.zip"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: C:\Temp\*.zip

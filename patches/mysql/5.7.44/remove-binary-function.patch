@@ -1,0 +1,396 @@
+diff --git a/client/mysqltest.cc b/client/mysqltest.cc
+index a4629110f09..78cafd296ca 100644
+--- a/client/mysqltest.cc
++++ b/client/mysqltest.cc
+@@ -11450,8 +11450,7 @@ void replace_dynstr_append_uint(DYNAMIC_STRING *ds, uint val)
+ 
+ */
+ 
+-class Comp_lines :
+-  public std::binary_function<const char*, const char *, bool>
++class Comp_lines
+ {
+ public:
+   bool operator()(const char *a, const char *b)
+diff --git a/sql/auth/sql_auth_cache.cc b/sql/auth/sql_auth_cache.cc
+index 70c2a3c0486..c3be4b28502 100644
+--- a/sql/auth/sql_auth_cache.cc
++++ b/sql/auth/sql_auth_cache.cc
+@@ -1251,8 +1251,7 @@ bool acl_getroot(Security_context *sctx, char *user, char *host,
+ 
+ namespace {
+ 
+-class ACL_compare :
+-  public std::binary_function<ACL_ACCESS, ACL_ACCESS, bool>
++class ACL_compare
+ {
+ public:
+   bool operator()(const ACL_ACCESS &a, const ACL_ACCESS &b)
+diff --git a/sql/filesort_utils.cc b/sql/filesort_utils.cc
+index b2e97bb5c07..a1471759a78 100644
+--- a/sql/filesort_utils.cc
++++ b/sql/filesort_utils.cc
+@@ -174,8 +174,7 @@ inline bool my_mem_compare_longkey(const uchar *s1, const uchar *s2, size_t len)
+ }
+ 
+ 
+-class Mem_compare :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare
+ {
+ public:
+   Mem_compare(size_t n) : m_size(n) {}
+@@ -192,8 +191,7 @@ private:
+   size_t m_size;
+ };
+ 
+-class Mem_compare_longkey :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_longkey
+ {
+ public:
+   Mem_compare_longkey(size_t n) : m_size(n) {}
+diff --git a/sql/item_cmpfunc.cc b/sql/item_cmpfunc.cc
+index 2691e850c0f..7280611c2dc 100644
+--- a/sql/item_cmpfunc.cc
++++ b/sql/item_cmpfunc.cc
+@@ -4468,9 +4468,7 @@ int cmp_longlong(const in_longlong::packed_longlong *a,
+ }
+ 
+ 
+-class Cmp_longlong :
+-  public std::binary_function<const in_longlong::packed_longlong &,
+-                              const in_longlong::packed_longlong &, bool>
++class Cmp_longlong
+ {
+ public:
+   bool operator()(const in_longlong::packed_longlong &a,
+@@ -4502,8 +4500,7 @@ bool in_longlong::compare_elems(uint pos1, uint pos2) const
+ }
+ 
+ 
+-class Cmp_row :
+-  public std::binary_function<const cmp_item_row *, const cmp_item_row *, bool>
++class Cmp_row
+ {
+ public:
+   bool operator()(const cmp_item_row *a, const cmp_item_row *b)
+@@ -4594,8 +4591,7 @@ uchar *in_string::get_value(Item *item)
+ }
+ 
+ 
+-class Cmp_string :
+-  public std::binary_function<const String *, const String *, bool>
++class Cmp_string
+ {
+ public:
+   Cmp_string(qsort2_cmp cmp_func, const CHARSET_INFO *cs)
+diff --git a/sql/json_dom.h b/sql/json_dom.h
+index 14d120fe838..ab5fc7742ff 100644
+--- a/sql/json_dom.h
++++ b/sql/json_dom.h
+@@ -364,7 +364,6 @@ private:
+   for speed of look-up. See usage in Json_object_map.
+ */
+ struct Json_key_comparator
+-  : std::binary_function<std::string, std::string, bool>
+ {
+   bool operator() (const std::string &key1, const std::string &key2) const;
+ };
+diff --git a/sql/mdl.cc b/sql/mdl.cc
+index abef991e680..ed37b8f2a4f 100644
+--- a/sql/mdl.cc
++++ b/sql/mdl.cc
+@@ -3763,8 +3763,7 @@ MDL_context::acquire_lock(MDL_request *mdl_request, ulong lock_wait_timeout)
+ }
+ 
+ 
+-class MDL_request_cmp :
+-  public std::binary_function<const MDL_request*, const MDL_request*, bool>
++class MDL_request_cmp
+ {
+ public:
+   bool operator()(const MDL_request *req1, const MDL_request *req2)
+diff --git a/sql/sp_instr.cc b/sql/sp_instr.cc
+index ef583024d3e..617c22b892c 100644
+--- a/sql/sp_instr.cc
++++ b/sql/sp_instr.cc
+@@ -46,8 +46,7 @@
+ #include "table_trigger_dispatcher.h" // Table_trigger_dispatcher
+ 
+ 
+-class Cmp_splocal_locations :
+-  public std::binary_function<const Item_splocal*, const Item_splocal*, bool>
++class Cmp_splocal_locations
+ {
+ public:
+   bool operator()(const Item_splocal *a, const Item_splocal *b)
+diff --git a/sql/sql_select.h b/sql/sql_select.h
+index 1ad39d5ef6a..8552ee71968 100644
+--- a/sql/sql_select.h
++++ b/sql/sql_select.h
+@@ -781,8 +781,7 @@ JOIN_TAB::JOIN_TAB() :
+   @return
+     true if jt1 is smaller than jt2, false otherwise
+ */
+-class Join_tab_compare_default :
+-  public std::binary_function<const JOIN_TAB*, const JOIN_TAB*, bool>
++class Join_tab_compare_default
+ {
+ public:
+   bool operator()(const JOIN_TAB *jt1, const JOIN_TAB *jt2)
+@@ -819,8 +818,7 @@ public:
+   query which is reflected in JOIN_TAB::dependent. Table size and key
+   dependencies are ignored here.
+ */
+-class Join_tab_compare_straight :
+-  public std::binary_function<const JOIN_TAB*, const JOIN_TAB*, bool>
++class Join_tab_compare_straight
+ {
+ public:
+   bool operator()(const JOIN_TAB *jt1, const JOIN_TAB *jt2)
+@@ -850,8 +848,7 @@ public:
+   semi-join nest go first. Used when optimizing semi-join
+   materialization nests.
+ */
+-class Join_tab_compare_embedded_first :
+-  public std::binary_function<const JOIN_TAB*, const JOIN_TAB*, bool>
++class Join_tab_compare_embedded_first
+ {
+ private:
+   const TABLE_LIST *emb_nest;
+diff --git a/sql/sql_show.cc b/sql/sql_show.cc
+index 1f1f90cdf3b..e41dac6fa1c 100644
+--- a/sql/sql_show.cc
++++ b/sql/sql_show.cc
+@@ -2186,8 +2186,7 @@ public:
+ };
+ 
+ // For sorting by thread_id.
+-class thread_info_compare :
+-  public std::binary_function<const thread_info*, const thread_info*, bool>
++class thread_info_compare
+ {
+ public:
+   bool operator() (const thread_info* p1, const thread_info* p2)
+@@ -2619,9 +2618,7 @@ static inline int show_var_cmp(const SHOW_VAR *var1, const SHOW_VAR *var2)
+   return strcmp(var1->name, var2->name);
+ }
+ 
+-class Show_var_cmp :
+-  public std::binary_function<const st_mysql_show_var &,
+-                              const st_mysql_show_var &, bool>
++class Show_var_cmp
+ {
+ public:
+   bool operator()(const st_mysql_show_var &var1,
+diff --git a/sql/sql_test.cc b/sql/sql_test.cc
+index 00d6f5d9733..b143bf12062 100644
+--- a/sql/sql_test.cc
++++ b/sql/sql_test.cc
+@@ -326,9 +326,7 @@ static inline int dl_compare(const TABLE_LOCK_INFO *a,
+ }
+ 
+ 
+-class DL_commpare :
+-  public std::binary_function<const TABLE_LOCK_INFO &,
+-                              const TABLE_LOCK_INFO &, bool>
++class DL_commpare
+ {
+ public:
+   bool operator()(const TABLE_LOCK_INFO &a, const TABLE_LOCK_INFO &b)
+diff --git a/storage/innobase/handler/ha_innodb.cc b/storage/innobase/handler/ha_innodb.cc
+index d913bae0647..3475254083c 100644
+--- a/storage/innobase/handler/ha_innodb.cc
++++ b/storage/innobase/handler/ha_innodb.cc
+@@ -16059,7 +16059,7 @@ struct ShowStatus {
+ 	};
+ 
+ 	/** Order by m_waits, in descending order. */
+-	struct OrderByWaits: public std::binary_function<Value, Value, bool>
++	struct OrderByWaits
+ 	{
+ 		/** @return true if rhs < lhs */
+ 		bool operator()(
+diff --git a/storage/innobase/sync/sync0debug.cc b/storage/innobase/sync/sync0debug.cc
+index 42c801d2687..30273134ac4 100644
+--- a/storage/innobase/sync/sync0debug.cc
++++ b/storage/innobase/sync/sync0debug.cc
+@@ -117,10 +117,6 @@ struct LatchDebug {
+ 
+ 	/** Comparator for the ThreadMap. */
+ 	struct os_thread_id_less
+-		: public std::binary_function<
+-		  os_thread_id_t,
+-		  os_thread_id_t,
+-		  bool>
+ 	{
+ 		/** @return true if lhs < rhs */
+ 		bool operator()(
+@@ -413,10 +409,6 @@ private:
+ private:
+ 	/** Comparator for the Levels . */
+ 	struct latch_level_less
+-		: public std::binary_function<
+-		  latch_level_t,
+-		  latch_level_t,
+-		  bool>
+ 	{
+ 		/** @return true if lhs < rhs */
+ 		bool operator()(
+diff --git a/storage/myisam/sort.cc b/storage/myisam/sort.cc
+index 7affe7fdc15..32ade62c34b 100644
+--- a/storage/myisam/sort.cc
++++ b/storage/myisam/sort.cc
+@@ -46,8 +46,7 @@
+ #define DISK_BUFFER_SIZE (IO_SIZE*16)
+ 
+ 
+-class Key_compare :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Key_compare
+ {
+ public:
+   Key_compare(MI_SORT_PARAM *param) : info(param) {}
+diff --git a/unittest/gunit/alignment-t.cc b/unittest/gunit/alignment-t.cc
+index 844cfbc96d2..729d4ca9821 100644
+--- a/unittest/gunit/alignment-t.cc
++++ b/unittest/gunit/alignment-t.cc
+@@ -94,8 +94,7 @@ uchar* AlignmentTest::unaligned_data;
+                                      (((int32) ((uchar) (A)[1]) << 8)) + \
+                                      (((int32) ((uchar) (A)[2]) << 16)) + \
+                                      (((int32) ((int16) (A)[3]) << 24)))
+-class Mem_compare_uchar_int :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_uchar_int
+ {
+ public:
+   bool operator() (const uchar *s1, const uchar *s2)
+@@ -104,8 +103,7 @@ public:
+   }
+ };
+ 
+-class Mem_compare_sint4 :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_sint4
+ {
+ public:
+   bool operator() (const uchar *s1, const uchar *s2)
+@@ -114,8 +112,7 @@ public:
+   }
+ };
+ 
+-class Mem_compare_sint4_generic :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_sint4_generic
+ {
+ public:
+   bool operator() (const uchar *s1, const uchar *s2)
+diff --git a/unittest/gunit/filesort_compare-t.cc b/unittest/gunit/filesort_compare-t.cc
+index 38ac46933eb..3179798942d 100644
+--- a/unittest/gunit/filesort_compare-t.cc
++++ b/unittest/gunit/filesort_compare-t.cc
+@@ -197,8 +197,7 @@ inline bool mem_compare_3(const uchar *s1, const uchar *s2, size_t len)
+ // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=43052
+ 
+ 
+-class Mem_compare_memcmp :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_memcmp
+ {
+ public:
+   Mem_compare_memcmp(size_t n) : m_size(n) {}
+@@ -210,8 +209,7 @@ public:
+ };
+ 
+ 
+-class Mem_compare_0 :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_0
+ {
+ public:
+   Mem_compare_0(size_t n) : m_size(n) {}
+@@ -223,8 +221,7 @@ public:
+ };
+ 
+ 
+-class Mem_compare_1 :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_1
+ {
+ public:
+   Mem_compare_1(size_t n) : m_size(n) {}
+@@ -236,8 +233,7 @@ public:
+ };
+ 
+ 
+-class Mem_compare_2 :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_2
+ {
+ public:
+   Mem_compare_2(size_t n) : m_size(n) {}
+@@ -249,8 +245,7 @@ public:
+ };
+ 
+ 
+-class Mem_compare_3 :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_3
+ {
+ public:
+   Mem_compare_3(size_t n) : m_size(n) {}
+@@ -264,8 +259,7 @@ public:
+ 
+ #define COMPARE(N) if (s1[N] != s2[N]) return s1[N] < s2[N]
+ 
+-class Mem_compare_4 : 
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_4
+ {
+ public:
+   Mem_compare_4(size_t n) : m_size(n) {}
+@@ -288,8 +282,7 @@ public:
+ };
+ 
+ 
+-class Mem_compare_5 :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_5
+ {
+ public:
+   Mem_compare_5(size_t n) : m_size(n) {}
+@@ -307,8 +300,7 @@ public:
+ 
+ // This one works for any number of keys.
+ // We treat the first key as int, the rest byte-by-byte.
+-class Mem_compare_int : 
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_int
+ {
+ public:
+   Mem_compare_int(size_t n) : m_size(n), rest(n - sizeof(int)) {}
+@@ -325,8 +317,7 @@ private:
+   const size_t rest;
+ };
+ 
+-class Mem_compare_int_4 :
+-  public std::binary_function<const uchar*, const uchar*, bool>
++class Mem_compare_int_4
+ {
+ public:
+   Mem_compare_int_4(size_t) : keyno(1) {}
+diff --git a/unittest/gunit/join_tab_sort-t.cc b/unittest/gunit/join_tab_sort-t.cc
+index 71cc9c2c505..a3822d77a26 100644
+--- a/unittest/gunit/join_tab_sort-t.cc
++++ b/unittest/gunit/join_tab_sort-t.cc
+@@ -200,8 +200,7 @@ TEST_F(JTSortTest, SortKeyDependsTest)
+   sorting works for ints types as well. 
+ */
+ 
+-class Int_compare_ptr :
+-  public std::binary_function<const int*, const int*, bool>
++class Int_compare_ptr
+ {
+ public:
+   bool operator()(const int *i1, const int *i2) const

@@ -22,7 +22,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - id: set-matrix
         name: list available MariaDB versions
         run: |
@@ -53,7 +53,7 @@ jobs:
       BUILD_OS: ${{ matrix.os }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - run: .github/build-mariadb-linux.sh "$MARIADB_VERSION"
       - name: upload
         shell: bash
@@ -75,7 +75,7 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mariadb-$MARIADB_VERSION-${BUILD_OS%-arm}-$MARIADB_ARCH.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: ${{ runner.temp }}/*.tar.zstd
 
@@ -89,7 +89,7 @@ jobs:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
       - name: upload
         shell: bash
@@ -100,7 +100,7 @@ jobs:
         env:
           MARIADB_VERSION: ${{ matrix.mariadb }}
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: ${{ runner.temp }}/*.tar.zstd
 
@@ -114,7 +114,7 @@ jobs:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - run: .github/build-mariadb-darwin.sh ${{ matrix.mariadb }}
       - name: upload
         shell: bash
@@ -125,7 +125,7 @@ jobs:
         env:
           MARIADB_VERSION: ${{ matrix.mariadb }}
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: ${{ runner.temp }}/*.tar.zstd
 
@@ -139,7 +139,7 @@ jobs:
       MARIADB_VERSION: ${{ matrix.mariadb }}
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - run: .github\build-mariadb-windows.ps1 $env:MARIADB_VERSION
       - name: upload
         shell: bash
@@ -151,6 +151,6 @@ jobs:
         env:
           MARIADB_VERSION: ${{ matrix.mariadb }}
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2.2.3
+      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
         with:
           subject-path: C:\Temp\*.zip
