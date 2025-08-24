@@ -1,0 +1,14 @@
+diff --git a/storage/mroonga/vendor/groonga/lib/grn_com.h b/storage/mroonga/vendor/groonga/lib/grn_com.h
+index 505e87a516f..fc058afb7f7 100644
+--- a/storage/mroonga/vendor/groonga/lib/grn_com.h
++++ b/storage/mroonga/vendor/groonga/lib/grn_com.h
+@@ -22,9 +22,7 @@
+ #include "grn_str.h"
+ #include "grn_hash.h"
+
+-#ifdef HAVE_NETDB_H
+ #include <netdb.h>
+-#endif /* HAVE_NETDB_H */
+
+ #ifdef __cplusplus
+ extern "C" {
