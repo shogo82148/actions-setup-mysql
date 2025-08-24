@@ -1,0 +1,12 @@
+diff --git a/storage/mroonga/vendor/groonga/lib/com.c b/storage/mroonga/vendor/groonga/lib/com.c
+index 7761f4838e2..0b7d57576d5 100644
+--- a/storage/mroonga/vendor/groonga/lib/com.c
++++ b/storage/mroonga/vendor/groonga/lib/com.c
+@@ -33,6 +33,7 @@
+ #  include <signal.h>
+ # endif /* HAVE_SIGNAL_H */
+ # include <sys/uio.h>
++# include <netdb.h>
+ #endif /* WIN32 */
+
+ #include "grn_ctx.h"
