@@ -1,12 +1,14 @@
-diff --git a/storage/mroonga/vendor/groonga/lib/com.c b/storage/mroonga/vendor/groonga/lib/com.c
-index 7761f4838e2..0b7d57576d5 100644
---- a/storage/mroonga/vendor/groonga/lib/com.c
-+++ b/storage/mroonga/vendor/groonga/lib/com.c
-@@ -33,6 +33,7 @@
- #  include <signal.h>
- # endif /* HAVE_SIGNAL_H */
- # include <sys/uio.h>
-+# include <netdb.h>
- #endif /* WIN32 */
+diff --git a/storage/mroonga/vendor/groonga/lib/grn_com.h b/storage/mroonga/vendor/groonga/lib/grn_com.h
+index 505e87a516f..fc058afb7f7 100644
+--- a/storage/mroonga/vendor/groonga/lib/grn_com.h
++++ b/storage/mroonga/vendor/groonga/lib/grn_com.h
+@@ -22,9 +22,7 @@
+ #include "grn_str.h"
+ #include "grn_hash.h"
 
- #include "grn_ctx.h"
+-#ifdef HAVE_NETDB_H
+ #include <netdb.h>
+-#endif /* HAVE_NETDB_H */
+
+ #ifdef __cplusplus
+ extern "C" {
