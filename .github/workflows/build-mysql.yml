@@ -76,7 +76,7 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-${BUILD_OS%-arm}-$MYSQL_ARCH.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+      - uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
         with:
           subject-path: ${{ runner.temp }}/*.tar.zstd
 
@@ -104,7 +104,7 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-x64.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+      - uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
         with:
           subject-path: ${{ runner.temp }}/*.tar.zstd
 
@@ -132,7 +132,7 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$RUNNER_TEMP/mysql-$MYSQL_VERSION-darwin-arm64.tar.zstd"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+      - uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
         with:
           subject-path: ${{ runner.temp }}/*.tar.zstd
 
@@ -157,6 +157,6 @@ jobs:
           gh release upload --clobber "$ACTIONS_VERSION" "$TEMP_DIR/mysql-$MYSQL_VERSION-win32-x64.zip"
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2.4.0
+      - uses: actions/attest-build-provenance@977bb373ede98d70efdf65b84cb5f73e068dcc2a # v3.0.0
         with:
           subject-path: C:\Temp\*.zip
