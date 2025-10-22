@@ -1,0 +1,12 @@
+diff --git a/router/src/mysql_rest_service/src/mrs/database/metadata_logger.cc b/router/src/mysql_rest_service/src/mrs/database/metadata_logger.cc
+index 3cd5ba1d4b1..85f01adf5bb 100644
+--- a/router/src/mysql_rest_service/src/mrs/database/metadata_logger.cc
++++ b/router/src/mysql_rest_service/src/mrs/database/metadata_logger.cc
+@@ -26,6 +26,7 @@
+ #include "mrs/database/metadata_logger.h"
+ 
+ #include <iomanip>
++#include <sstream>
+ 
+ #include "helper/json/rapid_json_to_struct.h"
+ #include "mrs/database/query_version.h"
