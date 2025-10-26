@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
+import * as crypto from "crypto";
 import * as tc from "@actions/tool-cache";
 import mysqlVersions from "../versions/mysql.json";
 import mariadbVersions from "../versions/mariadb.json";
@@ -92,6 +93,16 @@ async function acquireMySQL(version: Version): Promise<string> {
   }
 
   //
+  // Verify SHA256
+  //
+  const hash = await calculateDigest(downloadPath, "sha256");
+  if (hash !== version.sha256) {
+    throw new Error(
+      `Hash for downloaded MySQL version ${version.version} (${hash}) does not match expected value (${version.sha256})`,
+    );
+  }
+
+  //
   // Extract Zstandard compressed tar
   //
   const extPath = version.url.endsWith(".zip")
@@ -99,6 +110,17 @@ async function acquireMySQL(version: Version): Promise<string> {
     : await tc.extractTar(downloadPath, "", ["--use-compress-program", "zstd -d --long=30", "-x"]);
 
   return await tc.cacheDir(extPath, version.distribution, version.version);
+}
+
+async function calculateDigest(filename: string, algorithm: string): Promise<string> {
+  const hash = await new Promise<string>((resolve, reject) => {
+    const hash = crypto.createHash(algorithm);
+    const stream = fs.createReadStream(filename);
+    stream.on("data", (data) => hash.update(data));
+    stream.on("end", () => resolve(hash.digest("hex")));
+    stream.on("error", (err) => reject(err));
+  });
+  return hash;
 }
 
 function getImageOS(): string {
