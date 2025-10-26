@@ -3,12 +3,23 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import * as semver from "semver";
+import * as crypto from "crypto";
 import * as tc from "@actions/tool-cache";
-import { verify } from "@shogo82148/attestation-verify";
+import mysqlVersions from "../versions/mysql.json";
+import mariadbVersions from "../versions/mariadb.json";
 
 const osPlat = os.platform();
 const osArch = os.arch();
 const virtualEnv = getVirtualEnvironmentName();
+
+interface Version {
+  distribution: string;
+  arch: string;
+  os: string;
+  sha256: string;
+  url: string;
+  version: string;
+}
 
 export interface MySQL {
   distribution: string;
@@ -16,19 +27,7 @@ export interface MySQL {
   toolPath: string;
 }
 
-async function getAvailableVersions(distribution: string): Promise<string[]> {
-  return new Promise<string[]>((resolve, reject) => {
-    fs.readFile(path.join(__dirname, "..", "versions", `${distribution}.json`), (err, data) => {
-      if (err) {
-        reject(err);
-      }
-      const info = JSON.parse(data.toString()) as string[];
-      resolve(info);
-    });
-  });
-}
-
-async function determineVersion(distribution: string, version: string): Promise<MySQL> {
+function determineVersion(distribution: string, version: string): Version {
   if (version.startsWith("mysql-")) {
     distribution = "mysql";
     version = version.substring("mysql-".length);
@@ -36,10 +35,14 @@ async function determineVersion(distribution: string, version: string): Promise<
     distribution = "mariadb";
     version = version.substring("mariadb-".length);
   }
-  const availableVersions = await getAvailableVersions(distribution);
+  const availableVersions = distribution === "mysql" ? mysqlVersions : mariadbVersions;
   for (const v of availableVersions) {
-    if (semver.satisfies(v, version)) {
-      return { distribution, version: v, toolPath: "" };
+    if (
+      v.arch == osArch &&
+      (v.os == osPlat || v.os == virtualEnv) &&
+      semver.satisfies(v.version, version)
+    ) {
+      return v;
     }
   }
   throw new Error("unable to get latest version");
@@ -50,7 +53,7 @@ export async function getMySQL(
   version: string,
   githubToken: string,
 ): Promise<MySQL> {
-  const selected = await determineVersion(distribution, version);
+  const selected = determineVersion(distribution, version);
 
   // check cache
   let toolPath: string;
@@ -58,7 +61,7 @@ export async function getMySQL(
 
   if (!toolPath) {
     // download, extract, cache
-    toolPath = await acquireMySQL(selected.distribution, selected.version, githubToken);
+    toolPath = await acquireMySQL(selected);
     core.debug(`MySQL tool is cached under ${toolPath}`);
   }
 
@@ -71,20 +74,14 @@ export async function getMySQL(
   return { distribution: selected.distribution, version: selected.version, toolPath };
 }
 
-async function acquireMySQL(
-  distribution: string,
-  version: string,
-  githubToken: string,
-): Promise<string> {
+async function acquireMySQL(version: Version): Promise<string> {
   //
   // Download - a tool installer intimately knows how to get the tool (and construct urls)
   //
-  const fileName = getFileName(distribution, version);
-  const downloadUrl = await getDownloadUrl(fileName);
   let downloadPath: string | null = null;
   try {
-    core.info(`downloading from ${downloadUrl}`);
-    downloadPath = await tc.downloadTool(downloadUrl);
+    core.info(`downloading from ${version.url}`);
+    downloadPath = await tc.downloadTool(version.url);
   } catch (error) {
     if (error instanceof Error) {
       core.info(error.message);
@@ -96,62 +93,38 @@ async function acquireMySQL(
   }
 
   //
-  // Verify
+  // Verify SHA256
   //
-  core.info(`verifying ${downloadPath}`);
-  await verify(downloadPath, {
-    githubToken: githubToken,
-    repository: "shogo82148/actions-setup-mysql",
-  });
+  const hash = await calculateDigest(downloadPath, "sha256");
+  if (hash !== version.sha256) {
+    throw new Error(
+      `Hash for downloaded MySQL version ${version.version} (${hash}) does not match expected value (${version.sha256})`,
+    );
+  }
 
   //
   // Extract Zstandard compressed tar
   //
-  const extPath = downloadUrl.endsWith(".zip")
+  const extPath = version.url.endsWith(".zip")
     ? await tc.extractZip(downloadPath)
     : await tc.extractTar(downloadPath, "", ["--use-compress-program", "zstd -d --long=30", "-x"]);
 
-  return await tc.cacheDir(extPath, distribution, version);
+  return await tc.cacheDir(extPath, version.distribution, version.version);
 }
 
-function getFileName(distribution: string, version: string): string {
-  switch (osPlat) {
-    case "win32":
-      return `${distribution}-${version}-${osPlat}-${osArch}.zip`;
-    case "darwin":
-      return `${distribution}-${version}-${osPlat}-${osArch}.tar.zstd`;
-    case "linux":
-      return `${distribution}-${version}-${virtualEnv}-${osArch}.tar.zstd`;
-  }
-  throw new Error(`unknown platform: ${osPlat}`);
-}
-
-interface PackageVersion {
-  version: string;
-}
-
-async function getDownloadUrl(filename: string): Promise<string> {
-  const promise = new Promise<PackageVersion>((resolve, reject) => {
-    fs.readFile(path.join(__dirname, "..", "package.json"), (err, data) => {
-      if (err) {
-        reject(err);
-      }
-      const info: PackageVersion = JSON.parse(data.toString());
-      resolve(info);
-    });
+async function calculateDigest(filename: string, algorithm: string): Promise<string> {
+  const hash = await new Promise<string>((resolve, reject) => {
+    const hash = crypto.createHash(algorithm);
+    const stream = fs.createReadStream(filename);
+    stream.on("data", (data) => hash.update(data));
+    stream.on("end", () => resolve(hash.digest("hex")));
+    stream.on("error", (err) => reject(err));
   });
-
-  const info = await promise;
-  const actionsVersion = info.version;
-  return `https://github.com/shogo82148/actions-setup-mysql/releases/download/v${actionsVersion}/${filename}`;
+  return hash;
 }
 
 function getImageOS(): string {
-  const imageOS = process.env["ImageOS"];
-  if (!imageOS) {
-    throw new Error("The environment variable ImageOS must be set");
-  }
-  return imageOS;
+  return process.env["ImageOS"] || "unknown";
 }
 
 function getVirtualEnvironmentName(): string {
@@ -172,5 +145,5 @@ function getVirtualEnvironmentName(): string {
     return `windows-20${match[1]}`;
   }
 
-  throw new Error(`Unknown ImageOS ${imageOS}`);
+  return "unknown";
 }
