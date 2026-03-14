@@ -23,7 +23,7 @@ jobs:
       - name: Set Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version-file: package.json
+          node-version-file: ".node-version"
           cache: npm
 
       - run: npm ci
@@ -64,7 +64,7 @@ jobs:
       - name: Set Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version-file: package.json
+          node-version-file: ".node-version"
           cache: npm
       - name: Set up perl
         uses: shogo82148/actions-setup-perl@b6cfc127f1b0a63ac98797800f641494d80f42f8 # v1.37.1
@@ -72,7 +72,7 @@ jobs:
           perl-version: "5.40"
 
       - run: npm ci
-      - run: npm run build
+      - run: npm run bundle
       - name: use the action
         id: action
         uses: ./
@@ -99,11 +99,11 @@ jobs:
       - name: Set Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
-          node-version-file: package.json
+          node-version-file: ".node-version"
           cache: npm
 
       - run: npm ci
-      - run: npm run build
+      - run: npm run bundle
       - name: use the action
         id: action
         uses: ./

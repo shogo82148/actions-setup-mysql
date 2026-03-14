@@ -5,8 +5,8 @@ import * as path from "path";
 import * as semver from "semver";
 import * as crypto from "crypto";
 import * as tc from "@actions/tool-cache";
-import mysqlVersions from "../versions/mysql.json";
-import mariadbVersions from "../versions/mariadb.json";
+import mysqlVersions from "../versions/mysql.json" with { type: "json" };
+import mariadbVersions from "../versions/mariadb.json" with { type: "json" };
 
 const osPlat = os.platform();
 const osArch = os.arch();

@@ -1,4 +1,4 @@
-import * as mycnf from "../src/mycnf";
+import * as mycnf from "../src/mycnf.js";
 
 describe("parsing my.cnf", () => {
   it("ignores comments", () => {

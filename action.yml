@@ -28,8 +28,8 @@ outputs:
     description: "Returns directory under which the mysql database is being created."
 runs:
   using: "node24"
-  main: "lib/setup-mysql.js"
-  post: "lib/cleanup-mysql.js"
+  main: "dist/setup-mysql.js"
+  post: "dist/cleanup-mysql.js"
   post-if: "always()"
 branding:
   color: blue

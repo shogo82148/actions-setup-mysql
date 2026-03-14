@@ -4,7 +4,7 @@ import * as fs from "fs";
 import * as io from "@actions/io";
 import * as os from "os";
 import * as path from "path";
-import * as starter from "./starter";
+import * as starter from "./starter.js";
 
 // extension of executable files
 const binExt = os.platform() === "win32" ? ".exe" : "";
