@@ -28,11 +28,11 @@ git commit -m "bump up to v$MAJOR.$MINOR.$PATCH"
 
 : build the action
 npm ci
-npm run build
+npm run package
 
 : remove development packages from node_modules
 npm prune --production
-perl -ne 'print unless m(^/node_modules/|/lib/$)' -i .gitignore
+perl -ne 'print unless m(^/node_modules/|/dist/$)' -i .gitignore
 
 : publish to GitHub
 git add .

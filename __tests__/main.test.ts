@@ -1,6 +1,10 @@
 import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const githubToken = process.env["GITHUB_TOKEN"] || "";
 const toolDir = path.join(__dirname, "runner", "tools");
@@ -10,7 +14,7 @@ process.env["RUNNER_TOOL_CACHE"] = toolDir;
 process.env["RUNNER_TEMP"] = tempDir;
 
 import * as io from "@actions/io";
-import * as installer from "../src/installer";
+import * as installer from "../src/installer.js";
 
 describe("installer tests", () => {
   beforeAll(async () => {

@@ -1,6 +1,6 @@
-import * as cleanup from "./cleanup";
+import * as cleanup from "./cleanup.js";
 import * as core from "@actions/core";
-import * as starter from "./starter";
+import * as starter from "./starter.js";
 
 async function run(): Promise<void> {
   try {
