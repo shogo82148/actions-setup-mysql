@@ -14,7 +14,7 @@
     "format:write": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "npx eslint .",
-    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
+    "test": "npx cross-env NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
     "all": "npm run format:write && npm run lint && npm run test && npm run package"
   },
   "repository": {
@@ -44,6 +44,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.0.0",
     "@types/semver": "^7.7.1",
+    "cross-env": "^10.1.0",
     "eslint": "^9.39.1",
     "jest": "^30.2.0",
     "jest-circus": "^30.0.5",
