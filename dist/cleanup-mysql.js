@@ -24,7 +24,7 @@ import require$$2$1 from 'perf_hooks';
 import require$$5 from 'util/types';
 import require$$4$1 from 'async_hooks';
 import require$$1$2 from 'console';
-import require$$1$3 from 'url';
+import require$$1$3, { fileURLToPath } from 'url';
 import require$$3$1 from 'zlib';
 import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
@@ -27464,6 +27464,8 @@ async function sleep(waitSec) {
     });
 }
 
+const __filename$1 = fileURLToPath(import.meta.url);
+path.dirname(__filename$1);
 const BASEDIR = "BASEDIR";
 const PID = "PID";
 const PID_FILE = "PID_FILE";

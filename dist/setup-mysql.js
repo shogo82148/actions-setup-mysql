@@ -25,7 +25,7 @@ import require$$2$2 from 'perf_hooks';
 import require$$5 from 'util/types';
 import require$$4$1 from 'async_hooks';
 import require$$1$3 from 'console';
-import require$$1$4 from 'url';
+import require$$1$4, { fileURLToPath } from 'url';
 import require$$3 from 'zlib';
 import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
@@ -37168,6 +37168,8 @@ class Parser {
     }
 }
 
+const __filename$1 = fileURLToPath(import.meta.url);
+const __dirname$1 = path.dirname(__filename$1);
 const sep = path.sep;
 const BASEDIR = "BASEDIR";
 const PID = "PID";
@@ -37453,7 +37455,7 @@ async function setupTls(mysql, baseDir) {
         "-in",
         `${datadir}${sep}ca-req.pem`,
         "-extfile",
-        `${__dirname}${sep}..${sep}v3_ca.txt`,
+        `${__dirname$1}${sep}..${sep}v3_ca.txt`,
         "-days",
         "3650",
         "-set_serial",
@@ -37494,7 +37496,7 @@ async function setupTls(mysql, baseDir) {
         "-set_serial",
         "01",
         "-extfile",
-        `${__dirname}${sep}..${sep}subjectnames.txt`,
+        `${__dirname$1}${sep}..${sep}subjectnames.txt`,
         "-out",
         `${datadir}${sep}server-cert.pem`,
     ], options);
