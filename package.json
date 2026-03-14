@@ -9,12 +9,13 @@
     "node": ">=24.0.0"
   },
   "scripts": {
+    "bundle": "npm run format:write && npm run package",
     "package": "npx rimraf ./dist && npx rollup --config rollup.config.ts --configPlugin @rollup/plugin-typescript",
-    "format": "prettier --write **/*.ts",
-    "format-check": "prettier --check **/*.ts",
-    "lint": "eslint .",
+    "format:write": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "npx eslint .",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
-    "all": "npm run package && npm run format && npm run lint && npm test"
+    "all": "npm run format:write && npm run lint && npm run test && npm run package"
   },
   "repository": {
     "type": "git",

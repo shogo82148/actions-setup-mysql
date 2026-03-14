@@ -1,8 +1,5 @@
 {
-  "plugins": [
-    "jest",
-    "@typescript-eslint"
-  ],
+  "plugins": ["jest", "@typescript-eslint"],
   "extends": [],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -33,10 +30,7 @@
         "allowExpressions": true
       }
     ],
-    "@typescript-eslint/func-call-spacing": [
-      "error",
-      "never"
-    ],
+    "@typescript-eslint/func-call-spacing": ["error", "never"],
     "@typescript-eslint/no-array-constructor": "error",
     "@typescript-eslint/no-empty-interface": "error",
     "@typescript-eslint/no-explicit-any": "error",
