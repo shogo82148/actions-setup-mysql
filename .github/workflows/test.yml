@@ -72,7 +72,7 @@ jobs:
           perl-version: "5.40"
 
       - run: npm ci
-      - run: npm run build
+      - run: npm run bundle
       - name: use the action
         id: action
         uses: ./
@@ -103,7 +103,7 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: npm run build
+      - run: npm run bundle
       - name: use the action
         id: action
         uses: ./
