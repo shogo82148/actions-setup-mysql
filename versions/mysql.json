@@ -3,6 +3,174 @@
     "arch": "arm64",
     "distribution": "mysql",
     "os": "darwin",
+    "sha256": "2133b00e05a6c72856d7aacfbeb289262d9df492e4865c7f75c56df78587c819",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.6.0-20260315054621/mysql-9.6.0-darwin-arm64.tar.zstd",
+    "version": "9.6.0"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "darwin",
+    "sha256": "20192d8701ae01e539afd6fd786235a5ea5111522fb319d2ea6cce159a486c90",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.6.0-20260315054621/mysql-9.6.0-darwin-x64.tar.zstd",
+    "version": "9.6.0"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-22.04",
+    "sha256": "f9ab3c263490bd40c90835fcc5e269684727f628db8efeb3b5dc02339112d0b2",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.6.0-20260315054621/mysql-9.6.0-ubuntu-22.04-arm64.tar.zstd",
+    "version": "9.6.0"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-22.04",
+    "sha256": "9e94784963a6cf5df6495d98a39aab40b14f14938367279c82c7f4dcff0f431e",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.6.0-20260315054621/mysql-9.6.0-ubuntu-22.04-x64.tar.zstd",
+    "version": "9.6.0"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-24.04",
+    "sha256": "69ff15c280929f7ba394ea874b5c588f7de311d15ef30276ce47d572963d6110",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.6.0-20260315054621/mysql-9.6.0-ubuntu-24.04-arm64.tar.zstd",
+    "version": "9.6.0"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-24.04",
+    "sha256": "31788165273004d7fbd602f68c26e750c430e5de4ed20e0d9dede7e0ae705fa8",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.6.0-20260315054621/mysql-9.6.0-ubuntu-24.04-x64.tar.zstd",
+    "version": "9.6.0"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "win32",
+    "sha256": "228be29db566222d0674847a3cc8c60f30b31661af50c8ec7edf727196dc8f2a",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.6.0-20260315054621/mysql-9.6.0-win32-x64.zip",
+    "version": "9.6.0"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "darwin",
+    "sha256": "6ede9b8fd4a9199f42f54de7f30903bffe2e79ce8f6daa708ed6e2308446c345",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.2-20260314223927/mysql-9.5.2-darwin-arm64.tar.zstd",
+    "version": "9.5.2"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "darwin",
+    "sha256": "b38e7a6dec990ada8cd9fad6ca1fb4e31d19eac56409b65e74711ea8fb940378",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.2-20260314223927/mysql-9.5.2-darwin-x64.tar.zstd",
+    "version": "9.5.2"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-22.04",
+    "sha256": "24c296bbb5c1aedaf5b8ef513d94e310f949e49a604c686afb3a914f77b8d1e7",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.2-20260314223927/mysql-9.5.2-ubuntu-22.04-arm64.tar.zstd",
+    "version": "9.5.2"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-22.04",
+    "sha256": "55edd19559e9c2899c1b0963e531a6e12faf56e2fef2f6df390d41d7f7729712",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.2-20260314223927/mysql-9.5.2-ubuntu-22.04-x64.tar.zstd",
+    "version": "9.5.2"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-24.04",
+    "sha256": "23a614c315e7cfe3a86a0625bdd6e98682def6d54f7b48471c36eeff55b37006",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.2-20260314223927/mysql-9.5.2-ubuntu-24.04-arm64.tar.zstd",
+    "version": "9.5.2"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-24.04",
+    "sha256": "01b401f0295e5c0fea8ff54d27676bb283965f0b228c153e5e2a8f8228eafb67",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.2-20260314223927/mysql-9.5.2-ubuntu-24.04-x64.tar.zstd",
+    "version": "9.5.2"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "win32",
+    "sha256": "a84ac777d0983d353140d6000e964530e326a1a6120cb3772c767cba2c34f18f",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.2-20260314223927/mysql-9.5.2-win32-x64.zip",
+    "version": "9.5.2"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "darwin",
+    "sha256": "5595813253a5d7526de46f0f862ee02ae4d97d25d4b096ae9782c9a01c124007",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.1-20260314181255/mysql-9.5.1-darwin-arm64.tar.zstd",
+    "version": "9.5.1"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "darwin",
+    "sha256": "53c6ce417d7c9f1dba67a13ff5ad88c5558abf879fcdd5a5cd5435d718cf8860",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.1-20260314181255/mysql-9.5.1-darwin-x64.tar.zstd",
+    "version": "9.5.1"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-22.04",
+    "sha256": "7291fa8a5352e0411341cef2b2c6008e35759418b05a35b8013fee082defe584",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.1-20260314181255/mysql-9.5.1-ubuntu-22.04-arm64.tar.zstd",
+    "version": "9.5.1"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-22.04",
+    "sha256": "6ef0bad33853a80e8afbc23729a132fd3dbb85c4cb31a064cc2dabe0b6a4b01c",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.1-20260314181255/mysql-9.5.1-ubuntu-22.04-x64.tar.zstd",
+    "version": "9.5.1"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-24.04",
+    "sha256": "a9b47c3248fc8985524e1be6b599030864f88fb2c83b58e1590fabd238e75ec0",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.1-20260314181255/mysql-9.5.1-ubuntu-24.04-arm64.tar.zstd",
+    "version": "9.5.1"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-24.04",
+    "sha256": "2f09ee258d21cae311b4a87b826b726fb10f9d83139060c9f7ef8a66ad68c3ba",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.1-20260314181255/mysql-9.5.1-ubuntu-24.04-x64.tar.zstd",
+    "version": "9.5.1"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "win32",
+    "sha256": "29571bb8efe60567a7eb454b1f703f9461b4916d88c9e77bbf6494d4510f5e8a",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.1-20260314181255/mysql-9.5.1-win32-x64.zip",
+    "version": "9.5.1"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "darwin",
     "sha256": "874d49f26f0bcb1cdd186bf768d863cb1da227091609e5873e25255f19e46753",
     "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.5.0-20251026034039/mysql-9.5.0-darwin-arm64.tar.zstd",
     "version": "9.5.0"
@@ -614,6 +782,62 @@
     "sha256": "a1b289b6b0c3c029ecca9de8e58dac5556ac724d5c4e860d518e776b37b21101",
     "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.1.0-20251026124823/mysql-8.1.0-win32-x64.zip",
     "version": "8.1.0"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "darwin",
+    "sha256": "16463d4f916bce31df227242235dffb74cf92a4b90541faf58d48a809a48190e",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.45-20260314180130/mysql-8.0.45-darwin-arm64.tar.zstd",
+    "version": "8.0.45"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "darwin",
+    "sha256": "54d8f41eb2799e7645217eaf0a7dd45935c36ccccc190a7ff6a4ab56bf4a1e46",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.45-20260314180130/mysql-8.0.45-darwin-x64.tar.zstd",
+    "version": "8.0.45"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-22.04",
+    "sha256": "59c2035a7c3de920c92da71066f45d4ba1f8a0f0dd6544a394cb84403b14ad47",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.45-20260314180130/mysql-8.0.45-ubuntu-22.04-arm64.tar.zstd",
+    "version": "8.0.45"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-22.04",
+    "sha256": "5be99b90216d2dc47be511393d855702838c2f2e7904f199ac90f6a311f06920",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.45-20260314180130/mysql-8.0.45-ubuntu-22.04-x64.tar.zstd",
+    "version": "8.0.45"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-24.04",
+    "sha256": "2057aee5bbb5096bc4353044e2f5f8e712da26395b0ceaa1ce2ef217c9221722",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.45-20260314180130/mysql-8.0.45-ubuntu-24.04-arm64.tar.zstd",
+    "version": "8.0.45"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-24.04",
+    "sha256": "4a309e4193fafd23c5ae1dd099eee073b2e8b472b2b03b7fc8d6f2b6153f22cb",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.45-20260314180130/mysql-8.0.45-ubuntu-24.04-x64.tar.zstd",
+    "version": "8.0.45"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "win32",
+    "sha256": "15001bdd6779197c96487b95bcc41cc9bdaf0e41cfe6f2c3b5aae05a3fd355a7",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.45-20260314180130/mysql-8.0.45-win32-x64.zip",
+    "version": "8.0.45"
   },
   {
     "arch": "arm64",
