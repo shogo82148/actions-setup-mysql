@@ -507,6 +507,62 @@
     "arch": "arm64",
     "distribution": "mysql",
     "os": "darwin",
+    "sha256": "b112d7a662c4cefa77eb407f377efc48f466c388136e814cb978c2743bca103f",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.8-20260315094803/mysql-8.4.8-darwin-arm64.tar.zstd",
+    "version": "8.4.8"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "darwin",
+    "sha256": "78329f306aa3ffba7f2a2d2317ae5b87968cecbf0a6a6844d59cbdcf5d045cd1",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.8-20260315094803/mysql-8.4.8-darwin-x64.tar.zstd",
+    "version": "8.4.8"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-22.04",
+    "sha256": "37d5265273140d993013bdd9c7452204b1870ccf83ed33f33b02821ebde37897",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.8-20260315094803/mysql-8.4.8-ubuntu-22.04-arm64.tar.zstd",
+    "version": "8.4.8"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-22.04",
+    "sha256": "8efe81559dbf7907f7c96fdef8b92088922b17aedb2b882cfef5939f6128d14a",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.8-20260315094803/mysql-8.4.8-ubuntu-22.04-x64.tar.zstd",
+    "version": "8.4.8"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-24.04",
+    "sha256": "2554d342cad4582f15e3863e754b451801b7cc80f1cafd15586fc9a037ae28ef",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.8-20260315094803/mysql-8.4.8-ubuntu-24.04-arm64.tar.zstd",
+    "version": "8.4.8"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-24.04",
+    "sha256": "661ce985044ebc00e4e6d6ae1dd3339125d25a7ee2bba5fbce1467a8b3f08f4c",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.8-20260315094803/mysql-8.4.8-ubuntu-24.04-x64.tar.zstd",
+    "version": "8.4.8"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "win32",
+    "sha256": "2061acbfab9ee71e58ed4175e0074fdfba7ba21b3f09af5a800671ba77fb760a",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.8-20260315094803/mysql-8.4.8-win32-x64.zip",
+    "version": "8.4.8"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "darwin",
     "sha256": "30874587129a507b0c873ffe62b08dba0e68f036520ff08944becf27bda5ff8b",
     "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.7-20251026034542/mysql-8.4.7-darwin-arm64.tar.zstd",
     "version": "8.4.7"
