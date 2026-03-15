@@ -57,7 +57,7 @@ For example, the following two workflows install MariaDB 12.3.
 ```yaml
 - uses: shogo82148/actions-setup-mysql@v1
   with:
-    mysql-version: "mariadb-12.6"
+    mysql-version: "mariadb-12.3"
 ```
 
 ### `auto-start`
