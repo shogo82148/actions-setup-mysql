@@ -54,7 +54,8 @@ jobs:
           - "mariadb-11.4" # LTS
           - "mariadb-10.11" # LTS
         exclude:
-          # I don't know why, but mysqld got signal 11
+          # TODO(#1458): mariadb-12.3 crashes with signal 11 on macos-15-intel.
+          # Re-enable once upstream/root cause is fixed.
           - os: macos-15-intel
             mysql: "mariadb-12.3"
     timeout-minutes: 15
