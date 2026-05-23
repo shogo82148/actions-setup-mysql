@@ -31,13 +31,14 @@ The version of MySQL or MariaDB.
 Available Versions are:
 
 - MySQL
-  - `9.6`
-  - `9.0`
-  - `8.4`
+  - `9.7` (LTS)
+  - `8.4` (LTS)
+  - `8.0`
 - MariaDB
-  - `12.3`
-  - `11.4`
-  - `10.11`
+  - `12.3` (latest)
+  - `11.8` (LTS)
+  - `11.4` (LTS)
+  - `10.11` (LTS)
 
 ### `distribution`
 
