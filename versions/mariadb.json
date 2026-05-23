@@ -227,6 +227,62 @@
     "arch": "arm64",
     "distribution": "mariadb",
     "os": "darwin",
+    "sha256": "8bc5c23e24b4f497334fa102663cae1e096e0e860dcaddf7564244509d4bf21e",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-darwin-arm64.tar.zstd",
+    "version": "11.8.7"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "darwin",
+    "sha256": "2c5a15fcb25086d4d7adad1df1948ad765614e07f7c46c2eddab9c0f442b913c",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-darwin-x64.tar.zstd",
+    "version": "11.8.7"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mariadb",
+    "os": "ubuntu-22.04",
+    "sha256": "0bf82e0ec81567564054b984d0efe1d20e5df4ca8fa77c2edfda10d17747d7e8",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-ubuntu-22.04-arm64.tar.zstd",
+    "version": "11.8.7"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "ubuntu-22.04",
+    "sha256": "32468b75c7c9da7583cfeda8360a51859c47b5c1fa4a7316a7a103dacf04b034",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-ubuntu-22.04-x64.tar.zstd",
+    "version": "11.8.7"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mariadb",
+    "os": "ubuntu-24.04",
+    "sha256": "e6cb7c1cd9eb18437d95d798186ead49cd1f56933813d5156a6d26b5de7edf84",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-ubuntu-24.04-arm64.tar.zstd",
+    "version": "11.8.7"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "ubuntu-24.04",
+    "sha256": "5896a0429a3634df99b2604775d9dc804dee54751e5a4667ead5e520d6e4c2eb",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-ubuntu-24.04-x64.tar.zstd",
+    "version": "11.8.7"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "win32",
+    "sha256": "d3edf62cca74570c5a48dfee8f19bfb92e327c1dff7b472e8713c71437764322",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-win32-x64.zip",
+    "version": "11.8.7"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mariadb",
+    "os": "darwin",
     "sha256": "d0c5aa3d193232cbdb21d0f953575eb8e343c61351801f4b211cad1b8a390085",
     "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.6-20260315072037/mariadb-11.8.6-darwin-arm64.tar.zstd",
     "version": "11.8.6"
@@ -502,6 +558,62 @@
     "sha256": "2296d0d979041e534bcb5ef783c01681cbda94b746fdeaf72f12b0f8ad887e9a",
     "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.5.2-20251026130625/mariadb-11.5.2-win32-x64.zip",
     "version": "11.5.2"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mariadb",
+    "os": "darwin",
+    "sha256": "955c8fd0144cb8ebc98ae03e160646fe041f7160b4cb7143823168f68095cab0",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-darwin-arm64.tar.zstd",
+    "version": "11.4.11"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "darwin",
+    "sha256": "64bd1f4767b23e91a96da1c33a43d8708d5fc46aec9132bcb1f4e22bb37b0f95",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-darwin-x64.tar.zstd",
+    "version": "11.4.11"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mariadb",
+    "os": "ubuntu-22.04",
+    "sha256": "f42578cae8b25f0f8514657cb519134af576890af3e7292e050bcde5ab35b344",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-ubuntu-22.04-arm64.tar.zstd",
+    "version": "11.4.11"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "ubuntu-22.04",
+    "sha256": "ce289347805b2ce97dd71e2e47588270d06b90355d7e32893d24b2e49e5da904",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-ubuntu-22.04-x64.tar.zstd",
+    "version": "11.4.11"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mariadb",
+    "os": "ubuntu-24.04",
+    "sha256": "c89bbb138b1dd67a658428c886ab75b93c3d9f3a377363c54cd0a2f63538ceea",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-ubuntu-24.04-arm64.tar.zstd",
+    "version": "11.4.11"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "ubuntu-24.04",
+    "sha256": "9388d9cee7044a0d22c2c562cba06d7613d4c7c3d077517919e6cb0739cbab11",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-ubuntu-24.04-x64.tar.zstd",
+    "version": "11.4.11"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "win32",
+    "sha256": "bba4607f66a71a1de428f0c336abefc7b633499e275a5450420d799997f14a76",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-win32-x64.zip",
+    "version": "11.4.11"
   },
   {
     "arch": "arm64",
@@ -838,6 +950,62 @@
     "sha256": "a5cb1ba8bd7cde8b3e497dd2144138f62df44ccb101499631c5dc04bc712b67b",
     "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.0.6-20251026131809/mariadb-11.0.6-win32-x64.zip",
     "version": "11.0.6"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mariadb",
+    "os": "darwin",
+    "sha256": "b047b14536699e1a6e326840c202f484a2d2304b939e149ca2d4ef662c19004b",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-10.11.17-20260522013634/mariadb-10.11.17-darwin-arm64.tar.zstd",
+    "version": "10.11.17"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "darwin",
+    "sha256": "7ddd9c9ee61aedcbc9644cca5e671623962367967fc5b78d40cb86f933f11577",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-10.11.17-20260522013634/mariadb-10.11.17-darwin-x64.tar.zstd",
+    "version": "10.11.17"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mariadb",
+    "os": "ubuntu-22.04",
+    "sha256": "e4fe3c82386e1ce6c1978feb8682ecf114b3d2e3eeab644dde3b65adb56820f2",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-10.11.17-20260522013634/mariadb-10.11.17-ubuntu-22.04-arm64.tar.zstd",
+    "version": "10.11.17"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "ubuntu-22.04",
+    "sha256": "ea910fe42b5e7ebb2222a635d07c39a2385ded24413209d873602998c714fd6c",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-10.11.17-20260522013634/mariadb-10.11.17-ubuntu-22.04-x64.tar.zstd",
+    "version": "10.11.17"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mariadb",
+    "os": "ubuntu-24.04",
+    "sha256": "04c529078925e0fa3cada4794744e079eb3229440344ce3adf754f088031a509",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-10.11.17-20260522013634/mariadb-10.11.17-ubuntu-24.04-arm64.tar.zstd",
+    "version": "10.11.17"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "ubuntu-24.04",
+    "sha256": "895bf432a6eb2dd524397ec9076268bf55c248896f4ba263d2f509657ad7b5b7",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-10.11.17-20260522013634/mariadb-10.11.17-ubuntu-24.04-x64.tar.zstd",
+    "version": "10.11.17"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mariadb",
+    "os": "win32",
+    "sha256": "b0de8a00892b8c26c0b4f8c2b582b31d1ed77a86d65976f3ea5f8d88d8eda40a",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mariadb-10.11.17-20260522013634/mariadb-10.11.17-win32-x64.zip",
+    "version": "10.11.17"
   },
   {
     "arch": "arm64",
