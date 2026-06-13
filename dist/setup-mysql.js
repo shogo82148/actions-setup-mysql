@@ -33212,56 +33212,72 @@ var mysqlVersions = [
 		arch: "arm64",
 		distribution: "mysql",
 		os: "darwin",
-		sha256: "d8c3338a8fb537596624c845c44366c6a32faff778be349fb2e6c55321d247ef",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260422124148/mysql-9.7.0-darwin-arm64.tar.zstd",
+		sha256: "46a769538d39e323829ab2f5dca811637b91ebbf059013ea676147d608ae9765",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260612152033/mysql-9.7.0-darwin-arm64.tar.zstd",
 		version: "9.7.0"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "darwin",
-		sha256: "6cb8bfd12a9e0c8acfe5c3d5ccc15d58bcc6423a7c4c6270e42921c5c56817d3",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260422124148/mysql-9.7.0-darwin-x64.tar.zstd",
+		sha256: "128ce6e1d795939e1e1f8639da2ff48f9c45c780f2622fbf39eb951bcd604fa8",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260612152033/mysql-9.7.0-darwin-x64.tar.zstd",
 		version: "9.7.0"
 	},
 	{
 		arch: "arm64",
 		distribution: "mysql",
 		os: "ubuntu-22.04",
-		sha256: "36b3a212efa69147f2a19ba6e9395fe0ffcd06faa6a73e190f544aa4c5e5919f",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260422124148/mysql-9.7.0-ubuntu-22.04-arm64.tar.zstd",
+		sha256: "77bd62fe3adfdf09f865518fd6791afff25224dfafc7caea1e4a3a6c136b2b3d",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260612152033/mysql-9.7.0-ubuntu-22.04-arm64.tar.zstd",
 		version: "9.7.0"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "ubuntu-22.04",
-		sha256: "365ca3dc07519512c9ed2ffa9e41d954c7ade77e59ea26c61f931709cef103d2",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260422124148/mysql-9.7.0-ubuntu-22.04-x64.tar.zstd",
+		sha256: "8343440716d000bcfa18757602c513012190abec4ab08b8c790f8bb4cdd219ae",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260612152033/mysql-9.7.0-ubuntu-22.04-x64.tar.zstd",
 		version: "9.7.0"
 	},
 	{
 		arch: "arm64",
 		distribution: "mysql",
 		os: "ubuntu-24.04",
-		sha256: "bfdb1599be6d6308a2f0813f3cd6a650169a1f0a9f01d635ad11620a41b00b77",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260422124148/mysql-9.7.0-ubuntu-24.04-arm64.tar.zstd",
+		sha256: "89f90761010496da2a6e7470d5e3a685689738c85b27b78bb4cfaa270aabccc7",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260612152033/mysql-9.7.0-ubuntu-24.04-arm64.tar.zstd",
 		version: "9.7.0"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "ubuntu-24.04",
-		sha256: "338560168d1c8a5afdce22a447b7d31e89831066a483417e83abc7e48ffdee5d",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260422124148/mysql-9.7.0-ubuntu-24.04-x64.tar.zstd",
+		sha256: "5866e00b0c961b515b0c20f73ee3902ed9dff65b324dc8ef897e9c2a4051d2b2",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260612152033/mysql-9.7.0-ubuntu-24.04-x64.tar.zstd",
+		version: "9.7.0"
+	},
+	{
+		arch: "arm64",
+		distribution: "mysql",
+		os: "ubuntu-26.04",
+		sha256: "75d8127a4803fbe5923d7fc7ed79489013a24f51b840b4b88955abce73154a6e",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260612152033/mysql-9.7.0-ubuntu-26.04-arm64.tar.zstd",
+		version: "9.7.0"
+	},
+	{
+		arch: "x64",
+		distribution: "mysql",
+		os: "ubuntu-26.04",
+		sha256: "2e6b99e8578b1223d75bee77ebd2c1adaf8ad85bd8bd03a8d38f7a9c1ef5be9b",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260612152033/mysql-9.7.0-ubuntu-26.04-x64.tar.zstd",
 		version: "9.7.0"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "win32",
-		sha256: "9a99f00de51332e3144dd74091a9f8ba0e0a2995c0624aaa3e828afc497b8a29",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260422124148/mysql-9.7.0-win32-x64.zip",
+		sha256: "2506bf2ba7545c47c0410c9cf409c9e4064fc1e09b7d9cbffca45477c18f4763",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-9.7.0-20260612152033/mysql-9.7.0-win32-x64.zip",
 		version: "9.7.0"
 	},
 	{
@@ -33772,56 +33788,72 @@ var mysqlVersions = [
 		arch: "arm64",
 		distribution: "mysql",
 		os: "darwin",
-		sha256: "7a771376a857f61e6517b808e805ec70b25747f294aa1f9121cc87b4e373c383",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260421135958/mysql-8.4.9-darwin-arm64.tar.zstd",
+		sha256: "de11f5d2664846d6f895042f11baa87b12920dd75306fcfbc4744c5d3dd73766",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260612152033/mysql-8.4.9-darwin-arm64.tar.zstd",
 		version: "8.4.9"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "darwin",
-		sha256: "925353e5cf5771518d69eb7ae20072e266da73463f76f9b4c887c2a08067433b",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260421135958/mysql-8.4.9-darwin-x64.tar.zstd",
+		sha256: "d3df32775e2ff058ebbf4b8be5e2fcd69f34cba3119f2a9fb4b816f40f255d73",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260612152033/mysql-8.4.9-darwin-x64.tar.zstd",
 		version: "8.4.9"
 	},
 	{
 		arch: "arm64",
 		distribution: "mysql",
 		os: "ubuntu-22.04",
-		sha256: "19593758f86750f463349939ea4a5cdece221ea13f0791e1daa9c779c654f3db",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260421135958/mysql-8.4.9-ubuntu-22.04-arm64.tar.zstd",
+		sha256: "43f2f3a571c5c8a93ee289d99ca6079438702ccb0a7adc90a7eca341be759f18",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260612152033/mysql-8.4.9-ubuntu-22.04-arm64.tar.zstd",
 		version: "8.4.9"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "ubuntu-22.04",
-		sha256: "b349280505b734db68bac9a6a6a1b325c2eb1b33e02d8ed814d762a20be3147a",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260421135958/mysql-8.4.9-ubuntu-22.04-x64.tar.zstd",
+		sha256: "8031f9b2fb6ee0f60a79a7f47d77f489d147af965ce891fd54c28c0e6f459440",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260612152033/mysql-8.4.9-ubuntu-22.04-x64.tar.zstd",
 		version: "8.4.9"
 	},
 	{
 		arch: "arm64",
 		distribution: "mysql",
 		os: "ubuntu-24.04",
-		sha256: "f34786d1a388a7d94841388439cf78552ac390f96e0e47b019644ba48b8d27d9",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260421135958/mysql-8.4.9-ubuntu-24.04-arm64.tar.zstd",
+		sha256: "c5c1b59d6e3189320e8542443aa9e80a999240dd45591ed674acd085ee86cb2b",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260612152033/mysql-8.4.9-ubuntu-24.04-arm64.tar.zstd",
 		version: "8.4.9"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "ubuntu-24.04",
-		sha256: "f9417b36a279a825528f108ebdfb71a949d921e7dd3958e88958b788bfdf58a0",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260421135958/mysql-8.4.9-ubuntu-24.04-x64.tar.zstd",
+		sha256: "ca690dd337705ded6e751abd6bd541a1cf4096a692647d21eddfdef920bf2539",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260612152033/mysql-8.4.9-ubuntu-24.04-x64.tar.zstd",
+		version: "8.4.9"
+	},
+	{
+		arch: "arm64",
+		distribution: "mysql",
+		os: "ubuntu-26.04",
+		sha256: "c9854f0f73cc3d3d30e8dfbf5d73ff5116015416139d2b380f4ba230cf62858e",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260612152033/mysql-8.4.9-ubuntu-26.04-arm64.tar.zstd",
+		version: "8.4.9"
+	},
+	{
+		arch: "x64",
+		distribution: "mysql",
+		os: "ubuntu-26.04",
+		sha256: "3b51115446bc313df2c2e8afbaf70be17d51e0610ed8dcd9ccf4e81d4faeed98",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260612152033/mysql-8.4.9-ubuntu-26.04-x64.tar.zstd",
 		version: "8.4.9"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "win32",
-		sha256: "23046f867b0a25ddb55fe3ea3ed56594e01e0b8a3985fff712a9c86b0bacfea8",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260421135958/mysql-8.4.9-win32-x64.zip",
+		sha256: "cf632c82854a9c1c18b633683873794c1a48e7cd30854ce6bc096c29e8fc852e",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.4.9-20260612152033/mysql-8.4.9-win32-x64.zip",
 		version: "8.4.9"
 	},
 	{
@@ -34164,56 +34196,72 @@ var mysqlVersions = [
 		arch: "arm64",
 		distribution: "mysql",
 		os: "darwin",
-		sha256: "a8d952e64c2e3d74ecfaeba77cefb72af4f8500d6e66945e2cea588143b5bede",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260423061654/mysql-8.0.46-darwin-arm64.tar.zstd",
+		sha256: "3b1722d1d4d34cf19ba90610030f344b7f32c33423ff364c87971f547cbaf01e",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260612152033/mysql-8.0.46-darwin-arm64.tar.zstd",
 		version: "8.0.46"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "darwin",
-		sha256: "4278561b6bc7c8f14924f7c2041609e1d271c6316942ba56dfb0c6bb850026b1",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260423061654/mysql-8.0.46-darwin-x64.tar.zstd",
+		sha256: "a3651968920944157db578dca3a590c790690d3b687d0e0bed547393436935ac",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260612152033/mysql-8.0.46-darwin-x64.tar.zstd",
 		version: "8.0.46"
 	},
 	{
 		arch: "arm64",
 		distribution: "mysql",
 		os: "ubuntu-22.04",
-		sha256: "d08961ac69f859957ba56105f2df07e90a8caeb1f5e7edb647a923fa32363f3e",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260423061654/mysql-8.0.46-ubuntu-22.04-arm64.tar.zstd",
+		sha256: "9f283e1256edbc413d256372fe273815de17fbae6c4f59c85634b3c6448a7cea",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260612152033/mysql-8.0.46-ubuntu-22.04-arm64.tar.zstd",
 		version: "8.0.46"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "ubuntu-22.04",
-		sha256: "702b8967cae0eeffda6730bb84cd0680d9195dd92419d990c1c6777c952c2666",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260423061654/mysql-8.0.46-ubuntu-22.04-x64.tar.zstd",
+		sha256: "6cdca043d1c02d98ed1ef19925a971deb11bff73a0551b3f05891375863af7ef",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260612152033/mysql-8.0.46-ubuntu-22.04-x64.tar.zstd",
 		version: "8.0.46"
 	},
 	{
 		arch: "arm64",
 		distribution: "mysql",
 		os: "ubuntu-24.04",
-		sha256: "0c80ec14702e076eef00cb6287dc2e2fb5a7b3f8609d76bbd08e4e5daa9096f8",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260423061654/mysql-8.0.46-ubuntu-24.04-arm64.tar.zstd",
+		sha256: "471abef9f0746983fdf27d9b8eba2e52b3c430ddbeb64e403b687c212adf4aeb",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260612152033/mysql-8.0.46-ubuntu-24.04-arm64.tar.zstd",
 		version: "8.0.46"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "ubuntu-24.04",
-		sha256: "93f8878f248e75e5ee7b693fdaf28407d67d707716f94af7f9f2848fb0e4c0e0",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260423061654/mysql-8.0.46-ubuntu-24.04-x64.tar.zstd",
+		sha256: "9ea80b3850e985a98ba26d370b17eef061cc9ae47c20ae66855d9c9087b9186a",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260612152033/mysql-8.0.46-ubuntu-24.04-x64.tar.zstd",
+		version: "8.0.46"
+	},
+	{
+		arch: "arm64",
+		distribution: "mysql",
+		os: "ubuntu-26.04",
+		sha256: "c1d977492ef317e51384a17ca8a2e57249e7488c789e9467d0e2eb2ec7d95e88",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260612152033/mysql-8.0.46-ubuntu-26.04-arm64.tar.zstd",
+		version: "8.0.46"
+	},
+	{
+		arch: "x64",
+		distribution: "mysql",
+		os: "ubuntu-26.04",
+		sha256: "888358241b15afbc530a158394badfc5941e940ce9b5be6454e8283cc6482987",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260612152033/mysql-8.0.46-ubuntu-26.04-x64.tar.zstd",
 		version: "8.0.46"
 	},
 	{
 		arch: "x64",
 		distribution: "mysql",
 		os: "win32",
-		sha256: "d53ebff3cd050775bea516e198878758a0b6dfbd3da835319d2268c8605f430f",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260423061654/mysql-8.0.46-win32-x64.zip",
+		sha256: "ff7b37e01557c9ecec455e35982cf3fa6ade504f70b473b43ce85adcc93ad42d",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mysql-8.0.46-20260612152033/mysql-8.0.46-win32-x64.zip",
 		version: "8.0.46"
 	},
 	{
@@ -34559,56 +34607,72 @@ var mariadbVersions = [
 		arch: "arm64",
 		distribution: "mariadb",
 		os: "darwin",
-		sha256: "f2710fe80e2270bf76854ca13f6c2f3c0f013bc66264ff5ef6cb4d2dbb568d58",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260315071931/mariadb-12.3.1-darwin-arm64.tar.zstd",
+		sha256: "e7985cb65951bf0260f950f9b4d8fd7e813aa9601b884816539a30bb794e108d",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260612152446/mariadb-12.3.1-darwin-arm64.tar.zstd",
 		version: "12.3.1"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "darwin",
-		sha256: "fa29077fd4bb279debbdb151a26a314a687d38008c93e7553d2e2ca6e1842d81",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260315071931/mariadb-12.3.1-darwin-x64.tar.zstd",
+		sha256: "932a2a1d18f37bd39d60f60b3e582274251feeca28e99dd965182c1e2d7470ea",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260612152446/mariadb-12.3.1-darwin-x64.tar.zstd",
 		version: "12.3.1"
 	},
 	{
 		arch: "arm64",
 		distribution: "mariadb",
 		os: "ubuntu-22.04",
-		sha256: "40d9fd39b9e10ad3511c205a3803885a2602d89231a29dbe27d5dae556f3d2e3",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260315071931/mariadb-12.3.1-ubuntu-22.04-arm64.tar.zstd",
+		sha256: "79b24d0540b328edc649f379c34a0e3844761bbb4f9b941760bbb73384d0b458",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260612152446/mariadb-12.3.1-ubuntu-22.04-arm64.tar.zstd",
 		version: "12.3.1"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "ubuntu-22.04",
-		sha256: "3b6c9c3456515369f57987820a30e8248bb0bde9de31c967d0c25730cea793d2",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260315071931/mariadb-12.3.1-ubuntu-22.04-x64.tar.zstd",
+		sha256: "27528dc10c310a80221d71b3f96ad0c77a6459b1be6542f92811bbae0380d319",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260612152446/mariadb-12.3.1-ubuntu-22.04-x64.tar.zstd",
 		version: "12.3.1"
 	},
 	{
 		arch: "arm64",
 		distribution: "mariadb",
 		os: "ubuntu-24.04",
-		sha256: "42df038d9ba8895bd39645f1c528c3615ca4a70a79994fe7bec42310a13f7539",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260315071931/mariadb-12.3.1-ubuntu-24.04-arm64.tar.zstd",
+		sha256: "c235f6318c24e2de630b73a3cac37f769f71644f415c5416f9e68c87759a1886",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260612152446/mariadb-12.3.1-ubuntu-24.04-arm64.tar.zstd",
 		version: "12.3.1"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "ubuntu-24.04",
-		sha256: "48f0a0f219a905bc93a45b7314368fa1aa5303ab5a5c676af8954097e78e6f08",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260315071931/mariadb-12.3.1-ubuntu-24.04-x64.tar.zstd",
+		sha256: "9ae664cd29569dc5ad3306074d0a415450cfc4efaaedd6dd89e606f651827b3b",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260612152446/mariadb-12.3.1-ubuntu-24.04-x64.tar.zstd",
+		version: "12.3.1"
+	},
+	{
+		arch: "arm64",
+		distribution: "mariadb",
+		os: "ubuntu-26.04",
+		sha256: "8b5310624890865395ac55ffcb6311f3615933c5002fd22ae00143ba20e1b3c9",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260612152446/mariadb-12.3.1-ubuntu-26.04-arm64.tar.zstd",
+		version: "12.3.1"
+	},
+	{
+		arch: "x64",
+		distribution: "mariadb",
+		os: "ubuntu-26.04",
+		sha256: "eeea28b179e2348c61ed42147474ba2aa8526dfaf68ff00e980af95a3c4eb664",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260612152446/mariadb-12.3.1-ubuntu-26.04-x64.tar.zstd",
 		version: "12.3.1"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "win32",
-		sha256: "bf42d564fcfd13e35329a903400ce4830d61b5258a161d68a548e09f9bfa5ec3",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260315071931/mariadb-12.3.1-win32-x64.zip",
+		sha256: "9dcc9cba7076640af2741772828f7f97dfc0f97d21f437e84046f8b01d610dab",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-12.3.1-20260612152446/mariadb-12.3.1-win32-x64.zip",
 		version: "12.3.1"
 	},
 	{
@@ -34783,56 +34847,72 @@ var mariadbVersions = [
 		arch: "arm64",
 		distribution: "mariadb",
 		os: "darwin",
-		sha256: "8bc5c23e24b4f497334fa102663cae1e096e0e860dcaddf7564244509d4bf21e",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-darwin-arm64.tar.zstd",
+		sha256: "29515beb99563cb8bbe92ccb02c166011788ed228a012951c7070d952d823ff6",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260612152446/mariadb-11.8.7-darwin-arm64.tar.zstd",
 		version: "11.8.7"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "darwin",
-		sha256: "2c5a15fcb25086d4d7adad1df1948ad765614e07f7c46c2eddab9c0f442b913c",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-darwin-x64.tar.zstd",
+		sha256: "d9a1f62db26224ad7312fd531f0b9c02afd3d28ff742401348d75d85ea9e8e49",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260612152446/mariadb-11.8.7-darwin-x64.tar.zstd",
 		version: "11.8.7"
 	},
 	{
 		arch: "arm64",
 		distribution: "mariadb",
 		os: "ubuntu-22.04",
-		sha256: "0bf82e0ec81567564054b984d0efe1d20e5df4ca8fa77c2edfda10d17747d7e8",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-ubuntu-22.04-arm64.tar.zstd",
+		sha256: "9da91a973e53383a2acd8472fdc43de6f2defa9d17f3b629f6d57d7e3441c9b0",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260612152446/mariadb-11.8.7-ubuntu-22.04-arm64.tar.zstd",
 		version: "11.8.7"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "ubuntu-22.04",
-		sha256: "32468b75c7c9da7583cfeda8360a51859c47b5c1fa4a7316a7a103dacf04b034",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-ubuntu-22.04-x64.tar.zstd",
+		sha256: "d987a7c73120fd817fc0c3e08277c74d2be7e1f1ceb128e102299dc2423ebd08",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260612152446/mariadb-11.8.7-ubuntu-22.04-x64.tar.zstd",
 		version: "11.8.7"
 	},
 	{
 		arch: "arm64",
 		distribution: "mariadb",
 		os: "ubuntu-24.04",
-		sha256: "e6cb7c1cd9eb18437d95d798186ead49cd1f56933813d5156a6d26b5de7edf84",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-ubuntu-24.04-arm64.tar.zstd",
+		sha256: "c9c80bbe3687c87430a147d3ab27a1aa8d63f2333dd240135c0b06c972a5ea7b",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260612152446/mariadb-11.8.7-ubuntu-24.04-arm64.tar.zstd",
 		version: "11.8.7"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "ubuntu-24.04",
-		sha256: "5896a0429a3634df99b2604775d9dc804dee54751e5a4667ead5e520d6e4c2eb",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-ubuntu-24.04-x64.tar.zstd",
+		sha256: "153c596b3ca30a443d32e494e1ac8a8714fbed3586a557f32c55765f22db32f6",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260612152446/mariadb-11.8.7-ubuntu-24.04-x64.tar.zstd",
+		version: "11.8.7"
+	},
+	{
+		arch: "arm64",
+		distribution: "mariadb",
+		os: "ubuntu-26.04",
+		sha256: "8c5189963b216f574ec7f4a86b033a3a05c62deb9bd9e740e9b603740f18eff4",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260612152446/mariadb-11.8.7-ubuntu-26.04-arm64.tar.zstd",
+		version: "11.8.7"
+	},
+	{
+		arch: "x64",
+		distribution: "mariadb",
+		os: "ubuntu-26.04",
+		sha256: "ffcd6854f253f167556618e93797f170dec5306a166289185c022b8e65c84bb6",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260612152446/mariadb-11.8.7-ubuntu-26.04-x64.tar.zstd",
 		version: "11.8.7"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "win32",
-		sha256: "d3edf62cca74570c5a48dfee8f19bfb92e327c1dff7b472e8713c71437764322",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260522075410/mariadb-11.8.7-win32-x64.zip",
+		sha256: "4c8778cb582b76f129ce9c65058964d15da665a2f4d122f85081b29bec0178d7",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.8.7-20260612152446/mariadb-11.8.7-win32-x64.zip",
 		version: "11.8.7"
 	},
 	{
@@ -35119,56 +35199,72 @@ var mariadbVersions = [
 		arch: "arm64",
 		distribution: "mariadb",
 		os: "darwin",
-		sha256: "955c8fd0144cb8ebc98ae03e160646fe041f7160b4cb7143823168f68095cab0",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-darwin-arm64.tar.zstd",
+		sha256: "3be6584cb3f168345f257c056973bb2beb8b0538f12421fa1bd07a694f12e9fb",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260612152446/mariadb-11.4.11-darwin-arm64.tar.zstd",
 		version: "11.4.11"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "darwin",
-		sha256: "64bd1f4767b23e91a96da1c33a43d8708d5fc46aec9132bcb1f4e22bb37b0f95",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-darwin-x64.tar.zstd",
+		sha256: "207dc50a0a1ad9c5e5f800e20bedc0326d10b38926fe1d5b66d4c5ab642ff312",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260612152446/mariadb-11.4.11-darwin-x64.tar.zstd",
 		version: "11.4.11"
 	},
 	{
 		arch: "arm64",
 		distribution: "mariadb",
 		os: "ubuntu-22.04",
-		sha256: "f42578cae8b25f0f8514657cb519134af576890af3e7292e050bcde5ab35b344",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-ubuntu-22.04-arm64.tar.zstd",
+		sha256: "e0b2b676c68dd265a51e862a9e9aae96ac780077be570e86a342f63c8b0fe2a3",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260612152446/mariadb-11.4.11-ubuntu-22.04-arm64.tar.zstd",
 		version: "11.4.11"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "ubuntu-22.04",
-		sha256: "ce289347805b2ce97dd71e2e47588270d06b90355d7e32893d24b2e49e5da904",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-ubuntu-22.04-x64.tar.zstd",
+		sha256: "e0f9bfe7510eee4a46fcdd714d2725fddffd81fb663204fab8a22a655635810e",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260612152446/mariadb-11.4.11-ubuntu-22.04-x64.tar.zstd",
 		version: "11.4.11"
 	},
 	{
 		arch: "arm64",
 		distribution: "mariadb",
 		os: "ubuntu-24.04",
-		sha256: "c89bbb138b1dd67a658428c886ab75b93c3d9f3a377363c54cd0a2f63538ceea",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-ubuntu-24.04-arm64.tar.zstd",
+		sha256: "b84286265f4f2cea08dde3fe02b9bd0c822d444ceeeb57af12da1e9ef1b8de8c",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260612152446/mariadb-11.4.11-ubuntu-24.04-arm64.tar.zstd",
 		version: "11.4.11"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "ubuntu-24.04",
-		sha256: "9388d9cee7044a0d22c2c562cba06d7613d4c7c3d077517919e6cb0739cbab11",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-ubuntu-24.04-x64.tar.zstd",
+		sha256: "8976e8c52af4933a94f2d067c071cae0790b487ddd7bdb089c3e1169530da1ba",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260612152446/mariadb-11.4.11-ubuntu-24.04-x64.tar.zstd",
+		version: "11.4.11"
+	},
+	{
+		arch: "arm64",
+		distribution: "mariadb",
+		os: "ubuntu-26.04",
+		sha256: "a4ce864ee4003bcae8888f007743d18cc4d2747d5989258045e1a004668cc3fa",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260612152446/mariadb-11.4.11-ubuntu-26.04-arm64.tar.zstd",
+		version: "11.4.11"
+	},
+	{
+		arch: "x64",
+		distribution: "mariadb",
+		os: "ubuntu-26.04",
+		sha256: "c5619be5d1f905d6d724a44231688a6d0296e3d421100c8fcc4ad20445bbddb3",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260612152446/mariadb-11.4.11-ubuntu-26.04-x64.tar.zstd",
 		version: "11.4.11"
 	},
 	{
 		arch: "x64",
 		distribution: "mariadb",
 		os: "win32",
-		sha256: "bba4607f66a71a1de428f0c336abefc7b633499e275a5450420d799997f14a76",
-		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260522075410/mariadb-11.4.11-win32-x64.zip",
+		sha256: "b30cca79571e37b33a45d64856f94bd4ea522d48795d5992a8a108519a77e2b0",
+		url: "https://github.com/shogo82148/build-mysql/releases/download/mariadb-11.4.11-20260612152446/mariadb-11.4.11-win32-x64.zip",
 		version: "11.4.11"
 	},
 	{
