@@ -45,11 +45,11 @@ jobs:
           - macos-26
           - macos-15
           - macos-15-intel
-          - macos-14
           - windows-2025
           - windows-2022
         mysql:
-          - "9.7" # latest/LTS
+          - "26.7" # latest
+          - "9.7" # LTS
           - "8.4" # LTS
           - "8.0"
           - "mariadb-12.3" # latest
