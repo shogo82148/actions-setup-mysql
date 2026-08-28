@@ -44,7 +44,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.13.0",
     "@types/semver": "^7.8.0",
-    "eslint": "^10.9.0",
+    "eslint": "^10.9.1",
     "jest": "^30.4.2",
     "jest-circus": "^30.0.5",
     "prettier": "^3.9.6",
