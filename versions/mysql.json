@@ -1643,56 +1643,72 @@
     "arch": "arm64",
     "distribution": "mysql",
     "os": "darwin",
-    "sha256": "726eae715c4783c40b2482f364e7e8bc3d9d41a3eaace7c9a6f3a06c6a80fa4c",
-    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20251026125203/mysql-5.7.44-darwin-arm64.tar.zstd",
+    "sha256": "dcefd640ecddbd7e1d19552843b017a3fe93c5172a4e63e8a89d2324dfce89e1",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20260930133437/mysql-5.7.44-darwin-arm64.tar.zstd",
     "version": "5.7.44"
   },
   {
     "arch": "x64",
     "distribution": "mysql",
     "os": "darwin",
-    "sha256": "7ca4dc31cb2ce37d74fd096365ffefc51cde9bf992d07ecabcba911c6ac2c5e1",
-    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20251026125203/mysql-5.7.44-darwin-x64.tar.zstd",
+    "sha256": "d8dac26788f30db88aefe2e54fdfb23f93098e3b17287158a1b643a4da7579dc",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20260930133437/mysql-5.7.44-darwin-x64.tar.zstd",
     "version": "5.7.44"
   },
   {
     "arch": "arm64",
     "distribution": "mysql",
     "os": "ubuntu-22.04",
-    "sha256": "f27298c75b726a387730775e388cb4e36861746f4f33f4feb097f31af653d8a7",
-    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20251026125203/mysql-5.7.44-ubuntu-22.04-arm64.tar.zstd",
+    "sha256": "f6ed2599fd34df5b271e72b7312f6723c544624c3b43b291c12f2c2eb432f3ab",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20260930133437/mysql-5.7.44-ubuntu-22.04-arm64.tar.zstd",
     "version": "5.7.44"
   },
   {
     "arch": "x64",
     "distribution": "mysql",
     "os": "ubuntu-22.04",
-    "sha256": "0104fcd8bdb3fc3f9645949c5a3db54884b04ae0414643940789161112dc7fa8",
-    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20251026125203/mysql-5.7.44-ubuntu-22.04-x64.tar.zstd",
+    "sha256": "0fc1aa6c01db14a682090957e908393e7b0e9122eaf4f38d6cda146da21bbf57",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20260930133437/mysql-5.7.44-ubuntu-22.04-x64.tar.zstd",
     "version": "5.7.44"
   },
   {
     "arch": "arm64",
     "distribution": "mysql",
     "os": "ubuntu-24.04",
-    "sha256": "d7b4ba66b683187150e6446bc39ec35cdaf17307a8c10162518fbed90d2f3dc7",
-    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20251026125203/mysql-5.7.44-ubuntu-24.04-arm64.tar.zstd",
+    "sha256": "58e72b5ab6dfd93a5a4fdf1a2637a6e52e1f8a5dfc810ee15b93abef23b6f0de",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20260930133437/mysql-5.7.44-ubuntu-24.04-arm64.tar.zstd",
     "version": "5.7.44"
   },
   {
     "arch": "x64",
     "distribution": "mysql",
     "os": "ubuntu-24.04",
-    "sha256": "e67cc4bffabbd064e98872e153b1446e18c7d62c348ea644fff7986c64a91f7d",
-    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20251026125203/mysql-5.7.44-ubuntu-24.04-x64.tar.zstd",
+    "sha256": "8d3da9848ac0287e69657e9e2ae8d94465b801dd73f9296e1c4bac341df75c9f",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20260930133437/mysql-5.7.44-ubuntu-24.04-x64.tar.zstd",
+    "version": "5.7.44"
+  },
+  {
+    "arch": "arm64",
+    "distribution": "mysql",
+    "os": "ubuntu-26.04",
+    "sha256": "0ea0dffe47dde722dc4219557e65f3c328510e0cccf4afa721c1ac8680e9a9d7",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20260930133437/mysql-5.7.44-ubuntu-26.04-arm64.tar.zstd",
+    "version": "5.7.44"
+  },
+  {
+    "arch": "x64",
+    "distribution": "mysql",
+    "os": "ubuntu-26.04",
+    "sha256": "2b2f40d2cbe0a3037f8b3b91a430cd63b4c240da5a2fcd77e5398a0148586e2f",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20260930133437/mysql-5.7.44-ubuntu-26.04-x64.tar.zstd",
     "version": "5.7.44"
   },
   {
     "arch": "x64",
     "distribution": "mysql",
     "os": "win32",
-    "sha256": "c81348f2dd3b981249b5c5ce926f7febf84e044378f4e43a571d39a660344f40",
-    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20251026125203/mysql-5.7.44-win32-x64.zip",
+    "sha256": "f6f24c23c45aad0ac047126ab1fbec9b781e10c009b108c29eef9d5e4acc7ff1",
+    "url": "https://github.com/shogo82148/build-mysql/releases/download/mysql-5.7.44-20260930133437/mysql-5.7.44-win32-x64.zip",
     "version": "5.7.44"
   },
   {
