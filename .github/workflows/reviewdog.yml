@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: reviewdog/action-actionlint@v1.80.2
+      - uses: reviewdog/action-actionlint@v1.80.3
 
   eslint:
     runs-on: ubuntu-latest
