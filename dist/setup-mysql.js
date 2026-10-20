@@ -38882,8 +38882,6 @@ async function setupTls(mysql, baseDir) {
         "req",
         "-newkey",
         "rsa:2048",
-        "-days",
-        "3650",
         "-nodes",
         "-keyout",
         `${datadir}${sep}server-key.pem`,
