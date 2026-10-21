@@ -48,7 +48,7 @@ jobs:
           - windows-2025
           - windows-2022
         mysql:
-          - "26.7" # latest
+          - "26.10" # latest
           - "9.7" # LTS
           - "8.4" # LTS
           - "8.0"
