@@ -100,11 +100,12 @@ jobs:
         id: action
         uses: $/
         with:
-          mysql-version: "8.3"
+          mysql-version: "8.4"
           root-password: very-very-secret
           user: my
           password: secret
           my-cnf: |
             port=5729
+            mysql_native_password=ON
             authentication_policy=mysql_native_password
             sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
