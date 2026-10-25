@@ -100,7 +100,7 @@ jobs:
         id: action
         uses: $/
         with:
-          mysql-version: "8.3"
+          mysql-version: "8.4"
           root-password: very-very-secret
           user: my
           password: secret
