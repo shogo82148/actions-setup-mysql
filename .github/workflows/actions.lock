@@ -18,7 +18,7 @@ workflows:
     '.github/workflows/test.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-node@v7.1.0'
-        - 'shogo82148/actions-setup-perl@v1.44.2'
+        - 'shogo82148/actions-setup-perl@v1.44.4'
 dependencies:
     'actions/checkout@v7.0.1':
         ref: 'v7.0.1'
@@ -50,8 +50,8 @@ dependencies:
         commit: 'sha1-3ee2a450da17e060b9dfa4bffd53976906c6b2b0'
         owner_id: 48765237
         repo_id: 210385198
-    'shogo82148/actions-setup-perl@v1.44.2':
-        ref: 'v1.44.2'
-        commit: 'sha1-8b574cdc2dffdae49f803204a4f2b716a2fa1db7'
+    'shogo82148/actions-setup-perl@v1.44.4':
+        ref: 'v1.44.4'
+        commit: 'sha1-3b59bd33efdae98406a9bc4b75a4aa041e11993a'
         owner_id: 1157344
         repo_id: 205511355
