@@ -38900,6 +38900,22 @@ class Parser {
     }
 }
 
+// resetSqlMode clears the SQL mode of the current session.
+// quote assumes that backslashes are escape characters, which is not true under
+// the NO_BACKSLASH_ESCAPES SQL mode that users may enable via my-cnf,
+// so run this before any statement that contains literals built by quote.
+const resetSqlMode = "SET SESSION sql_mode = ''";
+// quote returns s as a single-quoted SQL string literal.
+// Single quotes are doubled rather than backslash-escaped, so the literal stays closed
+// even when the server runs with the NO_BACKSLASH_ESCAPES SQL mode.
+function quote(s) {
+    return `'${s.replace(/\\/g, "\\\\").replace(/'/g, "''")}'`;
+}
+// account returns the account name 'user'@'host' with both parts quoted.
+function account(user, host) {
+    return `${quote(user)}@${quote(host)}`;
+}
+
 const __filename$1 = fileURLToPath(import.meta.url);
 const __dirname$1 = path.dirname(__filename$1);
 const sep = path.sep;
@@ -39104,10 +39120,18 @@ async function createUser(state, user, password) {
             env["MYSQL_DEBUG"] = "1";
         }
         for (const host of ["localhost", "127.0.0.1", "::1"]) {
-            await execute(mariadb, [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`], {
+            await execute(mariadb, [
+                ...args,
+                "-e",
+                `${resetSqlMode}; CREATE USER ${account(user, host)} IDENTIFIED BY ${quote(password)}`,
+            ], {
                 env,
             });
-            await execute(mariadb, [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`], {
+            await execute(mariadb, [
+                ...args,
+                "-e",
+                `${resetSqlMode}; GRANT ALL PRIVILEGES ON *.* TO ${account(user, host)} WITH GRANT OPTION`,
+            ], {
                 env,
             });
         }
@@ -39123,10 +39147,18 @@ async function createUser(state, user, password) {
             env["MYSQL_DEBUG"] = "1";
         }
         for (const host of ["localhost", "127.0.0.1", "::1"]) {
-            await execute(mysql, [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`], {
+            await execute(mysql, [
+                ...args,
+                "-e",
+                `${resetSqlMode}; CREATE USER ${account(user, host)} IDENTIFIED BY ${quote(password)}`,
+            ], {
                 env,
             });
-            await execute(mysql, [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`], {
+            await execute(mysql, [
+                ...args,
+                "-e",
+                `${resetSqlMode}; GRANT ALL PRIVILEGES ON *.* TO ${account(user, host)} WITH GRANT OPTION`,
+            ], {
                 env,
             });
         }

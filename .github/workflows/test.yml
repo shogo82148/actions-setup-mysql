@@ -109,3 +109,28 @@ jobs:
             mysql_native_password=ON
             authentication_policy=mysql_native_password
             sql_mode="STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+
+  # the user and password are escaped even under NO_BACKSLASH_ESCAPES
+  test-special-characters:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: use the action
+        id: action
+        uses: $/
+        with:
+          mysql-version: "8.4"
+          user: 'o''neil\x'
+          password: 'it''s\a\b'
+          my-cnf: |
+            sql_mode="NO_BACKSLASH_ESCAPES"
+
+      - name: test
+        run: |
+          mysql --host=127.0.0.1 --user="$TEST_USER" -e 'SELECT CURRENT_USER()'
+        env:
+          TEST_USER: 'o''neil\x'
+          MYSQL_PWD: 'it''s\a\b'
