@@ -269,7 +269,7 @@ export async function createUser(state: MySQLState, user: string, password: stri
         [
           ...args,
           "-e",
-          `CREATE USER ${sql.account(user, host)} IDENTIFIED BY ${sql.quote(password)}`,
+          `${sql.resetSqlMode}; CREATE USER ${sql.account(user, host)} IDENTIFIED BY ${sql.quote(password)}`,
         ],
         {
           env,
@@ -280,7 +280,7 @@ export async function createUser(state: MySQLState, user: string, password: stri
         [
           ...args,
           "-e",
-          `GRANT ALL PRIVILEGES ON *.* TO ${sql.account(user, host)} WITH GRANT OPTION`,
+          `${sql.resetSqlMode}; GRANT ALL PRIVILEGES ON *.* TO ${sql.account(user, host)} WITH GRANT OPTION`,
         ],
         {
           env,
@@ -303,7 +303,7 @@ export async function createUser(state: MySQLState, user: string, password: stri
         [
           ...args,
           "-e",
-          `CREATE USER ${sql.account(user, host)} IDENTIFIED BY ${sql.quote(password)}`,
+          `${sql.resetSqlMode}; CREATE USER ${sql.account(user, host)} IDENTIFIED BY ${sql.quote(password)}`,
         ],
         {
           env,
@@ -314,7 +314,7 @@ export async function createUser(state: MySQLState, user: string, password: stri
         [
           ...args,
           "-e",
-          `GRANT ALL PRIVILEGES ON *.* TO ${sql.account(user, host)} WITH GRANT OPTION`,
+          `${sql.resetSqlMode}; GRANT ALL PRIVILEGES ON *.* TO ${sql.account(user, host)} WITH GRANT OPTION`,
         ],
         {
           env,

@@ -38900,6 +38900,11 @@ class Parser {
     }
 }
 
+// resetSqlMode clears the SQL mode of the current session.
+// quote assumes that backslashes are escape characters, which is not true under
+// the NO_BACKSLASH_ESCAPES SQL mode that users may enable via my-cnf,
+// so run this before any statement that contains literals built by quote.
+const resetSqlMode = "SET SESSION sql_mode = ''";
 // quote returns s as a single-quoted SQL string literal.
 // Single quotes are doubled rather than backslash-escaped, so the literal stays closed
 // even when the server runs with the NO_BACKSLASH_ESCAPES SQL mode.
@@ -39118,14 +39123,14 @@ async function createUser(state, user, password) {
             await execute(mariadb, [
                 ...args,
                 "-e",
-                `CREATE USER ${account(user, host)} IDENTIFIED BY ${quote(password)}`,
+                `${resetSqlMode}; CREATE USER ${account(user, host)} IDENTIFIED BY ${quote(password)}`,
             ], {
                 env,
             });
             await execute(mariadb, [
                 ...args,
                 "-e",
-                `GRANT ALL PRIVILEGES ON *.* TO ${account(user, host)} WITH GRANT OPTION`,
+                `${resetSqlMode}; GRANT ALL PRIVILEGES ON *.* TO ${account(user, host)} WITH GRANT OPTION`,
             ], {
                 env,
             });
@@ -39145,14 +39150,14 @@ async function createUser(state, user, password) {
             await execute(mysql, [
                 ...args,
                 "-e",
-                `CREATE USER ${account(user, host)} IDENTIFIED BY ${quote(password)}`,
+                `${resetSqlMode}; CREATE USER ${account(user, host)} IDENTIFIED BY ${quote(password)}`,
             ], {
                 env,
             });
             await execute(mysql, [
                 ...args,
                 "-e",
-                `GRANT ALL PRIVILEGES ON *.* TO ${account(user, host)} WITH GRANT OPTION`,
+                `${resetSqlMode}; GRANT ALL PRIVILEGES ON *.* TO ${account(user, host)} WITH GRANT OPTION`,
             ], {
                 env,
             });
