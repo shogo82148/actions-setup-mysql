@@ -8,6 +8,7 @@ import * as io from "@actions/io";
 import * as mycnf from "./mycnf.js";
 import * as os from "os";
 import * as path from "path";
+import * as sql from "./sql.js";
 import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -265,14 +266,22 @@ export async function createUser(state: MySQLState, user: string, password: stri
     for (const host of ["localhost", "127.0.0.1", "::1"]) {
       await execute(
         mariadb,
-        [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
+        [
+          ...args,
+          "-e",
+          `CREATE USER ${sql.account(user, host)} IDENTIFIED BY ${sql.quote(password)}`,
+        ],
         {
           env,
         },
       );
       await execute(
         mariadb,
-        [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
+        [
+          ...args,
+          "-e",
+          `GRANT ALL PRIVILEGES ON *.* TO ${sql.account(user, host)} WITH GRANT OPTION`,
+        ],
         {
           env,
         },
@@ -291,14 +300,22 @@ export async function createUser(state: MySQLState, user: string, password: stri
     for (const host of ["localhost", "127.0.0.1", "::1"]) {
       await execute(
         mysql,
-        [...args, "-e", `CREATE USER '${user}'@'${host}' IDENTIFIED BY '${password}'`],
+        [
+          ...args,
+          "-e",
+          `CREATE USER ${sql.account(user, host)} IDENTIFIED BY ${sql.quote(password)}`,
+        ],
         {
           env,
         },
       );
       await execute(
         mysql,
-        [...args, "-e", `GRANT ALL PRIVILEGES ON *.* TO '${user}'@'${host}' WITH GRANT OPTION`],
+        [
+          ...args,
+          "-e",
+          `GRANT ALL PRIVILEGES ON *.* TO ${sql.account(user, host)} WITH GRANT OPTION`,
+        ],
         {
           env,
         },
