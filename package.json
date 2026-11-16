@@ -47,7 +47,7 @@
     "eslint": "^10.14.0",
     "jest": "^30.5.2",
     "jest-circus": "^30.0.5",
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "rimraf": "^6.1.4",
     "rollup": "^4.68.2",
     "ts-jest": "^29.4.15",
